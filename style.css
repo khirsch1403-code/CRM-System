@@ -1,0 +1,2459 @@
+/* =====================================================
+   DESIGN TOKENS
+===================================================== */
+
+:root{
+
+    /* Flächen & Hintergrund — warmes Creme mit Rosé-Ton */
+    --c-bg:#f5eeec;
+    --c-surface:#fdfaf9;
+    --c-surface-muted:#f7f2f0;
+    --c-border:#e8d9d4;
+    --c-border-stark:#d4bdb6;
+
+    /* Text */
+    --c-text:#1a1210;
+    --c-text-muted:#6b5047;
+    --c-text-schwach:#a08070;
+
+    /* Marke / Aktion — Bordeaux */
+    --c-primary:#7a1e35;
+    --c-primary-dunkel:#561526;
+    --c-primary-soft:#faeaee;
+    --c-accent:#8b6914;
+    --c-accent-soft:#fdf3dc;
+
+    /* Status */
+    --c-danger:#b83c35;
+    --c-danger-bg:rgba(184,60,53,0.10);
+    --c-danger-text:#922e28;
+
+    --c-warn-bg:rgba(139,105,20,0.14);
+    --c-warn-text:#6b4e10;
+
+    --c-success-bg:rgba(45,106,79,0.12);
+    --c-success-text:#1e5c3a;
+
+    /* Legacy-Aliase */
+    --farbe-hintergrund:var(--c-bg);
+    --farbe-panel:var(--c-surface-muted);
+    --farbe-panel-dunkel:var(--c-border);
+    --farbe-border:var(--c-border);
+    --farbe-text:var(--c-text);
+    --farbe-text-grau:var(--c-text-muted);
+    --farbe-gruen:var(--c-success-bg);
+    --farbe-gelb:var(--c-warn-bg);
+    --farbe-rot:var(--c-danger-bg);
+    --farbe-gruen-text:var(--c-success-text);
+    --farbe-gelb-text:var(--c-warn-text);
+    --farbe-rot-text:var(--c-danger-text);
+
+    /* Abstände & Radien — weicher */
+    --radius-s:8px;
+    --radius-m:12px;
+    --radius-l:16px;
+    --schatten-karte:0 1px 3px rgba(28,26,23,0.07),
+                      0 1px 2px rgba(28,26,23,0.04);
+    --schatten-modal:0 24px 64px rgba(28,26,23,0.22);
+
+}
+
+/* =====================================================
+   GLOBALE EINSTELLUNGEN
+===================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    -webkit-font-smoothing:antialiased;
+}
+
+body{
+    background:var(--c-bg);
+    color:var(--c-text);
+    font-family:
+    -apple-system,"Segoe UI",Roboto,
+    Helvetica,Arial,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+}
+
+h2{
+    font-size:19px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--c-text);
+}
+
+h3{
+    font-size:13px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+}
+
+label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    margin-bottom:5px;
+    margin-top:12px;
+}
+
+label:first-child{
+    margin-top:0;
+}
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.navbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    background:linear-gradient(
+        135deg,
+        var(--c-primary-dunkel) 0%,
+        var(--c-primary) 100%
+    );
+    padding:12px 20px;
+    border-bottom:none;
+    box-shadow:0 2px 8px rgba(28,26,23,0.15);
+    position:sticky;
+    top:0;
+    z-index:500;
+}
+
+.navbar-brand{
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:#ffffff;
+    padding-right:14px;
+    white-space:nowrap;
+    opacity:0.95;
+}
+
+.navbar-links{
+    display:flex;
+    gap:4px;
+    flex-wrap:wrap;
+}
+
+.nav-button{
+    border:1px solid rgba(255,255,255,0.15);
+    background:transparent;
+    color:rgba(255,255,255,0.75);
+    border-radius:var(--radius-s);
+    padding:8px 14px;
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.15s ease,color 0.15s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.nav-icon{
+    width:18px;
+    height:18px;
+    display:block;
+    /* SVGs sind weinrot-strichig — hier weißlich einfärben passend zur Navbar */
+    filter:brightness(0) invert(1);
+    opacity:0.75;
+    transition:opacity 0.15s ease;
+    flex-shrink:0;
+}
+
+.nav-button:hover .nav-icon,
+.nav-button-aktiv .nav-icon{
+    opacity:1;
+}
+
+.nav-button:hover{
+    background:rgba(255,255,255,0.12);
+    color:#ffffff;
+}
+
+.nav-button-aktiv,
+.nav-button-aktiv:hover{
+    background:rgba(255,255,255,0.2);
+    color:#ffffff;
+    border-color:rgba(255,255,255,0.35);
+}
+
+/* =====================================================
+   CONTENT
+===================================================== */
+
+.content{
+    padding:24px;
+    max-width:1400px;
+    margin:0 auto;
+}
+
+/* =====================================================
+   TABS
+===================================================== */
+
+.tab-content{
+    display:none;
+}
+
+.tab-active{
+    display:block;
+    animation:einblenden 0.15s ease;
+}
+
+@keyframes einblenden{
+    from{ opacity:0; }
+    to{ opacity:1; }
+}
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(200px,1fr));
+    gap:16px;
+    align-items:stretch;
+}
+
+/* Abschluss-Übersicht: 4 Kacheln in einer Reihe. */
+.dashboard-grid-abschluesse{
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+}
+
+.dashboard-grid-abschluesse .dashboard-card{
+    padding:12px 10px;
+    min-height:auto;
+}
+
+.dashboard-grid-abschluesse .dashboard-card h3{
+    font-size:11px;
+    letter-spacing:0.03em;
+    line-height:1.25;
+    margin-bottom:6px;
+}
+
+.dashboard-grid-abschluesse .dashboard-value{
+    font-size:24px;
+    line-height:1.1;
+}
+
+/* Tablet: 2 pro Zeile (2+2) */
+@media (max-width:1000px){
+    .dashboard-grid-abschluesse{
+        grid-template-columns:repeat(2, 1fr);
+    }
+    .dashboard-grid-abschluesse .dashboard-value{
+        font-size:28px;
+    }
+}
+
+/* Handy: 2 pro Zeile bleibt, aber kompakter */
+@media (max-width:500px){
+    .dashboard-grid-abschluesse{
+        grid-template-columns:repeat(2, 1fr);
+    }
+}
+
+.dashboard-card{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:20px;
+    box-shadow:var(--schatten-karte);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    min-height:90px;
+}
+
+.dashboard-card h3{
+    margin-bottom:10px;
+    font-size:11.5px;
+}
+
+.dashboard-value{
+    font-size:32px;
+    font-weight:700;
+    color:var(--c-primary);
+    letter-spacing:-0.02em;
+    line-height:1;
+}
+
+/* =====================================================
+   KUNDENBEREICH
+===================================================== */
+
+.kunden-layout{
+    display:grid;
+    grid-template-columns:340px 1fr;
+    gap:20px;
+    height:calc(100vh - 140px);
+}
+
+.kunden-sidebar{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-shadow:var(--schatten-karte);
+}
+
+.kunden-details{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:24px;
+    overflow-y:auto;
+    box-shadow:var(--schatten-karte);
+}
+
+.kundenkarte{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:11px 12px;
+    cursor:pointer;
+    margin-bottom:8px;
+    transition:border-color 0.15s ease,
+               background 0.15s ease;
+}
+
+.kundenkarte:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-border-stark);
+}
+
+#kundenListe{
+    flex:1;
+    overflow-y:auto;
+    margin-top:10px;
+    padding-right:5px;
+}
+
+/* =====================================================
+   KUNDEN-SUCHE (AUFGABEN-MODAL)
+===================================================== */
+
+#aufgabeKundeErgebnisse,
+#abschlussKundeErgebnisse{
+    max-height:180px;
+    overflow-y:auto;
+    margin-bottom:8px;
+}
+
+.kunde-suche-treffer{
+    padding:8px 10px;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    margin-bottom:6px;
+    cursor:pointer;
+    font-size:13px;
+    transition:background 0.15s ease;
+}
+
+.kunde-suche-treffer:hover{
+    background:var(--c-primary-soft);
+    border-color:var(--c-primary);
+}
+
+#aufgabeKundeAusgewaehlt,
+#abschlussKundeAusgewaehlt{
+    align-items:center;
+    justify-content:space-between;
+    background:var(--c-accent-soft);
+    border:1px solid var(--c-accent);
+    color:var(--c-accent);
+    border-radius:var(--radius-s);
+    padding:8px 10px;
+    margin-bottom:10px;
+    font-size:13px;
+    font-weight:600;
+}
+
+/* =====================================================
+   MODALS
+===================================================== */
+
+.modal-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(15,22,38,0.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    backdrop-filter:blur(1px);
+}
+
+.modal{
+    width:600px;
+    max-width:95%;
+    max-height:90vh;
+    overflow-y:auto;
+    background:var(--c-surface);
+    border-radius:var(--radius-l);
+    padding:26px;
+    box-shadow:var(--schatten-modal);
+}
+
+.modal h2{
+    margin-bottom:18px;
+}
+
+.modal-buttons{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid var(--c-border);
+}
+
+#aufgabeModal{
+    z-index:10000;
+}
+
+/* =====================================================
+   FORMULAR
+===================================================== */
+
+.crm-input,
+select.crm-input,
+input.crm-input{
+    width:100%;
+    padding:9px 11px;
+    margin-bottom:4px;
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    color:var(--c-text);
+    font-size:13.5px;
+    font-family:inherit;
+    transition:border-color 0.15s ease,
+               box-shadow 0.15s ease;
+}
+
+.crm-input:focus{
+    outline:none;
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 3px var(--c-primary-soft);
+}
+
+.crm-textarea{
+    width:100%;
+    min-height:110px;
+    padding:9px 11px;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    font-family:inherit;
+    font-size:13.5px;
+    color:var(--c-text);
+    resize:vertical;
+}
+
+.crm-textarea:focus{
+    outline:none;
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 3px var(--c-primary-soft);
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.crm-button{
+    border:1px solid var(--c-border);
+    background:var(--c-surface);
+    color:var(--c-text);
+    padding:9px 16px;
+    cursor:pointer;
+    border-radius:var(--radius-s);
+    font-size:13.5px;
+    font-weight:600;
+    font-family:inherit;
+    transition:background 0.15s ease,
+               border-color 0.15s ease,
+               transform 0.05s ease;
+}
+
+.crm-button:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-border-stark);
+}
+
+.crm-button:active{
+    transform:translateY(1px);
+}
+
+.crm-button-primary{
+    background:var(--c-primary);
+    border-color:var(--c-primary);
+    color:#ffffff;
+}
+
+.crm-button-primary:hover{
+    background:var(--c-primary-dunkel);
+    border-color:var(--c-primary-dunkel);
+}
+
+.crm-button-klein{
+    padding:5px 10px;
+    font-size:12px;
+}
+
+/* =====================================================
+   KENNZEICHNUNGEN / TAGS
+===================================================== */
+
+.tag{
+    display:inline-block;
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    color:var(--c-text-muted);
+    padding:4px 10px;
+    border-radius:20px;
+    margin:2px;
+    font-size:11.5px;
+    font-weight:600;
+}
+
+/* =====================================================
+   STATUS FARBEN
+===================================================== */
+
+.status-gelb{
+    background:var(--c-warn-bg);
+    color:var(--c-warn-text);
+}
+
+.status-rot{
+    background:var(--c-danger-bg);
+    color:var(--c-danger-text);
+}
+
+.status-gruen{
+    background:var(--c-success-bg);
+    color:var(--c-success-text);
+}
+
+/* =====================================================
+   AUFGABEN KANBAN
+===================================================== */
+
+.kanban-board{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    height:calc(100vh - 160px);
+}
+
+.kanban-spalte{
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.kanban-spalte h3{
+    padding:2px 4px 10px;
+    flex-shrink:0;
+}
+
+.kanban-spalte-inhalt{
+    flex:1;
+    overflow-y:auto;
+    padding-right:2px;
+}
+
+.kanban-karte{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:9px 10px;
+    margin-bottom:7px;
+    cursor:move;
+    box-shadow:var(--schatten-karte);
+    font-size:13px;
+}
+
+.kanban-karte:hover{
+    border-color:var(--c-border-stark);
+}
+
+.wird-gezogen{
+    opacity:0.4;
+    transform:scale(0.97) rotate(-1deg);
+}
+
+.kanban-karte{
+    transition:opacity 0.15s ease,
+               transform 0.15s ease,
+               box-shadow 0.15s ease;
+}
+
+.kanban-spalte{
+    transition:background 0.15s ease,
+               box-shadow 0.15s ease;
+}
+
+.drop-ziel-aktiv{
+    background:var(--c-primary-soft) !important;
+    box-shadow:inset 0 0 0 2px var(--c-primary);
+}
+
+.aufgaben-loeschcountdown{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-style:italic;
+    margin-top:4px;
+}
+
+/* =====================================================
+   TERMINE
+===================================================== */
+
+.termin-karte{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:12px;
+    margin-bottom:10px;
+    box-shadow:var(--schatten-karte);
+}
+
+/* =====================================================
+   HAUSHALT MITGLIEDER
+===================================================== */
+
+.haushalt-mitglied{
+    padding:10px 12px;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface);
+    margin-bottom:8px;
+}
+
+.haushalt-mitglied-info{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.haushalt-mitglied-name{
+    font-size:14px;
+    color:var(--c-primary);
+}
+
+.haushalt-mitglied-name:hover{
+    text-decoration:underline;
+}
+
+.haushalt-mitglied-kontakt{
+    font-size:12px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.kennzeichen-badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+}
+
+.kennzeichen-badge-rot{ background:var(--c-danger); }
+.kennzeichen-badge-grau{ background:#667085; }
+.kennzeichen-badge-blau{ background:var(--c-primary); }
+.kennzeichen-badge-gruen{ background:var(--c-accent); }
+.kennzeichen-badge-dunkelrot{ background:var(--c-primary-dunkel); }
+
+/* =====================================================
+   TERMIN MODAL HAUSHALT-CHECKBOX
+===================================================== */
+
+.haushalt-checkbox-label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--c-primary-soft);
+    border:1px solid var(--c-primary);
+    border-radius:var(--radius-s);
+    padding:11px 13px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--c-primary-dunkel);
+    cursor:pointer;
+    margin-top:12px;
+    user-select:none;
+}
+
+.haushalt-checkbox-label input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    cursor:pointer;
+    accent-color:var(--c-primary);
+    flex-shrink:0;
+}
+
+/* =====================================================
+   HAUSHALT
+===================================================== */
+
+.haushalt-box{
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:12px;
+}
+
+/* =====================================================
+   KLAPP-PANELS (details/summary)
+===================================================== */
+
+.klapp-panel{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface-muted);
+    margin-top:10px;
+    overflow:hidden;
+}
+
+.klapp-panel summary{
+    cursor:pointer;
+    padding:10px 12px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    list-style:none;
+    user-select:none;
+}
+
+.klapp-panel summary::-webkit-details-marker{
+    display:none;
+}
+
+.klapp-panel summary::before{
+    content:"▸";
+    display:inline-block;
+    margin-right:8px;
+    transition:transform 0.15s ease;
+    color:var(--c-primary);
+}
+
+.klapp-panel[open] summary::before{
+    transform:rotate(90deg);
+}
+
+.klapp-panel .klapp-inhalt{
+    padding:4px 12px 14px;
+    border-top:1px solid var(--c-border);
+}
+
+.klapp-panel-gross{
+    background:var(--c-surface);
+    margin-top:20px;
+}
+
+.klapp-panel-gross > summary{
+    font-size:15px;
+    padding:14px 16px;
+}
+
+.klapp-panel-mini{
+    margin-top:8px;
+    background:transparent;
+}
+
+.klapp-panel-mini summary{
+    padding:4px 0;
+    font-size:12px;
+    color:var(--c-text-schwach);
+}
+
+.klapp-panel-mini .klapp-inhalt{
+    padding:4px 0 4px 20px;
+    border-top:none;
+    font-size:13px;
+    color:var(--c-text-muted);
+}
+
+/* =====================================================
+   DATENSICHERUNG (im Dashboard)
+===================================================== */
+
+.datensicherung-zeile{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+}
+
+.verbindungs-status{
+    font-size:12.5px;
+    color:var(--c-text-muted);
+}
+
+/* =====================================================
+   AUFGABEN KARTE (kompakt)
+===================================================== */
+
+.aufgaben-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:8px;
+}
+
+.aufgaben-kopf strong{
+    font-size:13.5px;
+    color:var(--c-text);
+}
+
+.aufgaben-titel-ueberfaellig{
+    color:var(--c-danger) !important;
+}
+
+.aufgaben-faellig{
+    font-size:11.5px;
+    color:var(--c-text-schwach);
+    white-space:nowrap;
+}
+
+.aufgaben-kunde{
+    font-size:12px;
+    color:var(--c-text-muted);
+    margin-top:3px;
+}
+
+.aufgaben-aktionen{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+    flex-wrap:wrap;
+}
+
+/* =====================================================
+   BUTTON GEFAHR
+===================================================== */
+
+.crm-button-gefahr{
+    background:var(--c-danger);
+    border-color:var(--c-danger);
+    color:#ffffff;
+}
+
+.crm-button-gefahr:hover{
+    background:var(--c-danger-text);
+    border-color:var(--c-danger-text);
+}
+
+/* =====================================================
+   ABSCHLUSS (kompakt)
+===================================================== */
+
+.abschluss-zeile{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:10px;
+}
+
+.abschluss-zeile label{
+    margin-top:0;
+}
+
+@media (max-width:900px){
+
+    .abschluss-zeile{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+.abschluss-icon{
+    font-size:22px;
+    line-height:1;
+    flex-shrink:0;
+}
+
+.abschluss-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.abschluss-kunde{
+    font-size:12.5px;
+    color:var(--c-text-muted);
+    font-weight:600;
+}
+
+.abschluss-details{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--c-border);
+}
+
+.abschluss-detail-block{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.abschluss-detail-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--c-text-schwach);
+    font-weight:600;
+}
+
+.abschluss-detail-wert{
+    font-size:16px;
+    font-weight:600;
+    color:var(--c-text);
+}
+
+@media (max-width:900px){
+
+    .abschluss-details{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+.abschluss-aktionen{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+}
+
+/* =====================================================
+   KUNDENDATENBLATT KOMPAKT
+===================================================== */
+
+.kd-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:14px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.kd-layout{
+    display:grid;
+    grid-template-columns:1fr 260px;
+    gap:16px;
+    margin-bottom:16px;
+}
+
+.kd-stamm{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.kd-grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.kd-grid-adresse{
+    display:grid;
+    grid-template-columns:1fr 90px;
+    gap:8px;
+}
+
+.kd-grid-adresse .crm-input{
+    margin-bottom:0;
+}
+
+.kd-grid-plzort{
+    display:grid;
+    grid-template-columns:80px 1fr;
+    gap:8px;
+}
+
+.kd-grid-plzort .crm-input{
+    margin-bottom:0;
+}
+
+.kd-grid-geburtstag{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:4px;
+}
+
+.kd-grid-geburtstag .crm-input{
+    margin-bottom:0;
+    max-width:140px;
+}
+
+.kd-geburtstag-label{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    margin:0;
+    white-space:nowrap;
+}
+
+.kd-grid-2 .crm-input{
+    margin-bottom:0;
+}
+
+.kd-kontakte-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    min-width:0;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--c-border);
+}
+
+.kd-kontakte-grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    min-width:0;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--c-border);
+}
+
+/* =====================================================
+   VERTRAG TABELLE
+===================================================== */
+
+.vertrag-tabelle{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface);
+    overflow:hidden;
+}
+
+.vertrag-zeile{
+    display:grid;
+    grid-template-columns:
+        1.4fr 1.5fr 1fr 1fr 0.8fr 32px;
+    gap:12px;
+    padding:9px 12px;
+    align-items:center;
+    font-size:13px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.vertrag-zeile:last-child{
+    border-bottom:none;
+}
+
+.vertrag-zeile:hover:not(.vertrag-kopf){
+    background:var(--c-surface-muted);
+}
+
+.vertrag-kopf{
+    font-size:11px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    background:var(--c-surface-muted);
+}
+
+.vertrag-nummer{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.vertrag-zuteilung{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-weight:normal;
+}
+
+.kd-kontakt-spalte{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:0;
+    overflow:hidden;
+}
+
+.kd-kontakt-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:0 2px 4px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.eintrag-plus{
+    border:none;
+    background:transparent;
+    color:var(--c-primary);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    padding:0 4px;
+    font-weight:700;
+    transition:color 0.1s;
+}
+
+.eintrag-plus:hover{
+    color:var(--c-primary-dunkel);
+}
+
+.kd-notiz{
+    display:flex;
+    flex-direction:column;
+}
+
+.kd-notiz-textarea{
+    flex:1;
+    min-height:160px;
+    resize:vertical;
+}
+
+.kd-abschnitt{
+    border-top:1px solid var(--c-border);
+    padding-top:14px;
+    margin-top:14px;
+}
+
+.kd-abschnitt-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.kd-archivieren{
+    margin-top:20px;
+    padding-top:14px;
+    border-top:1px solid var(--c-border);
+}
+
+/* =====================================================
+   TERMINE ZEILEN (KOMPAKT)
+===================================================== */
+
+.termin-zeile{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:9px 12px;
+    margin-bottom:8px;
+    box-shadow:var(--schatten-karte);
+    transition:border-color 0.15s ease;
+}
+
+.termin-zeile:hover{
+    border-color:var(--c-border-stark);
+}
+
+.termin-zeile:last-child{
+    margin-bottom:0;
+}
+
+.termin-zeile-haupt{
+    display:grid;
+    grid-template-columns:130px 90px 1fr auto;
+    align-items:center;
+    gap:12px;
+    font-size:13px;
+}
+
+.termin-datum{
+    color:var(--c-text-muted);
+    font-size:12.5px;
+    white-space:nowrap;
+}
+
+.termin-kategorie{
+    color:var(--c-text-schwach);
+    font-size:12px;
+}
+
+.termin-titel{
+    font-weight:600;
+    color:var(--c-text);
+}
+
+.termin-aktionen{
+    display:flex;
+    gap:6px;
+    flex-shrink:0;
+}
+
+.termin-notiz{
+    margin:2px 0 4px 0;
+}
+
+.termin-leer{
+    color:var(--c-text-schwach);
+    font-size:13px;
+    padding:8px 0;
+}
+
+.termin-info .termin-titel{
+    font-weight:normal;
+    color:var(--c-text-muted);
+    font-style:italic;
+}
+
+.termin-info .termin-kategorie{
+    color:var(--c-accent);
+    font-style:italic;
+    font-weight:600;
+}
+
+/* =====================================================
+   KENNZEICHNUNGEN (KUNDE)
+===================================================== */
+
+.kennzeichen-reihe{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+}
+
+.kennzeichen-btn{
+    border:1px solid var(--c-border);
+    background:var(--c-surface);
+    color:var(--c-text-muted);
+    padding:7px 14px;
+    border-radius:20px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.15s ease;
+}
+
+.kennzeichen-btn:hover{
+    border-color:var(--c-border-stark);
+}
+
+.kennzeichen-aktiv-rot{
+    background:var(--c-primary);
+    border-color:var(--c-danger);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-grau{
+    background:#667085;
+    border-color:#667085;
+    color:#fff;
+}
+
+.kennzeichen-aktiv-blau{
+    background:var(--c-primary);
+    border-color:var(--c-primary);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-gruen{
+    background:var(--c-accent);
+    border-color:var(--c-accent);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-dunkelrot{
+    background:var(--c-primary-dunkel);
+    border-color:var(--c-primary-dunkel);
+    color:#fff;
+}
+
+/* =====================================================
+   EINTRAGS-LISTEN (TELEFON / E-MAIL / VERTRAG)
+===================================================== */
+
+.eintrag-liste{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    overflow:hidden;
+    background:var(--c-surface);
+}
+
+.eintrag-zeile{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:9px 12px;
+    font-size:13.5px;
+    border-bottom:1px solid var(--c-border);
+    min-width:0;
+}
+
+.eintrag-zeile span,
+.eintrag-zeile a{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+    flex:1;
+}
+
+.eintrag-email{
+    color:var(--c-primary);
+    text-decoration:none;
+    font-size:13.5px;
+}
+
+.eintrag-email:hover{
+    text-decoration:underline;
+}
+
+.eintrag-zeile:last-child{
+    border-bottom:none;
+}
+
+.eintrag-zeile:hover{
+    background:var(--c-surface-muted);
+}
+
+.eintrag-leer{
+    padding:12px;
+    font-size:13px;
+    color:var(--c-text-schwach);
+}
+
+.eintrag-entfernen{
+    border:none;
+    background:transparent;
+    color:var(--c-text-schwach);
+    font-size:17px;
+    line-height:1;
+    cursor:pointer;
+    padding:2px 8px;
+    border-radius:var(--radius-s);
+    transition:all 0.15s ease;
+}
+
+.eintrag-entfernen:hover{
+    background:var(--c-danger-bg);
+    color:var(--c-danger-text);
+}
+
+.crm-button-hinzufuegen{
+    border:1px dashed var(--c-border-stark);
+    background:transparent;
+    color:var(--c-primary);
+    padding:8px 14px;
+    border-radius:var(--radius-s);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:8px;
+    transition:all 0.15s ease;
+}
+
+.crm-button-hinzufuegen:hover{
+    background:var(--c-primary-soft);
+    border-style:solid;
+    border-color:var(--c-primary);
+}
+
+.datensicherung-hinweis{
+    font-size:12.5px;
+    color:var(--c-text-muted);
+    margin-bottom:14px;
+    line-height:1.5;
+}
+
+.datensicherung-datei-input{
+    display:block;
+    margin-top:8px;
+    font-size:13px;
+    color:var(--c-text-muted);
+}
+
+/* =====================================================
+   KONTAKTUEBERWACHUNG SCROLLLISTEN
+===================================================== */
+
+.kontakt-scroll-liste{
+    max-height:380px;
+    overflow-y:auto;
+    padding-right:4px;
+}
+
+/* =====================================================
+   ABSCHLUESSE (kompakte Zeilen-Darstellung)
+===================================================== */
+
+.abschlusseintrag{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:12px;
+    margin-bottom:10px;
+    box-shadow:var(--schatten-karte);
+}
+
+.abschluss-zeile-kompakt{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:10px 14px;
+    margin-bottom:8px;
+    box-shadow:var(--schatten-karte);
+    transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.abschluss-zeile-kompakt:hover{
+    border-color:var(--c-border-stark);
+}
+
+/* Kundenzeile über dem Raster – klein und dezent */
+.abschluss-kunde-zeile{
+    font-size:11.5px;
+    color:var(--c-text-muted);
+    font-weight:600;
+    margin-bottom:5px;
+    padding-left:2px;
+    letter-spacing:0.01em;
+}
+
+.abschluss-kunde-leer{
+    color:var(--c-text-schwach);
+    font-style:italic;
+    font-weight:500;
+}
+
+/* FESTES RASTER — Spaltenbreiten unabhängig vom Inhalt gleich.
+   Produkt hat feste Breite (damit "Genius" und "Turbodarlehen" gleich viel
+   Platz beanspruchen). Die 1fr-Spalte ist die Notiz-Vorschau — dehnt sich
+   in den Freiraum rechts, statt dort eine Lücke zu lassen. */
+.abschluss-hauptzeile{
+    display:grid;
+    grid-template-columns:
+        36px            /* Icon             */
+        90px            /* Datum            */
+        150px           /* Produkt (fix)    */
+        110px           /* Vertriebsweg     */
+        170px           /* Bausparsumme     */
+        150px           /* Monatsbeitrag    */
+        1fr             /* Notiz-Vorschau   */
+        34px            /* Bearbeiten       */
+        34px;           /* Löschen          */
+    align-items:center;
+    gap:10px;
+}
+
+.ab-sp-icon{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+}
+
+.ab-sp-icon .produkt-icon-svg{
+    width:34px;
+    height:34px;
+    display:block;
+    border-radius:9px;
+}
+
+.ab-sp-datum{
+    font-size:14px;
+    font-weight:700;
+    color:var(--c-text);
+    white-space:nowrap;
+}
+
+.ab-sp-produkt{
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+    border-radius:14px;
+    padding:4px 12px;
+    text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    font-weight:700;
+    font-size:11.5px;
+    justify-self:stretch;
+}
+
+.ab-sp-ort{
+    font-size:13px;
+    color:var(--c-text-muted);
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.ab-sp-bss,
+.ab-sp-mb{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    white-space:nowrap;
+    overflow:hidden;
+}
+
+.ab-wert-label{
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--c-text-schwach);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    flex-shrink:0;
+}
+
+.ab-wert-zahl{
+    font-size:14px;
+    font-weight:700;
+    color:var(--c-text);
+    font-variant-numeric:tabular-nums;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/* Notiz-Vorschau als klickbare Spalte, dehnt sich in den Freiraum */
+.ab-sp-notizvorschau{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 10px;
+    border-radius:var(--radius-s);
+    background:var(--c-surface-muted);
+    color:var(--c-text-muted);
+    font-size:12px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:background 0.15s ease, color 0.15s ease;
+    min-width:0; /* wichtig damit text-overflow greift */
+}
+
+.ab-sp-notizvorschau:hover{
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+}
+
+.ab-sp-notizvorschau-leer{
+    background:transparent;
+    cursor:default;
+    pointer-events:none;
+}
+
+.ab-notiz-chevron{
+    font-size:11px;
+    color:var(--c-primary);
+    flex-shrink:0;
+    line-height:1;
+}
+
+.ab-notiz-vorschautext{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+}
+
+/* Aufklappbare Notiz unterhalb der Rasterzeile */
+.abschluss-notiz-inhalt{
+    display:none;
+    margin-top:8px;
+    padding:8px 12px;
+    background:var(--c-surface-muted);
+    border-radius:var(--radius-s);
+    border-left:3px solid var(--c-primary);
+    font-size:12.5px;
+    color:var(--c-text-muted);
+    line-height:1.45;
+    white-space:pre-wrap;
+}
+
+.abschluss-notiz-offen{
+    display:block;
+}
+
+/* ===== FILTER: aktiver Filter (Rand + fett) ===== */
+
+/* Aktive Auswahl im Dropdown-Popup (nicht "alle") — dunkler markiert */
+select.crm-input option:checked{
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+    font-weight:700;
+}
+
+/* Wenn im Feld ein Filter (nicht "alle") aktiv ist: fetteres Feld
+   mit farbigem Rand — signalisiert "hier ist gerade gefiltert" */
+select.crm-input.filter-select-aktiv{
+    font-weight:700;
+    color:var(--c-primary-dunkel);
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 2px var(--c-primary-soft);
+}
+
+/* Auf schmalen Bildschirmen: Raster umbrechen */
+@media (max-width:900px){
+    .abschluss-hauptzeile{
+        grid-template-columns:36px 90px 1fr auto auto auto;
+        row-gap:8px;
+    }
+    .ab-sp-ort{ grid-column:1 / -1; padding-left:46px; }
+    .ab-sp-bss{ grid-column:1 / span 3; padding-left:46px; }
+    .ab-sp-mb { grid-column:4 / -1; }
+    .ab-sp-notizvorschau{ grid-column:1 / -1; padding-left:46px; }
+}
+
+/* =====================================================
+   BAUSPAR-KACHEL AKZENT (Fokus auf Bausparen)
+===================================================== */
+
+.dashboard-card-bauspar{
+    background:linear-gradient(135deg,
+        var(--c-surface) 0%,
+        var(--c-primary-soft) 100%);
+    border:1px solid var(--c-primary);
+    box-shadow:0 2px 8px rgba(122,30,53,0.10);
+}
+
+.dashboard-card-bauspar h3{
+    color:var(--c-primary-dunkel);
+}
+
+.dashboard-card-bauspar .dashboard-value{
+    color:var(--c-primary-dunkel);
+}
+
+/* Finanzierungs-Akzent (analog zu Bauspar, aber goldbraun-warm)
+   damit Bauspar und Finanzierung auf einen Blick trennbar sind. */
+.dashboard-card-finanzierung{
+    background:linear-gradient(135deg,
+        var(--c-surface) 0%,
+        #f6e6cf 100%);
+    border:1px solid #a06a26;
+    box-shadow:0 2px 8px rgba(160,106,38,0.10);
+}
+
+.dashboard-card-finanzierung h3{
+    color:#6b4315;
+}
+
+.dashboard-card-finanzierung .dashboard-value{
+    color:#6b4315;
+}
+
+/* =====================================================
+   SIRENE — pulsierender roter Rahmen für überfällige,
+   OFFENE Aufgaben (nicht in anderen Kanban-Spalten)
+===================================================== */
+
+@keyframes aufgabe-sirene-puls{
+    0%{
+        box-shadow:
+            0 0 0 0 rgba(180,20,30,0.55),
+            0 0 6px 0 rgba(180,20,30,0.25);
+        border-color:#8a0f1a;
+    }
+    50%{
+        box-shadow:
+            0 0 0 6px rgba(180,20,30,0.0),
+            0 0 18px 3px rgba(180,20,30,0.55);
+        border-color:#c8102e;
+    }
+    100%{
+        box-shadow:
+            0 0 0 0 rgba(180,20,30,0.55),
+            0 0 6px 0 rgba(180,20,30,0.25);
+        border-color:#8a0f1a;
+    }
+}
+
+.aufgabe-sirene{
+    border:2px solid #8a0f1a !important;
+    animation:aufgabe-sirene-puls 1.6s ease-in-out infinite;
+    position:relative;
+}
+
+/* Bewegung ausschalten für Nutzer mit
+   „Reduzierte Bewegung"-Einstellung im OS */
+@media (prefers-reduced-motion:reduce){
+    .aufgabe-sirene{
+        animation:none;
+        box-shadow:0 0 0 2px rgba(180,20,30,0.5);
+    }
+}
+
+.kanban-karte-kompakt{
+    padding:7px 9px !important;
+    margin-bottom:5px !important;
+    font-size:12.5px !important;
+}
+
+.ak-zeile-1{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:6px;
+}
+
+.ak-titel{
+    font-size:13px;
+    color:var(--c-text);
+    line-height:1.25;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.ak-faellig{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-weight:600;
+    white-space:nowrap;
+    flex-shrink:0;
+}
+
+.ak-faellig-ueberfaellig{
+    color:var(--c-danger) !important;
+    font-weight:700;
+}
+
+.ak-zeile-2{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:3px;
+    flex-wrap:wrap;
+}
+
+.ak-prio-badge{
+    display:inline-block;
+    padding:1px 6px;
+    border-radius:8px;
+    font-size:9.5px;
+    font-weight:700;
+    color:#fff;
+    letter-spacing:0.05em;
+    line-height:1.4;
+}
+
+.ak-kunde{
+    font-size:11px;
+    color:var(--c-text-muted);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.ak-aktionen{
+    display:flex;
+    gap:2px;
+    margin-top:6px;
+    justify-content:flex-end;
+}
+
+/* =====================================================
+   ICON BUTTONS (kompakt)
+===================================================== */
+
+.crm-icon-button{
+    background:transparent;
+    border:1px solid transparent;
+    border-radius:6px;
+    padding:3px 6px;
+    font-size:13px;
+    cursor:pointer;
+    line-height:1;
+    transition:background 0.12s ease, border-color 0.12s ease;
+}
+
+.crm-icon-button:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-border);
+}
+
+.crm-icon-button-gefahr:hover{
+    background:#fdecec;
+    border-color:var(--c-danger);
+}
+
+/* =====================================================
+   SCROLLBALKEN (dezent, Chrome/Edge)
+===================================================== */
+
+::-webkit-scrollbar{
+    width:9px;
+    height:9px;
+}
+
+::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+::-webkit-scrollbar-thumb{
+    background:var(--c-border-stark);
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:var(--c-text-schwach);
+}
+
+/* =====================================================
+   DASHBOARD ERWEITERUNG
+===================================================== */
+
+.dashboard-kopf{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:0;
+}
+
+.speicher-status{
+    font-size:12px;
+    color:var(--c-text-schwach);
+    font-weight:600;
+}
+
+.dashboard-card-link{
+    cursor:pointer;
+    position:relative;
+    transition:transform 0.12s ease,
+               box-shadow 0.12s ease,
+               border-color 0.12s ease;
+}
+
+.dashboard-card-link:hover{
+    transform:translateY(-2px);
+    box-shadow:0 4px 16px rgba(28,26,23,0.10);
+    border-color:var(--c-primary);
+}
+
+.dashboard-card-link::after{
+    content:"→";
+    position:absolute;
+    bottom:10px;
+    right:12px;
+    font-size:14px;
+    color:var(--c-primary);
+    opacity:0;
+    transition:opacity 0.12s ease;
+}
+
+.dashboard-card-link:hover::after{
+    opacity:1;
+}
+
+/* =====================================================
+   PRODUKTIONSAUSWERTUNG
+===================================================== */
+
+.prod-container{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:4px;
+}
+
+.prod-block{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:16px;
+    box-shadow:var(--schatten-karte);
+}
+
+.prod-titel{
+    font-size:13px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.prod-gesamt{
+    font-size:22px;
+    font-weight:700;
+    color:var(--c-primary);
+    letter-spacing:-0.01em;
+}
+
+.prod-zeile{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 0;
+    font-size:13px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.prod-zeile-label{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.prod-zeile-label .produkt-icon-svg{
+    width:20px;
+    height:20px;
+    display:block;
+    border-radius:5px;
+    flex-shrink:0;
+}
+
+/* Kleiner Doppel-Marker neben Turbo-/Flexdarlehen in der Produktliste */
+.prod-doppel-hinweis{
+    display:inline-block;
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+    font-size:9.5px;
+    font-weight:700;
+    padding:1px 5px;
+    border-radius:8px;
+    letter-spacing:0.03em;
+    margin-left:2px;
+    cursor:help;
+}
+
+/* Kategorie-Summenzeile am Ende jedes prod-block:
+   Bauspar-Stücke + Finanzierungs-Stücke inkl. Turbo-Doppelwertung */
+.prod-kategorie-zeile{
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px dashed var(--c-border);
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    font-size:11.5px;
+    color:var(--c-text-muted);
+}
+
+.prod-kategorie-zeile strong{
+    color:var(--c-text);
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+}
+
+.prod-kat-trenn{
+    color:var(--c-text-schwach);
+}
+
+.prod-zeile:last-child{
+    border-bottom:none;
+}
+
+.prod-zahl{
+    font-weight:700;
+    color:var(--c-text);
+    background:var(--c-surface-muted);
+    border-radius:20px;
+    padding:1px 9px;
+    font-size:12px;
+}
+
+/* =====================================================
+   AUFGABEN ANSICHT-TOGGLE
+===================================================== */
+
+.aufgaben-kopfzeile{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+}
+
+.ansicht-toggle{
+    display:flex;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    overflow:hidden;
+}
+
+.toggle-btn{
+    border:none;
+    border-radius:0;
+    background:transparent;
+    color:var(--c-text-muted);
+    padding:6px 14px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.12s ease,color 0.12s ease;
+}
+
+.toggle-btn:hover{
+    background:var(--c-surface-muted);
+    color:var(--c-text);
+}
+
+.toggle-btn-aktiv{
+    background:var(--c-primary);
+    color:#fff;
+}
+
+.toggle-btn-aktiv:hover{
+    background:var(--c-primary-dunkel);
+    color:#fff;
+}
+
+/* =====================================================
+   KALENDERANSICHT
+===================================================== */
+
+.kalender-nav{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:14px;
+}
+
+.kalender-titel{
+    font-size:16px;
+    font-weight:700;
+    color:var(--c-text);
+    min-width:160px;
+    text-align:center;
+}
+
+.kalender-wochentage{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+    margin-bottom:4px;
+}
+
+.kalender-wt{
+    text-align:center;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--c-text-schwach);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:4px 0;
+}
+
+.kalender-tage{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+}
+
+.kalender-tag{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    min-height:90px;
+    padding:6px;
+    vertical-align:top;
+    cursor:pointer;
+    transition:background 0.12s ease,
+               border-color 0.12s ease,
+               transform 0.1s ease;
+}
+
+.kalender-tag:hover{
+    background:var(--c-primary-soft);
+    border-color:var(--c-primary);
+    transform:translateY(-1px);
+}
+
+.kalender-tag-leer{
+    background:transparent;
+    border-color:transparent;
+    min-height:90px;
+    cursor:default;
+}
+
+.kalender-tag-leer:hover{
+    background:transparent;
+    border-color:transparent;
+    transform:none;
+}
+
+.kalender-heute{
+    border-color:var(--c-primary);
+    background:var(--c-primary-soft);
+}
+
+.kalender-heute:hover{
+    background:var(--c-primary-soft);
+    filter:brightness(0.96);
+}
+
+.kalender-tag-nr{
+    font-size:12px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    margin-bottom:4px;
+}
+
+.kalender-heute-nr{
+    color:var(--c-primary);
+}
+
+.kalender-aufgaben{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.kalender-aufgabe-pill{
+    font-size:11px;
+    padding:3px 6px;
+    border-radius:4px;
+    background:var(--c-surface-muted);
+    cursor:pointer;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition:background 0.1s ease,
+               box-shadow 0.1s ease;
+}
+
+.kalender-aufgabe-pill:hover{
+    background:var(--c-primary-soft);
+    box-shadow:0 1px 3px rgba(122,30,53,0.15);
+}
+
+.kalender-mehr{
+    font-size:10.5px;
+    color:var(--c-text-schwach);
+    padding:1px 5px;
+}
+
+
+/* =====================================================
+   SELEKTIONEN
+===================================================== */
+
+.selektionen-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+}
+
+.selektionen-aktionen{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.selektion-filter-liste{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.selektion-filter-zeile{
+    display:grid;
+    grid-template-columns:1fr 180px 1fr 32px;
+    gap:8px;
+    padding:10px;
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    align-items:center;
+}
+
+.selektion-filter-zeile .crm-input{
+    margin-bottom:0;
+}
+
+.selektion-filter-zeile .selektion-wert{
+    /* wenn zwischen → zwei inputs teilen sich die Spalte */
+}
+
+.selektion-filter-zeile:has(.selektion-wert:nth-child(4)){
+    grid-template-columns:1fr 180px 1fr 32px;
+}
+
+.selektion-leer{
+    padding:16px;
+    background:var(--c-surface-muted);
+    border:1px dashed var(--c-border);
+    border-radius:var(--radius-s);
+    color:var(--c-text-schwach);
+    font-size:13px;
+    text-align:center;
+}
+
+.selektion-controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:12px;
+    background:var(--c-surface-muted);
+    border-radius:var(--radius-s);
+    margin-bottom:16px;
+    flex-wrap:wrap;
+}
+
+.selektion-treffer-live{
+    font-size:13px;
+    font-weight:600;
+    color:var(--c-primary);
+    padding:4px 10px;
+    background:var(--c-primary-soft);
+    border-radius:20px;
+}
+
+.selektion-ergebnis{
+    margin-top:8px;
+}
+
+.selektion-treffer-tabelle{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface);
+    overflow:hidden;
+}
+
+.selektion-treffer-kopf,
+.selektion-treffer-zeile{
+    display:grid;
+    grid-template-columns:1.5fr 1.5fr 60px 80px 1fr;
+    gap:12px;
+    padding:9px 12px;
+    align-items:center;
+    font-size:13px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.selektion-treffer-kopf{
+    font-size:11px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    background:var(--c-surface-muted);
+}
+
+.selektion-treffer-zeile{
+    cursor:pointer;
+    transition:background 0.1s ease;
+}
+
+.selektion-treffer-zeile:hover{
+    background:var(--c-primary-soft);
+}
+
+.selektion-treffer-zeile:last-child{
+    border-bottom:none;
+}
+
+.selektion-mehr{
+    padding:12px;
+    text-align:center;
+    color:var(--c-text-schwach);
+    font-size:12.5px;
+    font-style:italic;
+}
+
+/* =====================================================
+   BENACHRICHTIGUNGS-BANNER
+===================================================== */
+
+.benachrichtigung-banner{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    max-width:400px;
+    background:var(--c-surface);
+    border:1px solid var(--c-primary);
+    border-radius:var(--radius-m);
+    box-shadow:0 10px 40px rgba(28,26,23,0.18);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    font-size:13.5px;
+    color:var(--c-text);
+    z-index:9998;
+    animation:banner-ein 0.25s ease;
+}
+
+.benachrichtigung-banner > div{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+}
+
+@keyframes banner-ein{
+    from{ transform:translateY(20px); opacity:0; }
+    to{ transform:translateY(0); opacity:1; }
+}
+
+/* =====================================================
+   MERGE / DOPPLUNGEN
+===================================================== */
+
+.modal-breit{
+    width:820px;
+}
+
+.merge-hinweis{
+    background:var(--c-warn-bg, #fff4e5);
+    color:var(--c-text);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.5;
+    margin-bottom:16px;
+}
+
+.merge-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.merge-spalte{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:14px;
+    background:var(--c-surface);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.merge-spalte-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--c-border);
+    padding-bottom:6px;
+    margin-bottom:6px;
+}
+
+.merge-id{
+    font-size:11px;
+    color:var(--c-text-schwach);
+}
+
+.merge-zeile{
+    display:grid;
+    grid-template-columns:110px 1fr;
+    gap:8px;
+    font-size:12.5px;
+    padding:3px 0;
+    border-bottom:1px dashed var(--c-border);
+}
+
+.merge-label{
+    color:var(--c-text-schwach);
+}
+
+.merge-wert{
+    word-break:break-word;
+}
+
+.merge-waehlen-btn{
+    margin-top:12px;
+    align-self:stretch;
+}
+
+/* =====================================================
+   KUNDENUNTERLAGEN
+===================================================== */
+
+.ku-panel-body{
+    margin-top:8px;
+}
+
+.ku-datei-liste{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.ku-datei-zeile{
+    display:grid;
+    grid-template-columns:1fr auto auto;
+    gap:10px;
+    align-items:center;
+    padding:4px 6px;
+    border-radius:4px;
+    font-size:13px;
+}
+
+.ku-datei-zeile:hover{
+    background:var(--c-hover, rgba(0,0,0,0.03));
+}
+
+.ku-datei-zeile a{
+    color:var(--c-link, #7a1e35);
+    text-decoration:none;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.ku-datei-zeile a:hover{
+    text-decoration:underline;
+}
+
+.ku-datei-meta{
+    font-size:11px;
+    color:var(--c-text-schwach);
+}
+
+#kundenordnerModal .ku-datei-liste{
+    max-height:60vh;
+}

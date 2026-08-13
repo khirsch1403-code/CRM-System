@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="app-icon/favicon.svg">
+<link rel="apple-touch-icon" href="app-icon/icon-512.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Vertrieb</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<div class="navbar">
+
+    <div class="navbar-brand">CRM Vertrieb</div>
+
+    <div class="navbar-links">
+
+    <button
+        class="nav-button nav-button-aktiv"
+        data-tab="dashboard"
+        onclick="showTab('dashboard')">
+
+        <img src="nav/dashboard.svg" alt="" class="nav-icon">
+        Dashboard
+
+    </button>
+
+    <button
+        class="nav-button"
+        data-tab="kunden"
+        onclick="showTab('kunden')">
+
+        <img src="nav/kunden.svg" alt="" class="nav-icon">
+        Kunden
+
+    </button>
+
+    <button
+        class="nav-button"
+        data-tab="aufgaben"
+        onclick="showTab('aufgaben')">
+
+        <img src="nav/aufgaben.svg" alt="" class="nav-icon">
+        Aufgaben
+
+    </button>
+
+    <button
+        class="nav-button"
+        data-tab="abschluesse"
+        onclick="showTab('abschluesse')">
+
+        <img src="nav/abschluesse.svg" alt="" class="nav-icon">
+        Abschlüsse
+
+    </button>
+
+    <button
+        class="nav-button"
+        data-tab="kontakt"
+        onclick="showTab('kontakt')">
+
+        <img src="nav/kontakt.svg" alt="" class="nav-icon">
+        Kontaktüberwachung
+
+    </button>
+
+    <button
+        class="nav-button"
+        data-tab="selektionen"
+        onclick="showTab('selektionen'); selektionenInitialisieren();">
+
+        <img src="nav/selektionen.svg" alt="" class="nav-icon">
+        Selektionen
+
+    </button>
+
+    <button
+        class="nav-button"
+        data-tab="archiv"
+        onclick="showTab('archiv'); renderArchiv();">
+
+        <img src="nav/archiv.svg" alt="" class="nav-icon">
+        Archiv
+
+    </button>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     CONTENT
+===================================================== -->
+
+<div class="content">
+
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<div
+    id="dashboard"
+    class="tab-content tab-active">
+
+    <div class="dashboard-kopf">
+        <h2>Dashboard</h2>
+        <div style="display:flex;gap:16px;align-items:center;">
+            <span id="letzterSyncAnzeige" class="speicher-status"></span>
+            <span id="speicherStatus" class="speicher-status"></span>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="dashboard-grid">
+
+        <div class="dashboard-card dashboard-card-link"
+             onclick="showTab('kunden')" title="Zum Kundenstamm">
+
+            <h3>Kunden gesamt</h3>
+
+            <div id="dashboardKunden" class="dashboard-value">0</div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-card-link"
+             onclick="showTab('aufgaben')" title="Zu den Aufgaben">
+
+            <h3>Offene Aufgaben</h3>
+
+            <div id="dashboardAufgaben" class="dashboard-value">0</div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-card-link"
+             onclick="showTab('abschluesse')" title="Zu den Abschlüssen">
+
+            <h3>Abschlüsse (laufendes Jahr)</h3>
+
+            <div id="dashboardAbschluesse" class="dashboard-value">0</div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-card-link"
+             onclick="showTab('kontakt')" title="Zur Kontaktüberwachung">
+
+            <h3>Kontaktbedarf (1+ Jahr)</h3>
+
+            <div id="dashboard365" class="dashboard-value">0</div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-card-link"
+             onclick="showTab('kontakt')" title="Zur Kontaktüberwachung">
+
+            <h3>Akuter Kontaktbedarf (2+ Jahre)</h3>
+
+            <div id="dashboard730" class="dashboard-value">0</div>
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <div id="produktionsauswertung" class="prod-container">
+
+    </div>
+
+    <details class="klapp-panel klapp-panel-gross">
+
+        <summary>Datensicherung</summary>
+
+        <div class="klapp-inhalt">
+
+            <p class="datensicherung-hinweis">
+                Deine Daten werden automatisch gespeichert.
+                Die folgenden Optionen sind für den Notfall.
+            </p>
+
+            <div class="datensicherung-zeile">
+
+                <button
+                    id="backupButton"
+                    class="crm-button">
+                    📥 Sicherung herunterladen
+                </button>
+
+                <button
+                    id="syncButton"
+                    class="crm-button">
+                    🔄 Bestand synchronisieren
+                </button>
+
+                <button
+                    type="button"
+                    class="crm-button"
+                    onclick="dopplungenManuellStarten()"
+                    title="Kunden mit gleichem Vor- und Nachnamen sowie Geburtsdatum finden und zusammenführen">
+                    🧩 Dopplungen prüfen
+                </button>
+
+            </div>
+
+            <div class="datensicherung-zeile" style="margin-top:14px;flex-wrap:wrap;">
+
+                <button
+                    type="button"
+                    class="crm-button"
+                    onclick="kuWurzelWaehlen()">
+                    📁 Kundenunterlagen-Ordner wählen
+                </button>
+
+                <button
+                    type="button"
+                    class="crm-button crm-button-klein"
+                    onclick="kuWurzelZuruecksetzen()">
+                    Verknüpfung entfernen
+                </button>
+
+                <span id="kuStatus" class="speicher-status"></span>
+
+            </div>
+
+            <label style="margin-top:14px;">
+                Sicherung wiederherstellen
+            </label>
+
+            <input
+                type="file"
+                id="ladenDatei"
+                accept=".json"
+                class="datensicherung-datei-input">
+
+            <input
+                type="file"
+                id="syncDatei"
+                accept=".xlsx,.xls,.xlsm"
+                style="display:none;">
+
+        </div>
+
+    </details>
+
+</div>
+
+<!-- =====================================================
+     KUNDEN
+===================================================== -->
+
+<div
+    id="kunden"
+    class="tab-content">
+
+    <div class="kunden-layout">
+
+        <div class="kunden-sidebar">
+
+            <h2>Kunden</h2>
+
+            <br>
+
+            <input
+                id="kundenSuche"
+                class="crm-input"
+                placeholder="Name, Ort, Vertragsnummer">
+
+            <button
+                id="kundeAnlegenButton"
+                class="crm-button crm-button-primary">
+
+                Kunde anlegen
+
+            </button>
+
+            <button
+                type="button"
+                class="crm-button crm-button-klein"
+                style="margin-top:6px;width:100%;"
+                onclick="bestandVerlassenArchivieren()"
+                title="Alle Kunden mit dem Marker 'Bestand verlassen' ins Archiv verschieben">
+
+                Bestand-Verlassen archivieren
+
+            </button>
+
+            <br><br>
+
+            <div id="kundenListe">
+
+            </div>
+
+        </div>
+
+        <div
+            id="kundenDetails"
+            class="kunden-details">
+
+            <h2>
+
+                Kein Kunde ausgewählt
+
+            </h2>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     AUFGABEN
+===================================================== -->
+
+<div
+    id="aufgaben"
+    class="tab-content">
+
+    <div class="aufgaben-kopfzeile">
+
+        <div style="display:flex;align-items:center;gap:12px;">
+
+            <h2>Aufgaben</h2>
+
+            <div class="ansicht-toggle">
+
+                <button
+                    id="toggleKanban"
+                    class="toggle-btn toggle-btn-aktiv"
+                    onclick="aufgabenAnsichtWechseln('kanban')">
+
+                    Kanban
+
+                </button>
+
+                <button
+                    id="toggleKalender"
+                    class="toggle-btn"
+                    onclick="aufgabenAnsichtWechseln('kalender')">
+
+                    Kalender
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <button
+            id="aufgabeAnlegenButton"
+            class="crm-button crm-button-primary">
+
+            Aufgabe anlegen
+
+        </button>
+
+    </div>
+
+    <div id="aufgabenKanbanAnsicht">
+
+    <div class="kanban-board">
+
+        <div
+             class="kanban-spalte"
+             id="offen">
+
+            <h3>Offen</h3>
+
+        </div>
+
+        <div
+             class="kanban-spalte"
+             id="inBearbeitung">
+
+            <h3>In Bearbeitung</h3>
+
+        </div>
+
+        <div
+             class="kanban-spalte"
+             id="wartetAufKunde">
+
+            <h3>Wartet auf Kunde</h3>
+
+        </div>
+
+        <div
+             class="kanban-spalte"
+             id="erledigt">
+
+            <h3>Erledigt</h3>
+
+        </div>
+
+    </div>
+
+    </div><!-- kanbanAnsicht Ende -->
+
+    <div id="aufgabenKalenderAnsicht" style="display:none;">
+
+        <div id="kalenderNav" class="kalender-nav">
+
+            <button class="crm-button crm-button-klein"
+                onclick="kalenderMonatWechseln(-1)">‹</button>
+
+            <span id="kalenderTitel" class="kalender-titel"></span>
+
+            <button class="crm-button crm-button-klein"
+                onclick="kalenderMonatWechseln(1)">›</button>
+
+        </div>
+
+        <div id="kalenderGrid" class="kalender-grid"></div>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     ABSCHLUESSE
+===================================================== -->
+
+<div
+    id="abschluesse"
+    class="tab-content">
+
+    <h2>Abschlüsse</h2>
+
+    <br>
+
+    <div class="dashboard-grid dashboard-grid-abschluesse" style="margin-bottom:20px;">
+
+        <div class="dashboard-card dashboard-card-bauspar">
+
+            <h3>Bausparabschlüsse <span class="filter-zeitraum">Jahr</span></h3>
+
+            <div
+                id="bausparAnzahlJahr"
+                class="dashboard-value">
+
+                0
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-card-bauspar">
+
+            <h3>Bausparsumme <span class="filter-zeitraum">Jahr</span></h3>
+
+            <div
+                id="bausparSummeJahr"
+                class="dashboard-value">
+
+                0&nbsp;€
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-card-finanzierung">
+
+            <h3>Finanzierungsabschlüsse <span class="filter-zeitraum">Jahr</span></h3>
+
+            <div
+                id="finanzierungAnzahlJahr"
+                class="dashboard-value">
+
+                0
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-card-finanzierung">
+
+            <h3>Finanzierungssumme <span class="filter-zeitraum">Jahr</span></h3>
+
+            <div
+                id="finanzierungSummeJahr"
+                class="dashboard-value">
+
+                0&nbsp;€
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <button
+        id="abschlussAnlegenButton"
+        class="crm-button crm-button-primary">
+
+        Abschluss erfassen
+
+    </button>
+
+    <div class="datensicherung-zeile" style="margin-top:16px;">
+
+        <label style="margin:0;">Filter:</label>
+
+        <select
+            id="abschlussFilterMonat"
+            class="crm-input"
+            style="width:auto;margin-bottom:0;"
+            onchange="renderAbschluesse()">
+
+            <option value="alle">Alle Monate</option>
+            <option value="aktuell">Aktueller Monat</option>
+            <option value="0">Januar</option>
+            <option value="1">Februar</option>
+            <option value="2">März</option>
+            <option value="3">April</option>
+            <option value="4">Mai</option>
+            <option value="5">Juni</option>
+            <option value="6">Juli</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">Oktober</option>
+            <option value="10">November</option>
+            <option value="11">Dezember</option>
+
+        </select>
+
+        <select
+            id="abschlussFilterJahr"
+            class="crm-input"
+            style="width:auto;margin-bottom:0;"
+            onchange="renderAbschluesse()">
+
+            <option value="alle">Alle Jahre</option>
+
+        </select>
+
+    </div>
+
+    <br>
+
+    <div id="abschluesseListe">
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     KONTAKTUEBERWACHUNG
+===================================================== -->
+
+<div
+    id="kontakt"
+    class="tab-content">
+
+    <h2>Kontaktüberwachung</h2>
+
+    <br>
+
+    <h3 class="status-gruen">
+
+        Noch kein Termin erfasst
+
+    </h3>
+
+    <br>
+
+    <div id="kontaktNieListe" class="kontakt-scroll-liste">
+
+    </div>
+
+    <br><br>
+
+    <h3 class="status-gelb">
+
+        Kontaktbedarf
+
+        (über 1 Jahr)
+
+    </h3>
+
+    <br>
+
+    <div id="kontakt365Liste" class="kontakt-scroll-liste">
+
+    </div>
+
+    <br><br>
+
+    <h3 class="status-rot">
+
+        Akuter Kontaktbedarf
+
+        (über 2 Jahre)
+
+    </h3>
+
+    <br>
+
+    <div id="kontakt730Liste" class="kontakt-scroll-liste">
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     SELEKTIONEN
+===================================================== -->
+
+<div
+    id="selektionen"
+    class="tab-content">
+
+    <div class="selektionen-kopf">
+
+        <h2>Selektionen</h2>
+
+        <div class="selektionen-aktionen">
+
+            <select id="selektionGespeicherteAuswahl"
+                class="crm-input"
+                style="width:auto;margin-bottom:0;"
+                onchange="selektionLaden(this.value)">
+                <option value="">Gespeicherte Selektion laden...</option>
+            </select>
+
+            <button class="crm-button crm-button-klein"
+                onclick="selektionSpeichern()">
+                💾 Speichern
+            </button>
+
+            <button class="crm-button crm-button-klein crm-button-gefahr"
+                onclick="selektionLoeschen()"
+                id="selektionLoeschenButton"
+                style="display:none;">
+                Löschen
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="selektion-filter-liste" id="selektionFilterListe">
+    </div>
+
+    <div class="selektion-controls">
+
+        <button class="crm-button crm-button-klein"
+            onclick="selektionFilterHinzufuegen()">
+            + Filter hinzufügen
+        </button>
+
+        <button class="crm-button crm-button-klein"
+            onclick="selektionAlleZuruecksetzen()">
+            Zurücksetzen
+        </button>
+
+        <span class="selektion-treffer-live" id="selektionTrefferLive">
+            Keine Filter aktiv
+        </span>
+
+        <div style="flex:1;"></div>
+
+        <button class="crm-button crm-button-primary"
+            onclick="selektionExportieren()"
+            id="selektionExportButton"
+            disabled>
+            📥 Als Excel exportieren
+        </button>
+
+    </div>
+
+    <div id="selektionErgebnis" class="selektion-ergebnis">
+    </div>
+
+</div>
+
+<!-- =====================================================
+     ARCHIV
+===================================================== -->
+
+<div
+    id="archiv"
+    class="tab-content">
+
+    <h2>Archiv</h2>
+
+    <p style="color:var(--c-text-muted);font-size:13px;margin-top:6px;">
+
+        Archivierte Kunden werden hier nicht gelöscht,
+        bis du sie endgültig entfernst.
+
+    </p>
+
+    <br>
+
+    <div id="archivListe">
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- =====================================================
+     ABSCHLUSS MODAL
+===================================================== -->
+
+<div
+    id="abschlussModal"
+    class="modal-overlay">
+
+    <div class="modal">
+
+        <h2>Abschluss erfassen</h2>
+
+        <label>Verknüpfter Kunde</label>
+
+        <div id="abschlussKundeAusgewaehlt" style="display:none;"></div>
+
+        <input
+            id="abschlussKundeSuche"
+            class="crm-input"
+            placeholder="Name oder Vertragsnummer suchen..."
+            oninput="abschlussKundeSucheAktualisieren()">
+
+        <div id="abschlussKundeErgebnisse"></div>
+
+        <div class="abschluss-zeile">
+
+            <div>
+
+                <label>Datum</label>
+
+                <input
+                    id="abschlussDatum"
+                    type="date"
+                    class="crm-input">
+
+            </div>
+
+            <div>
+
+                <label>Vertriebsweg</label>
+
+                <select
+                    id="abschlussVertriebsweg"
+                    class="crm-input">
+
+                    <option>Online</option>
+                    <option>Telefon</option>
+                    <option>Kunde</option>
+                    <option>Büro</option>
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label>Produkt</label>
+
+                <select
+                    id="abschlussProdukt"
+                    class="crm-input">
+
+                    <option>Erhöhung BSV</option>
+                    <option>Neuer BSV</option>
+                    <option>Genius</option>
+                    <option>Krankenversicherung</option>
+                    <option>Kompositversicherung</option>
+                    <option>Passiv-Produkt</option>
+                    <option>Privat Kredit</option>
+                    <option>Finanzierung</option>
+                    <option>Turbo-/Flexdarlehen</option>
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label>Bausparsumme</label>
+
+                <input
+                    id="abschlussBausparsumme"
+                    class="crm-input">
+
+            </div>
+
+            <div>
+
+                <label>Monatsbeitrag</label>
+
+                <input
+                    id="abschlussMonatsbeitrag"
+                    class="crm-input">
+
+            </div>
+
+        </div>
+
+        <details class="klapp-panel">
+
+            <summary>Notiz</summary>
+
+            <div class="klapp-inhalt">
+
+                <textarea
+                    id="abschlussNotiz"
+                    class="crm-textarea"></textarea>
+
+            </div>
+
+        </details>
+
+        <div class="modal-buttons">
+
+            <button
+                class="crm-button"
+                onclick="abschlussModalSchliessen()">
+
+                Abbrechen
+
+            </button>
+
+            <button
+                class="crm-button crm-button-primary"
+                onclick="abschlussSpeichern()">
+
+                Speichern
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     TERMIN MODAL
+===================================================== -->
+
+<div
+    id="terminModal"
+    class="modal-overlay">
+
+    <div class="modal">
+
+        <h2>Kontakt erfassen</h2>
+
+        <label>Datum</label>
+
+        <input
+            id="terminDatum"
+            type="date"
+            class="crm-input">
+
+        <label>Kategorie</label>
+
+        <select
+            id="terminKategorie"
+            class="crm-input">
+
+            <option>Telefon</option>
+            <option>E-Mail</option>
+            <option>Außendienst</option>
+            <option>Büro</option>
+            <option>Online</option>
+            <option>Info (kein Kontakt)</option>
+
+        </select>
+
+        <label>Titel</label>
+
+        <input
+            id="terminTitel"
+            class="crm-input">
+
+        <label>Zusammenfassung</label>
+
+        <textarea
+            id="terminZusammenfassung"
+            class="crm-textarea"></textarea>
+
+        <label
+            id="terminHaushaltLabel"
+            class="haushalt-checkbox-label"
+            style="display:none;">
+
+            <input
+                type="checkbox"
+                id="terminGanzerHaushalt">
+
+            Kompletten Haushalt als besucht markieren
+
+        </label>
+
+        <div class="modal-buttons">
+
+            <button
+                class="crm-button"
+                onclick="terminModalSchliessen()">
+
+                Abbrechen
+
+            </button>
+
+            <button
+                class="crm-button crm-button-primary"
+                onclick="terminSpeichern()">
+
+                Speichern
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     AUFGABEN MODAL
+===================================================== -->
+
+<div
+    id="aufgabeModal"
+    class="modal-overlay">
+
+    <div class="modal">
+
+        <h2>Aufgabe anlegen</h2>
+
+        <label>Titel</label>
+
+        <input
+            id="aufgabeTitel"
+            class="crm-input">
+
+        <label>Beschreibung</label>
+
+        <textarea
+            id="aufgabeBeschreibung"
+            class="crm-textarea"></textarea>
+
+        <label>Priorität</label>
+
+        <select
+            id="aufgabePrioritaet"
+            class="crm-input">
+
+            <option>Niedrig</option>
+            <option selected>Mittel</option>
+            <option>Hoch</option>
+            <option>Sofort</option>
+
+        </select>
+
+        <label>Fälligkeit</label>
+
+        <input
+            id="aufgabeFaelligkeit"
+            type="date"
+            class="crm-input">
+
+        <label>Verknüpfter Kunde</label>
+
+        <div id="aufgabeKundeAusgewaehlt" style="display:none;"></div>
+
+        <input
+            id="aufgabeKundeSuche"
+            class="crm-input"
+            placeholder="Name oder Vertragsnummer suchen..."
+            oninput="aufgabeKundeSucheAktualisieren()">
+
+        <div id="aufgabeKundeErgebnisse"></div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="crm-button"
+                onclick="aufgabeModalSchliessen()">
+
+                Abbrechen
+
+            </button>
+
+            <button
+                class="crm-button crm-button-primary"
+                onclick="aufgabeSpeichern()">
+
+                Speichern
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     MERGE (DOPPLUNGEN) MODAL
+===================================================== -->
+
+<div id="mergeModal" class="modal-overlay">
+    <div class="modal modal-breit">
+        <h2 id="mergeModalKopf">Mögliche Dopplung</h2>
+        <div id="mergeModalInhalt"></div>
+    </div>
+</div>
+
+<!-- =====================================================
+     KUNDENORDNER MODAL
+===================================================== -->
+
+<div id="kundenordnerModal" class="modal-overlay">
+    <div class="modal modal-breit">
+        <h2 id="kundenordnerModalKopf">Unterlagen</h2>
+        <div id="kundenordnerModalInhalt"></div>
+        <div class="modal-buttons">
+            <button class="crm-button" onclick="kundenordnerModalSchliessen()">Schließen</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/kunden.js"></script>
+<script src="js/kunden-merge.js"></script>
+<script src="js/kundenunterlagen.js"></script>
+<script src="js/termine.js"></script>
+<script src="js/aufgaben.js"></script>
+<script src="js/abschluesse.js"></script>
+<script src="js/selektionen.js"></script>
+<script src="js/benachrichtigungen.js"></script>
+<script src="js/sync-backup.js"></script>
+
+</body>
+</html>

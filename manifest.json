@@ -1,0 +1,23 @@
+{
+  "name": "CRM Vertrieb",
+  "short_name": "CRM",
+  "description": "Persönliches Vertrieb-CRM",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5eeec",
+  "theme_color": "#7a1e35",
+  "icons": [
+    {
+      "src": "./app-icon/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./app-icon/icon-512.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
