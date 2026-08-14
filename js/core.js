@@ -138,6 +138,115 @@ function migriereVertraege(){
             typeof v === "string" ? { nummer: v } : v
         );
     });
+    bereinigeAlleKontaktdaten();
+}
+
+/* =====================================================
+   KONTAKTDATEN-NORMALISIERUNG
+   -----------------------------------------------------
+   Behebt zwei wiederkehrende Excel-Sync-Probleme:
+     1. Fuehrender Apostroph (Excel-Text-Marker) — z. B.  '0176...
+     2. Uneinheitliches deutsches Rufnummern-Format
+        (0176 vs. +49176 vs. 0049176)
+   Emails werden getrimmt und lowercased.
+   Deduplizierung erfolgt auf normalisierter Basis.
+===================================================== */
+
+function _stripApostroph(s){
+    s = String(s == null ? "" : s).trim();
+    // eckige oder typografische Apostrophe am Anfang mit abfangen
+    while(s.length && (s[0] === "'" || s[0] === "’" || s[0] === "‘" || s[0] === "´")){
+        s = s.substring(1).trim();
+    }
+    return s;
+}
+
+function normalisiereTelefon(input){
+    let s = _stripApostroph(input);
+    if(!s){ return ""; }
+    // Nur Ziffern und + behalten (Leerzeichen, /, -, (), … fallen raus)
+    let z = s.replace(/[^\d+]/g, "");
+    if(!z){ return ""; }
+    // Deutsches Vorwahl-Prefix vereinheitlichen: +49… und 0049… → 0…
+    if(z.indexOf("+49") === 0){
+        z = "0" + z.substring(3);
+    }else if(z.indexOf("0049") === 0){
+        z = "0" + z.substring(4);
+    }
+    // Zwei fuehrende Nullen bei nationalen Nummern zusammenziehen
+    while(z.length > 2 && z.substring(0,2) === "00" && z[2] !== "0"){
+        // Nicht anfassen — 00 signalisiert internationale Waehlvorwahl
+        break;
+    }
+    return z;
+}
+
+function telefonSchluessel(input){
+    // Reine Ziffern als Vergleichsschluessel fuer Duplikat-Erkennung
+    return normalisiereTelefon(input).replace(/\D/g, "");
+}
+
+function normalisiereEmail(input){
+    const s = _stripApostroph(input);
+    if(!s){ return ""; }
+    return s.toLowerCase();
+}
+
+/* =====================================================
+   BEREINIGUNG EINES KUNDEN
+   Gibt true zurueck, wenn sich etwas geaendert hat.
+===================================================== */
+
+function bereinigeKontaktdatenEinesKunden(kunde){
+    if(!kunde){ return false; }
+    let veraendert = false;
+
+    if(Array.isArray(kunde.telefone)){
+        const gesehen = new Set();
+        const neu = [];
+        for(const t of kunde.telefone){
+            const norm = normalisiereTelefon(t);
+            if(!norm){ veraendert = true; continue; }
+            const key = telefonSchluessel(t);
+            if(gesehen.has(key)){ veraendert = true; continue; }
+            gesehen.add(key);
+            neu.push(norm);
+            if(norm !== t){ veraendert = true; }
+        }
+        if(neu.length !== kunde.telefone.length){ veraendert = true; }
+        kunde.telefone = neu;
+    }
+
+    if(Array.isArray(kunde.emails)){
+        const gesehen = new Set();
+        const neu = [];
+        for(const e of kunde.emails){
+            const norm = normalisiereEmail(e);
+            if(!norm){ veraendert = true; continue; }
+            if(gesehen.has(norm)){ veraendert = true; continue; }
+            gesehen.add(norm);
+            neu.push(norm);
+            if(norm !== e){ veraendert = true; }
+        }
+        if(neu.length !== kunde.emails.length){ veraendert = true; }
+        kunde.emails = neu;
+    }
+
+    return veraendert;
+}
+
+function bereinigeAlleKontaktdaten(){
+    if(!Array.isArray(kunden)){ return 0; }
+    let anzahl = 0;
+    kunden.forEach(k => {
+        if(bereinigeKontaktdatenEinesKunden(k)){ anzahl++; }
+    });
+    if(anzahl > 0){
+        console.log("Kontaktdaten bereinigt: " + anzahl + " Kunde(n) angepasst.");
+        // Nach Migration einmal persistieren
+        if(typeof triggerAutoSave === "function"){ triggerAutoSave(); }
+    }
+    return anzahl;
 }
 
 /* =====================================================

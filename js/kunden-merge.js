@@ -77,17 +77,28 @@ function mergeKunden(sieger, verlierer){
         }
     });
 
-    // Telefone
+    // Telefone (per normalisiertem Schluessel dedupliziert)
     sieger.telefone = sieger.telefone || [];
     (verlierer.telefone || []).forEach(t => {
-        if(t && !sieger.telefone.includes(t)){ sieger.telefone.push(t); }
+        const norm = normalisiereTelefon(t);
+        if(!norm){ return; }
+        const key = telefonSchluessel(norm);
+        const schonDa = sieger.telefone.some(x => telefonSchluessel(x) === key);
+        if(!schonDa){ sieger.telefone.push(norm); }
     });
 
-    // E-Mails
+    // E-Mails (case-insensitive dedupliziert)
     sieger.emails = sieger.emails || [];
     (verlierer.emails || []).forEach(e => {
-        if(e && !sieger.emails.includes(e)){ sieger.emails.push(e); }
+        const norm = normalisiereEmail(e);
+        if(!norm){ return; }
+        const schonDa = sieger.emails.some(x => normalisiereEmail(x) === norm);
+        if(!schonDa){ sieger.emails.push(norm); }
     });
+
+    // Zum Schluss den Sieger insgesamt bereinigen
+    // (falls Alt-Eintraege noch Apostrophe / +49-Form enthielten)
+    bereinigeKontaktdatenEinesKunden(sieger);
 
     // Verträge (dedupe per Nummer, Felder mergen)
     sieger.vertraege = sieger.vertraege || [];

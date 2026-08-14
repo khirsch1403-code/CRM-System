@@ -568,25 +568,26 @@ function kundeSpeichern(){
 
 function telefonHinzufuegen(){
 
-    const wert =
+    const wert = prompt("Telefonnummer");
+    if(!wert){ return; }
 
-    prompt(
-        "Telefonnummer"
-    );
-
-    if(!wert){
-
+    const norm = normalisiereTelefon(wert);
+    if(!norm){
+        alert("Ungültige Telefonnummer.");
         return;
-
     }
 
-    aktuellerKunde
-    .telefone
-    .push(wert);
+    const key = telefonSchluessel(wert);
+    const existiert = (aktuellerKunde.telefone || [])
+        .some(t => telefonSchluessel(t) === key);
 
-    kundeOeffnen(
-        aktuellerKunde.id
-    );
+    if(existiert){
+        alert("Diese Telefonnummer ist bereits hinterlegt.");
+        return;
+    }
+
+    aktuellerKunde.telefone.push(norm);
+    kundeOeffnen(aktuellerKunde.id);
 
 }
 
@@ -631,25 +632,25 @@ function telefonLoeschen(index){
 
 function emailHinzufuegen(){
 
-    const wert =
+    const wert = prompt("E-Mail");
+    if(!wert){ return; }
 
-    prompt(
-        "E-Mail"
-    );
-
-    if(!wert){
-
+    const norm = normalisiereEmail(wert);
+    if(!norm){
+        alert("Ungültige E-Mail-Adresse.");
         return;
-
     }
 
-    aktuellerKunde
-    .emails
-    .push(wert);
+    const existiert = (aktuellerKunde.emails || [])
+        .some(e => normalisiereEmail(e) === norm);
 
-    kundeOeffnen(
-        aktuellerKunde.id
-    );
+    if(existiert){
+        alert("Diese E-Mail-Adresse ist bereits hinterlegt.");
+        return;
+    }
+
+    aktuellerKunde.emails.push(norm);
+    kundeOeffnen(aktuellerKunde.id);
 
 }
 

@@ -596,37 +596,30 @@ if(
                 kunde.hausnummer
             ).trim();
 
-            const telefon =
-            String(
-                zeile["Telefon bevorzugt"] || ""
-            ).trim();
-
-            if(
-                telefon &&
-                !kunde.telefone.includes(
-                    telefon
-                )
-            ){
-                kunde.telefone.push(
-                    telefon
+            const telefon = normalisiereTelefon(zeile["Telefon bevorzugt"]);
+            if(telefon){
+                const key = telefonSchluessel(telefon);
+                const schonDa = kunde.telefone.some(t =>
+                    telefonSchluessel(t) === key
                 );
+                if(!schonDa){
+                    kunde.telefone.push(telefon);
+                }
             }
 
-            const email =
-            String(
-                zeile["E-Mail bevorzugt"] || ""
-            ).trim();
-
-            if(
-                email &&
-                !kunde.emails.includes(
-                    email
-                )
-            ){
-                kunde.emails.push(
-                    email
+            const email = normalisiereEmail(zeile["E-Mail bevorzugt"]);
+            if(email){
+                const schonDa = kunde.emails.some(e =>
+                    normalisiereEmail(e) === email
                 );
+                if(!schonDa){
+                    kunde.emails.push(email);
+                }
             }
+
+            // Vorhandene Eintraege dieses Kunden gleich mitbereinigen
+            // (streicht Excel-Apostrophe und dedupliziert Alt-Bestand)
+            bereinigeKontaktdatenEinesKunden(kunde);
 
             // Vertrag als Objekt mit allen Feldern zusammenbauen
             const vertragNr =
