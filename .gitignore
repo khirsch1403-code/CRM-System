@@ -1,0 +1,44 @@
+# =====================================================
+# DATENSCHUTZ — NIEMALS auf GitHub!
+# =====================================================
+# Der Ordner "Kundenunterlagen" enthaelt echte Kundendaten
+# und darf ausschliesslich lokal auf dem Arbeitsplatz-PC
+# unter c:\Dokumente\CRM\ existieren.
+Kundenunterlagen/
+kundenunterlagen/
+/Kundenunterlagen
+/kundenunterlagen
+
+# Backups / Exporte der App (koennen Kundendaten enthalten)
+backups/
+crm-backup*.json
+crm-bestand*.json
+crm-sync*.xlsx
+*.crm-backup.json
+
+# Typische Kundendatei-Formate — Sperre gegen versehentliches Ablegen
+# (SVG-Icons sind bewusst nicht gesperrt, weil sie zum UI gehoeren)
+*.pdf
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.eml
+*.msg
+*.jpg
+*.jpeg
+*.heic
+
+# =====================================================
+# System / Editor
+# =====================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

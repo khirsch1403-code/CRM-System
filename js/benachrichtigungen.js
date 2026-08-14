@@ -195,8 +195,8 @@ function benachrichtigungPruefen(erzwingen){
     try{
         const n = new Notification("CRM Vertrieb — Aufgaben", {
             body: text,
-            icon: "icon-192.png",
-            badge: "icon-192.png",
+            icon: "app-icon/icon-192.png",
+            badge: "app-icon/icon-192.png",
             tag: "crm-tagesuebersicht",
             requireInteraction: false
         });
