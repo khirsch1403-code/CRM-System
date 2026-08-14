@@ -404,9 +404,16 @@ document
 
         let neu = 0;
         let aktualisiert = 0;
+        let vertraegeEntfernt = 0;
 
         const importiertePartyIds =
         new Set();
+
+        // Pro Kunde die in dieser Excel gemeldeten Vertragsnummern
+        // sammeln — Grundlage fuer den Reconciler weiter unten.
+        // Ein Kunde ohne Vertragszeile landet mit leerem Set drin,
+        // damit auch "alle Vertraege des Kunden weggefallen" erkannt wird.
+        const importierteVertragsnummernProKunde = new Map();
 
         zeilen.forEach(zeile => {
 
@@ -621,9 +628,26 @@ if(
             // (streicht Excel-Apostrophe und dedupliziert Alt-Bestand)
             bereinigeKontaktdatenEinesKunden(kunde);
 
+            // Diesen Kunden fuer den Reconciler registrieren —
+            // auch wenn diese Zeile keine Vertragsnummer traegt.
+            if(!importierteVertragsnummernProKunde.has(kunde.id)){
+                importierteVertragsnummernProKunde.set(kunde.id, new Set());
+            }
+
             // Vertrag als Objekt mit allen Feldern zusammenbauen
-            const vertragNr =
+            // (fuehrenden Excel-Apostroph mit abfangen, damit
+            // '12345 und 12345 nicht als verschiedene Vertraege
+            // gelten — sonst wuerde der Reconciler falsch loeschen)
+            let vertragNr =
             String(zeile["Vertragsnummer"] || "").trim();
+            if(vertragNr.startsWith("'")){
+                vertragNr = vertragNr.substring(1).trim();
+            }
+
+            if(vertragNr){
+                importierteVertragsnummernProKunde
+                    .get(kunde.id).add(vertragNr);
+            }
 
             if(vertragNr){
 
@@ -692,6 +716,32 @@ if(
 
         });
 
+        // =============================================
+        // VERTRAGS-RECONCILER — Excel ist Wahrheit
+        // ---------------------------------------------
+        // Fuer jeden Kunden, der in dieser Excel enthalten
+        // war: alle Vertraege loeschen, deren Nummer in
+        // dieser Session nicht importiert wurde. Kunden,
+        // die NICHT in der Excel waren (bestandVerlassen),
+        // bleiben unberuehrt, damit deren Historie erhalten
+        // bleibt.
+        // =============================================
+        kunden.forEach(kunde => {
+            if(!importierteVertragsnummernProKunde.has(kunde.id)){
+                return; // Kunde war nicht in dieser Excel
+            }
+            if(!Array.isArray(kunde.vertraege) || kunde.vertraege.length === 0){
+                return;
+            }
+            const gemeldete = importierteVertragsnummernProKunde.get(kunde.id);
+            const vorher = kunde.vertraege.length;
+            kunde.vertraege = kunde.vertraege.filter(v => {
+                const vObj = typeof v === "string" ? { nummer: v } : v;
+                return vObj && vObj.nummer && gemeldete.has(vObj.nummer);
+            });
+            vertraegeEntfernt += (vorher - kunde.vertraege.length);
+        });
+
         renderKunden();
         dashboardAktualisieren();
         kontaktListenAktualisieren();
@@ -713,7 +763,11 @@ if(
             aktualisiert +
 
             "\nGesamt: " +
-            (neu + aktualisiert)
+            (neu + aktualisiert) +
+
+            "\n\nVerträge entfernt " +
+            "(nicht mehr im Bestand): " +
+            vertraegeEntfernt
 
         );
 
