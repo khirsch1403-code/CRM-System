@@ -396,7 +396,7 @@ function renderTerminHistorie(){
         termin.zusammenfassung
         ? `<details class="klapp-panel klapp-panel-mini termin-notiz">
                <summary>Notiz</summary>
-               <div class="klapp-inhalt">${termin.zusammenfassung}</div>
+               <div class="klapp-inhalt">${esc(termin.zusammenfassung)}</div>
            </details>`
         : "";
 
@@ -405,13 +405,13 @@ function renderTerminHistorie(){
             <div class="termin-zeile-haupt">
 
                 <span class="termin-datum">
-                    ${termin.wochentag ? termin.wochentag.slice(0,2) + "." : ""}
+                    ${termin.wochentag ? esc(termin.wochentag.slice(0,2)) + "." : ""}
                     ${formatDatum(termin.datum)}
                 </span>
 
-                <span class="termin-kategorie">${kategorieAnzeige}</span>
+                <span class="termin-kategorie">${esc(kategorieAnzeige)}</span>
 
-                <span class="termin-titel">${termin.titel}</span>
+                <span class="termin-titel">${esc(termin.titel)}</span>
 
                 <span class="termin-aktionen">
                     <button class="crm-button crm-button-klein"

@@ -57,10 +57,10 @@ function abschlussKundeSucheAktualisieren(){
         eintrag.className = "kunde-suche-treffer";
 
         eintrag.innerHTML =
-        "<strong>" + kunde.vorname + " " + kunde.nachname + "</strong>" +
-        (kunde.ort ? " · " + kunde.ort : "") +
+        "<strong>" + esc(kunde.vorname) + " " + esc(kunde.nachname) + "</strong>" +
+        (kunde.ort ? " · " + esc(kunde.ort) : "") +
         (kunde.vertraege && kunde.vertraege.length ?
-            " · " + kunde.vertraege.map(v => typeof v === "string" ? v : v.nummer).join(", ") : "");
+            " · " + esc(kunde.vertraege.map(v => typeof v === "string" ? v : v.nummer).join(", ")) : "");
 
         eintrag.onclick = function(){
             window.abschlussAusgewaehlterKunde = {
@@ -94,7 +94,7 @@ function abschlussKundeAnzeigeAktualisieren(){
 
     anzeige.style.display = "flex";
     anzeige.innerHTML =
-    "<span>" + kunde.name + "</span>" +
+    "<span>" + esc(kunde.name) + "</span>" +
     '<button type="button" class="crm-button crm-button-klein" ' +
     'onclick="abschlussKundeEntfernen()">Entfernen</button>';
 }
@@ -507,7 +507,7 @@ function renderAbschluesse(){
 
         /* Kundenzeile darüber (dezent, damit das Raster darunter sauber bleibt) */
         const kundenZeile = abschluss.kundenName
-            ? `<div class="abschluss-kunde-zeile">👤 ${abschluss.kundenName}</div>`
+            ? `<div class="abschluss-kunde-zeile">👤 ${esc(abschluss.kundenName)}</div>`
             : `<div class="abschluss-kunde-zeile abschluss-kunde-leer">Kein Kunde verknüpft</div>`;
 
         /* Notiz-Vorschau-Spalte: klickbar wenn Notiz da, sonst leer */
@@ -516,7 +516,7 @@ function renderAbschluesse(){
                     onclick="abschlussNotizToggle(${abschluss.id})"
                     title="Notiz ein-/ausblenden">
                     <span class="ab-notiz-chevron" id="abschluss-notiz-chevron-${abschluss.id}">▸</span>
-                    <span class="ab-notiz-vorschautext">${vorschau}</span>
+                    <span class="ab-notiz-vorschautext">${esc(vorschau)}</span>
                </div>`
             : `<div class="ab-sp-notizvorschau ab-sp-notizvorschau-leer"></div>`;
 
@@ -533,11 +533,11 @@ function renderAbschluesse(){
                 </span>
 
                 <span class="ab-sp-produkt">
-                    ${abschlussProduktKurz(abschluss.produkt)}
+                    ${esc(abschlussProduktKurz(abschluss.produkt))}
                 </span>
 
                 <span class="ab-sp-ort">
-                    ${abschluss.vertriebsweg || "—"}
+                    ${esc(abschluss.vertriebsweg || "—")}
                 </span>
 
                 <span class="ab-sp-bss">
@@ -561,7 +561,7 @@ function renderAbschluesse(){
             </div>
             ${hatNotiz ? `
                 <div id="abschluss-notiz-${abschluss.id}" class="abschluss-notiz-inhalt">
-                    ${abschluss.notiz}
+                    ${esc(abschluss.notiz)}
                 </div>
             ` : ""}
         `;

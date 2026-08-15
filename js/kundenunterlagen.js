@@ -384,7 +384,7 @@ async function kundenordnerModalOeffnen(kundenId){
     }else{
         inhalt.innerHTML = "<div class=\"ku-datei-liste\">" + dateien.map(d =>
             `<div class="ku-datei-zeile">
-                <a href="#" onclick="event.preventDefault();dateiOeffnen(${k.id},'${d.name.replace(/'/g,"\\'")}');">${d.name}</a>
+                <a href="#" onclick="event.preventDefault();dateiOeffnen(${k.id},'${d.name.replace(/'/g,"\\'")}');">${esc(d.name)}</a>
                 <span class="ku-datei-meta">${formatBytes(d.groesse)} · ${new Date(d.geaendert).toLocaleDateString("de-DE")}</span>
                 <button class="eintrag-entfernen" onclick="dateiLoeschen(${k.id},'${d.name.replace(/'/g,"\\'")}');">×</button>
             </div>`
@@ -472,7 +472,7 @@ async function kundenunterlagenPanelRendern(k){
 
     const dateien = await listeDateien(k);
     if(dateien.length === 0){
-        body.innerHTML = `<div class="eintrag-leer">Ordner "${ordnerNameFuerKunde(k)}" (leer)</div>`;
+        body.innerHTML = `<div class="eintrag-leer">Ordner "${esc(ordnerNameFuerKunde(k))}" (leer)</div>`;
         return;
     }
     const top5 = dateien.slice(0, 5);
@@ -481,7 +481,7 @@ async function kundenunterlagenPanelRendern(k){
         <div class="ku-datei-liste">
             ${top5.map(d =>
                 `<div class="ku-datei-zeile">
-                    <a href="#" onclick="event.preventDefault();dateiOeffnen(${k.id},'${d.name.replace(/'/g,"\\'")}');">${d.name}</a>
+                    <a href="#" onclick="event.preventDefault();dateiOeffnen(${k.id},'${d.name.replace(/'/g,"\\'")}');">${esc(d.name)}</a>
                     <span class="ku-datei-meta">${new Date(d.geaendert).toLocaleDateString("de-DE")}</span>
                 </div>`
             ).join("")}

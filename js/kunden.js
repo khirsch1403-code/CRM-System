@@ -137,7 +137,7 @@ function renderKunden(){
 
             div.innerHTML = `
     <strong class="kk-name">
-    ${kunde.vorname} ${kunde.nachname}
+    ${esc(kunde.vorname)} ${esc(kunde.nachname)}
     ${kunde.kennzeichen.keineBeratung ? '<span class="tag" style="background:#7a1e35;color:white;">KB</span>' : ''}
     ${kunde.kennzeichen.nurBuero ? '<span class="tag" style="background:#6c757d;color:white;">B</span>' : ''}
     ${kunde.kennzeichen.nurTelefon ? '<span class="tag" style="background:#0d6efd;color:white;">T</span>' : ''}
@@ -145,7 +145,7 @@ function renderKunden(){
     ${kunde.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#561526;color:white;">BV</span>' : ''}
     </strong>
     <br>
-    <span class="kk-ort">${kunde.plz} ${kunde.ort}</span>
+    <span class="kk-ort">${esc(kunde.plz)} ${esc(kunde.ort)}</span>
     <br>
     Verträge: ${kunde.vertraege.length}
             `;
@@ -215,7 +215,7 @@ function sidebarKarteAktualisieren(){
     const karte = document.querySelector(`.kundenkarte[data-kid="${k.id}"]`);
     if(!karte){ return; }
     karte.querySelector(".kk-name").innerHTML =
-        k.vorname + " " + k.nachname + " " + sidebarBadges(k);
+        esc(k.vorname) + " " + esc(k.nachname) + " " + sidebarBadges(k);
     karte.querySelector(".kk-ort").textContent =
         k.plz + " " + k.ort;
 }
@@ -274,18 +274,18 @@ function kundeOeffnen(id){
     <div class="kd-stamm">
 
         <div class="kd-grid-2">
-            <input class="crm-input" id="editVorname" placeholder="Vorname" onblur="kundeSpeichern()" value="${k.vorname}">
-            <input class="crm-input" id="editNachname" placeholder="Nachname" onblur="kundeSpeichern()" value="${k.nachname}">
+            <input class="crm-input" id="editVorname" placeholder="Vorname" onblur="kundeSpeichern()" value="${esc(k.vorname)}">
+            <input class="crm-input" id="editNachname" placeholder="Nachname" onblur="kundeSpeichern()" value="${esc(k.nachname)}">
         </div>
 
         <div class="kd-grid-adresse">
-            <input class="crm-input kd-strasse" id="editStrasse" placeholder="Straße" onblur="kundeSpeichern()" value="${k.strasse}">
-            <input class="crm-input kd-nr" id="editHausnummer" placeholder="Nr." onblur="kundeSpeichern()" value="${k.hausnummer}">
+            <input class="crm-input kd-strasse" id="editStrasse" placeholder="Straße" onblur="kundeSpeichern()" value="${esc(k.strasse)}">
+            <input class="crm-input kd-nr" id="editHausnummer" placeholder="Nr." onblur="kundeSpeichern()" value="${esc(k.hausnummer)}">
         </div>
 
         <div class="kd-grid-plzort">
-            <input class="crm-input kd-plz" id="editPlz" placeholder="PLZ" onblur="kundeSpeichern()" value="${k.plz}">
-            <input class="crm-input kd-ort" id="editOrt" placeholder="Ort" onblur="kundeSpeichern()" value="${k.ort}">
+            <input class="crm-input kd-plz" id="editPlz" placeholder="PLZ" onblur="kundeSpeichern()" value="${esc(k.plz)}">
+            <input class="crm-input kd-ort" id="editOrt" placeholder="Ort" onblur="kundeSpeichern()" value="${esc(k.ort)}">
         </div>
 
         <div class="kd-kontakte-grid-2">
@@ -299,7 +299,7 @@ function kundeOeffnen(id){
                 ${k.telefone.length === 0
                     ? '<div class="eintrag-leer">–</div>'
                     : k.telefone.map((t,i) =>
-                        `<div class="eintrag-zeile"><span>${t}</span>
+                        `<div class="eintrag-zeile"><span>${esc(t)}</span>
                         <button class="eintrag-entfernen" onclick="telefonLoeschen(${i})">×</button></div>`
                       ).join("")
                 }
@@ -316,7 +316,7 @@ function kundeOeffnen(id){
                     ? '<div class="eintrag-leer">–</div>'
                     : k.emails.map((e,i) =>
                         `<div class="eintrag-zeile">
-                        <a class="eintrag-email" href="mailto:${e}">${e}</a>
+                        <a class="eintrag-email" href="mailto:${encodeURIComponent(e)}">${esc(e)}</a>
                         <button class="eintrag-entfernen" onclick="emailLoeschen(${i})">×</button></div>`
                       ).join("")
                 }
@@ -335,14 +335,14 @@ function kundeOeffnen(id){
                 type="text"
                 placeholder="TT.MM.JJJJ"
                 onblur="kundeSpeichern()"
-                value="${k.geburtsdatum || ""}">
+                value="${esc(k.geburtsdatum || "")}">
         </div>
 
         <label style="margin-top:12px;">Notiz</label>
 
         <textarea class="crm-textarea kd-notiz-textarea" id="editNotiz"
             onblur="kundeSpeichern()"
-            onkeydown="notizAutoBullet(event, this)">${k.notiz}</textarea>
+            onkeydown="notizAutoBullet(event, this)">${esc(k.notiz)}</textarea>
 
     </div>
 
@@ -370,15 +370,15 @@ function kundeOeffnen(id){
                 const vObj = typeof v === "string" ? { nummer: v } : v;
                 return `<div class="vertrag-zeile">
                     <span class="vertrag-nummer">
-                        <strong>${vObj.nummer || "-"}</strong>
+                        <strong>${esc(vObj.nummer || "-")}</strong>
                         ${vObj.zuteilungsdatum
-                            ? `<span class="vertrag-zuteilung">Zuteilung: ${vObj.zuteilungsdatum}</span>`
+                            ? `<span class="vertrag-zuteilung">Zuteilung: ${esc(vObj.zuteilungsdatum)}</span>`
                             : ""}
                     </span>
-                    <span>${vObj.produkt || "-"}</span>
-                    <span>${vObj.bausparsumme || "-"}</span>
-                    <span>${vObj.saldo || "-"}</span>
-                    <span>${vObj.guthabenProzent || "-"}</span>
+                    <span>${esc(vObj.produkt || "-")}</span>
+                    <span>${esc(vObj.bausparsumme || "-")}</span>
+                    <span>${esc(vObj.saldo || "-")}</span>
+                    <span>${esc(vObj.guthabenProzent || "-")}</span>
                     <button class="eintrag-entfernen" onclick="vertragLoeschen(${i})">×</button>
                 </div>`;
             }).join("")}
@@ -422,7 +422,7 @@ function kundeOeffnen(id){
 
         return `<div class="haushalt-mitglied">
             <div class="haushalt-mitglied-info">
-                <strong class="haushalt-mitglied-name" onclick="kundeOeffnen(${person.id})">${person.vorname} ${person.nachname}</strong>
+                <strong class="haushalt-mitglied-name" onclick="kundeOeffnen(${person.id})">${esc(person.vorname)} ${esc(person.nachname)}</strong>
                 <span class="haushalt-mitglied-kontakt" style="color:${kontaktFarbe};">${kontaktAnzeige}</span>
             </div>
             <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
@@ -510,8 +510,8 @@ function kundeSpeichern(){
 
     if(karte){
         karte.querySelector(".kk-name").innerHTML =
-            aktuellerKunde.vorname + " " +
-            aktuellerKunde.nachname + " " +
+            esc(aktuellerKunde.vorname) + " " +
+            esc(aktuellerKunde.nachname) + " " +
             sidebarBadges(aktuellerKunde);
 
         karte.querySelector(".kk-ort").textContent =
@@ -912,7 +912,7 @@ function renderArchiv(){
         eintrag.innerHTML =
 
         "<strong>" +
-        kunde.vorname + " " + kunde.nachname +
+        esc(kunde.vorname) + " " + esc(kunde.nachname) +
         "</strong>" +
 
         "<div style=\"margin-top:8px;display:flex;gap:8px;\">" +

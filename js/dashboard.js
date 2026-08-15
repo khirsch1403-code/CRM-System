@@ -199,8 +199,8 @@ function kontaktListenAktualisieren(){
 
                     <strong>
 
-                    ${kunde.vorname}
-                    ${kunde.nachname}
+                    ${esc(kunde.vorname)}
+                    ${esc(kunde.nachname)}
 
                     </strong>
 

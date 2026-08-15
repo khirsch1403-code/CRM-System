@@ -51,10 +51,10 @@ function aufgabeKundeSucheAktualisieren(){
         eintrag.className = "kunde-suche-treffer";
 
         eintrag.innerHTML =
-        "<strong>" + kunde.vorname + " " + kunde.nachname + "</strong>" +
-        (kunde.ort ? " · " + kunde.ort : "") +
+        "<strong>" + esc(kunde.vorname) + " " + esc(kunde.nachname) + "</strong>" +
+        (kunde.ort ? " · " + esc(kunde.ort) : "") +
         (kunde.vertraege && kunde.vertraege.length ?
-            " · " + kunde.vertraege.map(v => typeof v === "string" ? v : v.nummer).join(", ") : "");
+            " · " + esc(kunde.vertraege.map(v => typeof v === "string" ? v : v.nummer).join(", ")) : "");
 
         eintrag.onclick = function(){
             window.aufgabeAusgewaehlterKunde = {
@@ -88,7 +88,7 @@ function aufgabeKundeAnzeigeAktualisieren(){
 
     anzeige.style.display = "flex";
     anzeige.innerHTML =
-    "<span>" + kunde.name + "</span>" +
+    "<span>" + esc(kunde.name) + "</span>" +
     '<button type="button" class="crm-button crm-button-klein" ' +
     'onclick="aufgabeKundeEntfernen()">Entfernen</button>';
 }
@@ -259,7 +259,7 @@ function renderAufgaben(){
 
         karte.innerHTML = `
             <div class="ak-zeile-1">
-                <strong class="ak-titel ${ueberfaellig ? "aufgaben-titel-ueberfaellig" : ""}">${aufgabe.titel}</strong>
+                <strong class="ak-titel ${ueberfaellig ? "aufgaben-titel-ueberfaellig" : ""}">${esc(aufgabe.titel)}</strong>
                 ${aufgabe.faelligkeit ? `
                 <span class="ak-faellig ${ueberfaellig ? "ak-faellig-ueberfaellig" : ""}">
                     ${formatDatum(aufgabe.faelligkeit)}
@@ -267,7 +267,7 @@ function renderAufgaben(){
             </div>
             <div class="ak-zeile-2">
                 <span class="ak-prio-badge" style="background:${prioFarbe};">${prioritaetKurz(aufgabe.prioritaet)}</span>
-                ${aufgabe.kundenName ? `<span class="ak-kunde">👤 ${aufgabe.kundenName}</span>` : ""}
+                ${aufgabe.kundenName ? `<span class="ak-kunde">👤 ${esc(aufgabe.kundenName)}</span>` : ""}
             </div>
             ${aufgabe.status === "Erledigt" && aufgabe.erledigtAm ? `
                 <div class="aufgaben-loeschcountdown">
@@ -277,7 +277,7 @@ function renderAufgaben(){
             ${aufgabe.beschreibung ? `
                 <details class="klapp-panel klapp-panel-mini">
                     <summary>Beschreibung</summary>
-                    <div class="klapp-inhalt">${aufgabe.beschreibung}</div>
+                    <div class="klapp-inhalt">${esc(aufgabe.beschreibung)}</div>
                 </details>
             ` : ""}
             <div class="ak-aktionen">
@@ -549,8 +549,8 @@ function renderKalender(){
             html += `<div class="kalender-aufgabe-pill"
                 style="border-left:3px solid ${farbe};"
                 onclick="event.stopPropagation();aufgabeBearbeiten(${a.id})"
-                title="${a.titel}">
-                <span ${ueberfaellig ? 'style="color:var(--c-danger)"' : ''}>${a.titel}</span>
+                title="${esc(a.titel)}">
+                <span ${ueberfaellig ? 'style="color:var(--c-danger)"' : ''}>${esc(a.titel)}</span>
             </div>`;
         });
 

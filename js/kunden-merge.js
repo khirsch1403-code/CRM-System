@@ -225,7 +225,7 @@ function kundeKurzInfo(k){
     const termine  = (k.termine || []).length;
 
     const zeile = (label, wert) =>
-        `<div class="merge-zeile"><span class="merge-label">${label}</span><span class="merge-wert">${wert || "-"}</span></div>`;
+        `<div class="merge-zeile"><span class="merge-label">${label}</span><span class="merge-wert">${esc(wert || "-")}</span></div>`;
 
     return [
         zeile("Party-ID",     partyIds),

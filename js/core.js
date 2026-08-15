@@ -292,6 +292,29 @@ function ermittleWochentag(datum){
 }
 
 /* =====================================================
+   HTML ESCAPE
+   -----------------------------------------------------
+   Wird an jeder Stelle verwendet, wo Kunden-, Vertrags-,
+   Aufgaben- oder Notiz-Text via innerHTML/template-string
+   interpoliert wird. Verhindert Anzeigefehler bei Namen
+   wie "Anna-Lisa D'Angelo" oder "Meyer & Soehne <GbR>"
+   und schuetzt gleichzeitig vor unbeabsichtigtem HTML.
+===================================================== */
+
+function escapeHtml(wert){
+    if(wert == null){ return ""; }
+    return String(wert)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+// Kurz-Alias fuer weniger visuelles Rauschen in Templates
+const esc = escapeHtml;
+
+/* =====================================================
    TAGE SEIT DATUM
 ===================================================== */
 

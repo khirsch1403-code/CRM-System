@@ -538,8 +538,8 @@ function selektionErgebnisRendern(treffer){
                 const letzterT = SELEKTIONS_FELDER.letzterTerminTage.wert(k);
                 return `<div class="selektion-treffer-zeile"
                     onclick="showTab('kunden');kundeOeffnen(${k.id})">
-                    <span><strong>${k.vorname} ${k.nachname}</strong></span>
-                    <span>${k.plz || ""} ${k.ort || ""}</span>
+                    <span><strong>${esc(k.vorname)} ${esc(k.nachname)}</strong></span>
+                    <span>${esc(k.plz || "")} ${esc(k.ort || "")}</span>
                     <span>${alter !== null ? alter + " J" : "-"}</span>
                     <span>${(k.vertraege || []).length}</span>
                     <span>${letzterT !== null ? "vor " + letzterT + " Tagen" : "nie"}</span>
