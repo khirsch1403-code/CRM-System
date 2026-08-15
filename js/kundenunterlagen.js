@@ -216,7 +216,10 @@ async function stelleAlleOrdnerSicher(){
             await stelleOrdnerSicher(k);
             zaehler++;
         }catch(e){
-            console.log("Ordner anlegen fehlgeschlagen für", k.id, e);
+            fehlerMelden("Kundenunterlagen",
+                "Ordner konnte nicht angelegt werden fuer Kunde " +
+                (k.vorname || "") + " " + (k.nachname || "") + " (ID " + k.id + ")",
+                e);
         }
     }
     return zaehler;
@@ -347,7 +350,8 @@ async function dateienHochladen(kundenId, dateien){
             await w.write(await datei.arrayBuffer());
             await w.close();
         }catch(e){
-            console.log("Upload fehlgeschlagen:", datei.name, e);
+            fehlerMelden("Kundenunterlagen",
+                "Upload fehlgeschlagen: " + datei.name, e);
         }
     }
     kundenunterlagenPanelRendern(k);

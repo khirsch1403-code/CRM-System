@@ -21,7 +21,14 @@
 
 <div class="navbar">
 
-    <div class="navbar-brand">CRM Vertrieb</div>
+    <div class="navbar-brand">
+        <span
+            id="crmStatusSymbol"
+            class="crm-status-symbol crm-status-ok"
+            onclick="fehlerModalOeffnen()"
+            title="Alles in Ordnung">✓</span>
+        CRM Vertrieb
+    </div>
 
     <div class="navbar-links">
 
@@ -1018,6 +1025,28 @@
     <div class="modal modal-breit">
         <h2 id="mergeModalKopf">Mögliche Dopplung</h2>
         <div id="mergeModalInhalt"></div>
+    </div>
+</div>
+
+<!-- =====================================================
+     FEHLER MODAL
+===================================================== -->
+
+<div id="crmFehlerModal" class="modal-overlay">
+    <div class="modal modal-breit">
+        <h2>Protokollierte Fehler</h2>
+        <div id="crmFehlerModalInhalt"></div>
+        <div class="modal-buttons">
+            <button class="crm-button" onclick="fehlerLogKopieren()">
+                📋 In Zwischenablage kopieren
+            </button>
+            <button class="crm-button crm-button-gefahr" onclick="fehlerLogLeeren();fehlerModalSchliessen();">
+                Log leeren
+            </button>
+            <button class="crm-button crm-button-primary" onclick="fehlerModalSchliessen()">
+                Schließen
+            </button>
+        </div>
     </div>
 </div>
 

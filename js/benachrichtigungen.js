@@ -210,7 +210,8 @@ function benachrichtigungPruefen(erzwingen){
         };
 
     }catch(e){
-        console.log("Benachrichtigung fehlgeschlagen:", e);
+        fehlerMelden("Benachrichtigung",
+            "Systembenachrichtigung konnte nicht angezeigt werden.", e);
     }
 
     localStorage.setItem(BENACHRICHTIGUNG_LS_KEY, heuteKey);

@@ -46,13 +46,18 @@ async function dbSpeichern(){
             tx.onerror = reject;
         });
     }catch(fehler){
-        console.log("IndexedDB Speichern fehlgeschlagen:", fehler);
-        // Fallback auf localStorage
+        fehlerMelden("Datenspeicherung",
+            "Speichern in IndexedDB fehlgeschlagen — Fallback auf localStorage.",
+            fehler);
         try{
             localStorage.setItem("crmBestand", JSON.stringify({
                 kunden, aufgaben, abschluesse
             }));
-        }catch(e){}
+        }catch(e){
+            fehlerMelden("Datenspeicherung",
+                "Auch localStorage-Fallback fehlgeschlagen — Aenderungen NICHT gesichert!",
+                e);
+        }
     }
 }
 
@@ -78,7 +83,9 @@ async function dbLaden(){
             anfrage.onerror = () => reject(anfrage.error);
         });
     }catch(fehler){
-        console.log("IndexedDB Laden fehlgeschlagen, versuche localStorage:", fehler);
+        fehlerMelden("Datenspeicherung",
+            "Laden aus IndexedDB fehlgeschlagen — versuche localStorage.",
+            fehler);
         return false;
     }
 }
@@ -313,6 +320,154 @@ function escapeHtml(wert){
 
 // Kurz-Alias fuer weniger visuelles Rauschen in Templates
 const esc = escapeHtml;
+
+/* =====================================================
+   FEHLER-LOG + STATUS-INDIKATOR
+   -----------------------------------------------------
+   Sammelt Fehler aus catch-Bloecken zentral, persistiert
+   sie in localStorage und schaltet das Statussymbol im
+   Header um. Bei Fehler: rotes Ausrufezeichen (pulst).
+   Sonst: blasser gruener Haken. Klick oeffnet Modal.
+===================================================== */
+
+const FEHLER_LS_KEY = "crmFehlerLog";
+const FEHLER_MAX    = 50;
+
+let crmFehlerLog = [];
+
+try{
+    const gespeichert = localStorage.getItem(FEHLER_LS_KEY);
+    if(gespeichert){ crmFehlerLog = JSON.parse(gespeichert); }
+}catch(_){ crmFehlerLog = []; }
+
+function fehlerMelden(kategorie, text, details){
+    const eintrag = {
+        zeit: new Date().toISOString(),
+        kategorie: String(kategorie || "Allgemein"),
+        text: String(text || ""),
+        details: details == null ? "" :
+                 (typeof details === "string" ? details :
+                  (details && details.message ? details.message :
+                   (function(){ try{ return JSON.stringify(details); }
+                                catch(_){ return String(details); }})()))
+    };
+    crmFehlerLog.push(eintrag);
+    if(crmFehlerLog.length > FEHLER_MAX){
+        crmFehlerLog = crmFehlerLog.slice(-FEHLER_MAX);
+    }
+    try{ localStorage.setItem(FEHLER_LS_KEY, JSON.stringify(crmFehlerLog)); }catch(_){}
+    if(typeof console !== "undefined" && console.warn){
+        console.warn("[CRM]", kategorie, text, details);
+    }
+    aktualisiereFehlerSymbol();
+}
+
+function fehlerLogLeeren(){
+    crmFehlerLog = [];
+    try{ localStorage.removeItem(FEHLER_LS_KEY); }catch(_){}
+    aktualisiereFehlerSymbol();
+}
+
+function aktualisiereFehlerSymbol(){
+    const sym = document.getElementById("crmStatusSymbol");
+    if(!sym){ return; }
+    if(crmFehlerLog.length === 0){
+        sym.className = "crm-status-symbol crm-status-ok";
+        sym.textContent = "✓";
+        sym.title = "Alles in Ordnung — keine Fehler protokolliert";
+    }else{
+        sym.className = "crm-status-symbol crm-status-fehler";
+        sym.textContent = "!";
+        sym.title = crmFehlerLog.length +
+            (crmFehlerLog.length === 1 ? " Fehler protokolliert — klicken fuer Details"
+                                       : " Fehler protokolliert — klicken fuer Details");
+    }
+}
+
+function fehlerModalOeffnen(){
+    const modal = document.getElementById("crmFehlerModal");
+    const body  = document.getElementById("crmFehlerModalInhalt");
+    if(!modal || !body){ return; }
+
+    if(crmFehlerLog.length === 0){
+        body.innerHTML = `<div class="eintrag-leer">
+            Aktuell sind keine Fehler protokolliert.
+        </div>`;
+    }else{
+        body.innerHTML = `
+            <p class="fehler-modal-hinweis">
+                ${crmFehlerLog.length} Fehler protokolliert.
+                Kopiere den Text unten und schicke ihn zum Fixen.
+            </p>
+            <textarea id="crmFehlerText" class="crm-textarea fehler-modal-text"
+                readonly>${esc(fehlerLogAlsText())}</textarea>
+            <div class="fehler-modal-liste">
+                ${crmFehlerLog.slice().reverse().map(e => `
+                    <div class="fehler-eintrag">
+                        <div class="fehler-eintrag-kopf">
+                            <strong>${esc(e.kategorie)}</strong>
+                            <span class="fehler-eintrag-zeit">
+                                ${esc(new Date(e.zeit).toLocaleString("de-DE"))}
+                            </span>
+                        </div>
+                        <div class="fehler-eintrag-text">${esc(e.text)}</div>
+                        ${e.details
+                            ? `<div class="fehler-eintrag-details">${esc(e.details)}</div>`
+                            : ""}
+                    </div>
+                `).join("")}
+            </div>
+        `;
+    }
+    modal.style.display = "flex";
+}
+
+function fehlerModalSchliessen(){
+    const modal = document.getElementById("crmFehlerModal");
+    if(modal){ modal.style.display = "none"; }
+}
+
+function fehlerLogAlsText(){
+    const kopf = "CRM Fehler-Log (" + new Date().toLocaleString("de-DE") + ")\n"
+               + "===========================================\n\n";
+    return kopf + crmFehlerLog.slice().reverse().map(e => {
+        return "[" + new Date(e.zeit).toLocaleString("de-DE") + "] "
+             + e.kategorie + "\n"
+             + "  " + e.text
+             + (e.details ? "\n  Details: " + e.details : "")
+             + "\n";
+    }).join("\n");
+}
+
+function fehlerLogKopieren(){
+    const ta = document.getElementById("crmFehlerText");
+    if(!ta){ return; }
+    ta.select();
+    try{
+        navigator.clipboard.writeText(ta.value)
+            .then(() => alert("Fehler-Log in die Zwischenablage kopiert."))
+            .catch(() => document.execCommand("copy"));
+    }catch(_){
+        try{ document.execCommand("copy"); }catch(_){}
+    }
+}
+
+// Globale Errorhandler — faengt ungefangene Exceptions ein
+window.addEventListener("error", function(e){
+    fehlerMelden("Unerwarteter Fehler",
+        e.message || "Unbekannt",
+        (e.filename ? e.filename + ":" + e.lineno : ""));
+});
+window.addEventListener("unhandledrejection", function(e){
+    fehlerMelden("Promise-Fehler",
+        (e.reason && e.reason.message) || String(e.reason || ""),
+        "");
+});
+
+// Beim Laden Symbol initialisieren
+window.addEventListener("load", function(){
+    aktualisiereFehlerSymbol();
+});
 
 /* =====================================================
    TAGE SEIT DATUM
