@@ -493,11 +493,132 @@ function findeKundePerPartyId(partyId){
 }
 
 function findeKundePerPerson(vorname, nachname, strasse, hausnummer, plz){
+    const vN = normalisierePersonNameStreng(vorname);
+    const nN = normalisierePersonNameStreng(nachname);
+    const sN = normalisiereStrasseKey(strasse);
+    const hN = String(hausnummer||"").trim().toLowerCase().replace(/\s+/g, "");
+    const pN = String(plz||"").trim();
     return kunden.find(k =>
-        k.vorname.trim().toLowerCase() === String(vorname).trim().toLowerCase() &&
-        k.nachname.trim().toLowerCase() === String(nachname).trim().toLowerCase() &&
-        k.strasse.trim().toLowerCase() === String(strasse).trim().toLowerCase() &&
-        k.hausnummer.trim().toLowerCase() === String(hausnummer).trim().toLowerCase() &&
-        k.plz.trim() === String(plz).trim()
+        normalisierePersonNameStreng(k.vorname) === vN &&
+        normalisierePersonNameStreng(k.nachname) === nN &&
+        normalisiereStrasseKey(k.strasse) === sN &&
+        String(k.hausnummer||"").trim().toLowerCase().replace(/\s+/g, "") === hN &&
+        String(k.plz||"").trim() === pN
     );
+}
+
+/* =====================================================
+   NAMEN- / ADRESSEN-NORMALISIERUNG
+   -----------------------------------------------------
+   Strenge Formen (fuer Import-Match — automatisch):
+     - Umlaute falten
+     - Interpunktion weg
+     - "Str." / "Str" / "Strasse" / "Strasze" → einheitlich "strasse"
+
+   Tolerante Zusatzformen (fuer den Duplikat-Pruefer,
+   der immer mit Merge-Dialog laeuft):
+     - Vorname: Doppelname wird in Tokens zerlegt; ein Kunde mit
+       "Anna" matched einen mit "Anna-Lisa" oder "Anna Maria",
+       solange der erste Vorname-Token uebereinstimmt.
+     - Nachname: Bindestrich/Leerzeichen als Splitter — die
+       Token-Menge muss identisch sein (Reihenfolge egal).
+       "Meyer-Schmidt" ↔ "Meyer Schmidt" ↔ "Meyerschmidt" (letzteres
+       matcht ueber zusaetzliche Zusammen-Vergleich-Regel).
+     - Geburtsdatum: exakt (nach Normalisierung auf ISO oder deutsch)
+===================================================== */
+
+function _faltUmlaute(s){
+    return String(s || "")
+        .replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue")
+        .replace(/Ä/g,"AE").replace(/Ö/g,"OE").replace(/Ü/g,"UE")
+        .replace(/ß/g,"ss");
+}
+
+function normalisierePersonNameStreng(s){
+    return _faltUmlaute(String(s || ""))
+        .toLowerCase()
+        .replace(/[.,;:'`´‘’]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function normalisiereStrasseKey(s){
+    let t = _faltUmlaute(String(s || "")).toLowerCase();
+    t = t.replace(/[.,;:'`´‘’]/g, "");
+    // "Str" / "Str." / "strasse" / "-strasse" → einheitliches Token
+    t = t.replace(/\bstr\b/g, "strasse");
+    t = t.replace(/-\s*strasse\b/g, " strasse");
+    t = t.replace(/\s+/g, " ").trim();
+    return t;
+}
+
+function normalisiereOrtKey(s){
+    return _faltUmlaute(String(s || ""))
+        .toLowerCase()
+        .replace(/[.,;:'`´‘’]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function normalisiereGeburtsdatumISO(s){
+    if(!s){ return ""; }
+    const t = String(s).trim();
+    // "TT.MM.JJJJ"
+    const dM = t.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if(dM){
+        return dM[3] + "-" +
+               String(dM[2]).padStart(2,"0") + "-" +
+               String(dM[1]).padStart(2,"0");
+    }
+    // ISO
+    const iM = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(iM){
+        return iM[1] + "-" +
+               String(iM[2]).padStart(2,"0") + "-" +
+               String(iM[3]).padStart(2,"0");
+    }
+    return t.toLowerCase();
+}
+
+/* --- Tolerante Vornamens- und Nachnamens-Vergleiche --- */
+
+function _tokenizeName(s){
+    return normalisierePersonNameStreng(s)
+        .split(/[\s\-]+/)
+        .filter(Boolean);
+}
+
+function vornamenTolerantMatch(a, b){
+    const ta = _tokenizeName(a);
+    const tb = _tokenizeName(b);
+    if(ta.length === 0 || tb.length === 0){ return false; }
+    // Erster Vorname-Token muss uebereinstimmen ODER einer ist Prefix
+    // des anderen (deckt "Anna" ↔ "Anna-Lisa" und "Anna Maria" ab).
+    return ta[0] === tb[0];
+}
+
+function nachnamenTolerantMatch(a, b){
+    const na = normalisierePersonNameStreng(a);
+    const nb = normalisierePersonNameStreng(b);
+    if(!na || !nb){ return false; }
+    if(na === nb){ return true; }
+    // Bindestrich/Leerzeichen als Splitter — Token-Set-Vergleich
+    const setA = _tokenizeName(a).sort().join("|");
+    const setB = _tokenizeName(b).sort().join("|");
+    if(setA && setA === setB){ return true; }
+    // Konkatenierte Form: "meyerschmidt" ↔ "meyer schmidt" ↔ "meyer-schmidt"
+    const flatA = na.replace(/[\s\-]/g, "");
+    const flatB = nb.replace(/[\s\-]/g, "");
+    return flatA === flatB;
+}
+
+function istPersonenDuplikat(a, b){
+    if(!a || !b || a.id === b.id){ return false; }
+    // Geburtsdatum muss existieren und exakt matchen
+    const gA = normalisiereGeburtsdatumISO(a.geburtsdatum);
+    const gB = normalisiereGeburtsdatumISO(b.geburtsdatum);
+    if(!gA || !gB || gA !== gB){ return false; }
+    if(!nachnamenTolerantMatch(a.nachname, b.nachname)){ return false; }
+    if(!vornamenTolerantMatch(a.vorname, b.vorname)){ return false; }
+    return true;
 }

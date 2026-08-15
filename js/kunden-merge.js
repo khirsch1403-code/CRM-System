@@ -24,39 +24,46 @@ function normalisiereGeburtsdatum(wert){
 }
 
 function findeAlleDopplungen(){
-    /* Gibt Paare [k1, k2] zurück, wenn Vorname, Nachname UND Geburtsdatum
-       vorhanden und identisch sind. Jeder Kunde erscheint in maximal
-       einem Paar (damit der Nutzer nicht dieselbe Person mehrfach mergt). */
+    /* Gibt Paare [k1, k2] zurueck, die als potenzielles Duplikat gelten.
+       Kriterien (tolerant — es folgt IMMER der Merge-Dialog):
+         - Geburtsdatum vorhanden und identisch
+         - Nachnamen matchen tolerant (Bindestrich/Leerzeichen egal,
+           "MeyerSchmidt" ↔ "Meyer-Schmidt")
+         - Vornamen matchen tolerant (erster Vorname-Token identisch —
+           "Anna" ↔ "Anna-Lisa" ↔ "Anna Maria")
+         - Adresse wird NICHT geprueft (Umzuege werden erkannt)
+       Jeder Kunde erscheint in maximal einem Paar. */
 
     const paare = [];
     const behandelt = new Set();
 
     const aktive = kunden.filter(k => !k.archiviert);
 
-    // Gruppen bilden per Schlüssel nachname|vorname|geburtsdatum
+    // Nach Geburtsdatum (ISO) gruppieren — schnellster Ausschluss
     const gruppen = new Map();
-
     aktive.forEach(k => {
-        const nn = normalisiereName(k.nachname);
-        const vn = normalisiereName(k.vorname);
-        const gd = normalisiereGeburtsdatum(k.geburtsdatum);
-        if(!nn || !vn || !gd){ return; }
-        const key = nn + "|" + vn + "|" + gd;
-        if(!gruppen.has(key)){ gruppen.set(key, []); }
-        gruppen.get(key).push(k);
+        const gd = normalisiereGeburtsdatumISO(k.geburtsdatum);
+        if(!gd){ return; }
+        if(!gruppen.has(gd)){ gruppen.set(gd, []); }
+        gruppen.get(gd).push(k);
     });
 
     gruppen.forEach(liste => {
         if(liste.length < 2){ return; }
-        // Sortiert nach ID, damit die Reihenfolge stabil ist
         liste.sort((a,b) => a.id - b.id);
         for(let i = 0; i < liste.length - 1; i++){
             const a = liste[i];
-            const b = liste[i+1];
-            if(behandelt.has(a.id) || behandelt.has(b.id)){ continue; }
-            paare.push([a, b]);
-            behandelt.add(a.id);
-            behandelt.add(b.id);
+            if(behandelt.has(a.id)){ continue; }
+            for(let j = i + 1; j < liste.length; j++){
+                const b = liste[j];
+                if(behandelt.has(b.id)){ continue; }
+                if(istPersonenDuplikat(a, b)){
+                    paare.push([a, b]);
+                    behandelt.add(a.id);
+                    behandelt.add(b.id);
+                    break;
+                }
+            }
         }
     });
 
