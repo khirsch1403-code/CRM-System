@@ -115,7 +115,7 @@ function triggerAutoSave(){
         await dbSpeichern();
         speicherStatusAnzeigen();
         autoSavePending = false;
-    }, 800);
+    }, 200);
 }
 
 function speicherStatusAnzeigen(){
