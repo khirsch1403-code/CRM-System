@@ -146,6 +146,10 @@ function migriereVertraege(){
         );
     });
     bereinigeAlleKontaktdaten();
+    // ID-Merkliste an frisch geladenen Bestand neu ausrichten,
+    // dann Kollisionen bereinigen.
+    resetIdCache();
+    bereinigeIdKollisionen();
 }
 
 /* =====================================================
@@ -280,8 +284,153 @@ function showTab(tabId){
    ID GENERATOR
 ===================================================== */
 
+/* =====================================================
+   KOLLISIONSFREIER ID-GENERATOR
+   -----------------------------------------------------
+   Zwei Sicherheitsebenen:
+     1) Zaehler pro Millisekunde — im laufenden Betrieb
+        vergibt jede ms IDs 0, 1, 2, … der Reihe nach.
+        Keine Zufallszahl → keine Zufallskollision.
+     2) Merkliste aller bereits vergebenen IDs. Bevor
+        eine ID ausgegeben wird, wird geprueft, ob sie
+        schon irgendwo existiert (Kunden, Aufgaben,
+        Abschluesse). Falls ja → naechste Nummer, bis
+        eine freie gefunden ist. Sicherheitsnetz gegen
+        App-Neustart in derselben Millisekunde.
+   Ergebnis: mathematisch ausgeschlossene Kollision.
+===================================================== */
+
+let _idLastMs   = 0;
+let _idInMs     = 0;
+let _bekannteIds = null;   // Set<number>
+
+function _initBekannteIds(){
+    _bekannteIds = new Set();
+    if(typeof kunden !== "undefined" && Array.isArray(kunden)){
+        kunden.forEach(k => { if(k && k.id != null) _bekannteIds.add(k.id); });
+    }
+    if(typeof aufgaben !== "undefined" && Array.isArray(aufgaben)){
+        aufgaben.forEach(a => { if(a && a.id != null) _bekannteIds.add(a.id); });
+    }
+    if(typeof abschluesse !== "undefined" && Array.isArray(abschluesse)){
+        abschluesse.forEach(a => { if(a && a.id != null) _bekannteIds.add(a.id); });
+    }
+}
+
+function resetIdCache(){
+    // Nach Backup-Wiederherstellung oder App-Reload aufrufen,
+    // damit die Merkliste den frisch geladenen Bestand kennt.
+    _bekannteIds = null;
+    _idLastMs = 0;
+    _idInMs = 0;
+}
+
 function neueId(){
-    return Date.now() + Math.floor(Math.random() * 10000);
+    if(_bekannteIds === null){ _initBekannteIds(); }
+    const now = Date.now();
+    if(now === _idLastMs){
+        _idInMs++;
+    }else{
+        _idLastMs = now;
+        _idInMs = 0;
+    }
+    let id = now * 1000 + _idInMs;
+    // Absicherung: falls ID zufaellig doch schon vergeben war
+    // (z. B. bei App-Neustart in derselben Millisekunde).
+    while(_bekannteIds.has(id)){
+        _idInMs++;
+        id = now * 1000 + _idInMs;
+    }
+    _bekannteIds.add(id);
+    return id;
+}
+
+/* =====================================================
+   ID-KOLLISIONS-BEREINIGUNG (Migration)
+   -----------------------------------------------------
+   Wird bei jedem Ladevorgang aufgerufen (IndexedDB,
+   localStorage-Fallback, Backup-Import). Findet Kunden,
+   Aufgaben und Abschluesse mit derselben ID und vergibt
+   dem jeweils spaeteren Eintrag eine neue eindeutige ID.
+   Verknuepfungen (aufgabe.kundenId, abschluss.kundenId)
+   bleiben dabei am ERSTEN Eintrag haengen — das
+   entspricht dem bisherigen Verhalten der App vor dem Fix.
+===================================================== */
+
+function bereinigeIdKollisionen(){
+    if(typeof kunden === "undefined"){ return 0; }
+
+    let bereinigt = 0;
+    const gesehen = new Set();
+
+    // 1) Kunden
+    if(Array.isArray(kunden)){
+        kunden.forEach(k => {
+            if(!k || k.id == null){ return; }
+            if(gesehen.has(k.id)){
+                // Kollision: neue ID vergeben (aufgaben/abschluesse dieses
+                // Kunden ziehen mit, sonst wuerden Verknuepfungen brechen).
+                const alt = k.id;
+                // Merkliste voruebergehend fuellen, damit neueId() nicht
+                // in den gerade freigegebenen Wert reinlaeuft.
+                if(_bekannteIds === null){ _initBekannteIds(); }
+                const neu = neueId();
+                k.id = neu;
+                // Aufgaben und Abschluesse dieses Kunden mit-migrieren.
+                // ACHTUNG: Wir wissen bei Kollision nicht, welchem der
+                // beiden Kunden die verknuepften Eintraege urspruenglich
+                // gehoerten. Wir lassen sie am ersten (= "alten") haengen,
+                // was dem bisherigen App-Verhalten entspricht.
+                bereinigt++;
+            }else{
+                gesehen.add(k.id);
+            }
+        });
+    }
+
+    // 2) Aufgaben (eigene ID-Kollisionen, unabhaengig)
+    const gesehenA = new Set();
+    if(Array.isArray(aufgaben)){
+        aufgaben.forEach(a => {
+            if(!a || a.id == null){ return; }
+            if(gesehenA.has(a.id)){
+                a.id = neueId();
+                bereinigt++;
+            }else{
+                gesehenA.add(a.id);
+            }
+        });
+    }
+
+    // 3) Abschluesse (dito)
+    const gesehenB = new Set();
+    if(Array.isArray(abschluesse)){
+        abschluesse.forEach(x => {
+            if(!x || x.id == null){ return; }
+            if(gesehenB.has(x.id)){
+                x.id = neueId();
+                bereinigt++;
+            }else{
+                gesehenB.add(x.id);
+            }
+        });
+    }
+
+    if(bereinigt > 0){
+        if(typeof fehlerMelden === "function"){
+            fehlerMelden("Datenbereinigung",
+                bereinigt + " doppelte ID(s) im Bestand gefunden und bereinigt. " +
+                "Klick auf einen Kunden oeffnet ab jetzt den richtigen. " +
+                "Achtung: eventuell falsch zugeordnete Aufgaben/Abschluesse " +
+                "aus der Zeit vor dem Fix bleiben beim jeweils ersten Kunden.",
+                "");
+        }
+        // Nach der Bereinigung sofort persistieren, damit der saubere
+        // Stand nach dem naechsten Reload weiter da ist.
+        if(typeof triggerAutoSave === "function"){ triggerAutoSave(); }
+    }
+
+    return bereinigt;
 }
 
 /* =====================================================

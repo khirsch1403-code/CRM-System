@@ -234,6 +234,17 @@ function datenLaden(datei){
             aktuellerKunde =
             null;
 
+            // Nach Backup-Wiederherstellung: ID-Merkliste neu bauen
+            // und Kollisionen bereinigen. Kompatibilitaet zu aelteren
+            // Backups (kollidierende IDs) ist damit gesichert.
+            if(typeof resetIdCache === "function"){ resetIdCache(); }
+            if(typeof bereinigeIdKollisionen === "function"){
+                bereinigeIdKollisionen();
+            }
+            if(typeof bereinigeAlleKontaktdaten === "function"){
+                bereinigeAlleKontaktdaten();
+            }
+
             renderKunden();
 
             renderAufgaben();
