@@ -382,6 +382,11 @@ async function kundenordnerModalOeffnen(kundenId){
     inhalt.innerHTML = "<div class=\"eintrag-leer\">Lade …</div>";
     modal.style.display = "flex";
 
+    // Als Drop-Zone markieren, damit der globale Drop-Handler weiss,
+    // welchem Kunden abgelegte Dateien zugeordnet werden sollen.
+    inhalt.classList.add("ku-drop-zone");
+    inhalt.dataset.kundenId = String(k.id);
+
     const dateien = await listeDateien(k);
     if(dateien.length === 0){
         inhalt.innerHTML = "<div class=\"eintrag-leer\">Keine Dateien vorhanden</div>";
@@ -415,6 +420,11 @@ async function kundenunterlagenPanelRendern(k){
     if(!k){ return; }
     const panel = document.getElementById("kundenunterlagenPanel");
     if(!panel){ return; }
+
+    // Panel als Drop-Zone kennzeichnen (aktiv erst, wenn Feature +
+    // Wurzel-Ordner vorhanden — siehe globaler dragover-Filter unten).
+    panel.classList.add("ku-drop-zone");
+    panel.dataset.kundenId = String(k.id);
 
     if(!kuUnterstuetzt){
         panel.innerHTML = `
@@ -506,4 +516,100 @@ async function kundenunterlagenPanelRendern(k){
 
 window.addEventListener("load", function(){
     kuInitialisieren();
+    kuDragDropInitialisieren();
 });
+
+/* =====================================================
+   DRAG & DROP — Dateien in eine Drop-Zone ablegen
+   -----------------------------------------------------
+   Zwei Drop-Zonen (Panel im Kundendatenblatt + Modal
+   "Ordner oeffnen") werden mit der Klasse "ku-drop-zone"
+   markiert und tragen data-kunden-id. Ein einziger
+   delegierter Handler auf document.body kuemmert sich
+   um Highlight + Drop.
+===================================================== */
+
+function kuDragDropInitialisieren(){
+
+    // Dateien enthalten? Nur dann behandeln, damit interne
+    // Draggables (z. B. Kanban-Aufgaben) nicht gestoert werden.
+    function hatDateien(e){
+        if(!e.dataTransfer || !e.dataTransfer.types){ return false; }
+        return Array.prototype.indexOf.call(e.dataTransfer.types, "Files") !== -1;
+    }
+
+    let aktiveZone = null;
+
+    function findeZone(target){
+        if(!(target instanceof Element)){ return null; }
+        return target.closest(".ku-drop-zone");
+    }
+
+    function zoneAktivieren(zone){
+        if(aktiveZone === zone){ return; }
+        if(aktiveZone){ aktiveZone.classList.remove("ku-drop-aktiv"); }
+        aktiveZone = zone;
+        if(aktiveZone){ aktiveZone.classList.add("ku-drop-aktiv"); }
+    }
+
+    function zoneDeaktivieren(){
+        if(aktiveZone){
+            aktiveZone.classList.remove("ku-drop-aktiv");
+            aktiveZone = null;
+        }
+    }
+
+    document.addEventListener("dragover", function(e){
+        if(!hatDateien(e)){ return; }
+        const zone = findeZone(e.target);
+        if(!zone){ zoneDeaktivieren(); return; }
+        if(!kuWurzelHandle){ return; }  // Ordner nicht konfiguriert
+        e.preventDefault();               // Drop erlauben
+        if(e.dataTransfer){
+            e.dataTransfer.dropEffect = "copy";
+        }
+        zoneAktivieren(zone);
+    });
+
+    // dragleave feuert oft beim Uebergang zwischen Child-Elementen —
+    // deshalb pruefen wir hier, ob wir wirklich das Fenster verlassen.
+    document.addEventListener("dragleave", function(e){
+        if(!hatDateien(e)){ return; }
+        // Wenn relatedTarget null ist ODER ausserhalb des Body:
+        // wir haben das Fenster verlassen.
+        if(!e.relatedTarget || e.relatedTarget.nodeType !== 1){
+            zoneDeaktivieren();
+            return;
+        }
+        // Wenn wir eine andere Zone treffen — Umschalten passiert
+        // via dragover, hier nichts tun.
+    });
+
+    document.addEventListener("drop", async function(e){
+        if(!hatDateien(e)){ return; }
+        const zone = findeZone(e.target);
+        zoneDeaktivieren();
+        if(!zone){ return; }
+        e.preventDefault();  // Browser nicht die Datei oeffnen lassen
+        if(!kuWurzelHandle){
+            alert("Bitte zuerst einen Kundenunterlagen-Ordner waehlen "
+                + "(Dashboard → Datensicherung).");
+            return;
+        }
+        const kundenId = Number(zone.dataset.kundenId);
+        if(!kundenId){ return; }
+        const dateien = Array.from(e.dataTransfer.files || []);
+        if(dateien.length === 0){ return; }
+        try{
+            await dateienHochladen(kundenId, dateien);
+        }catch(err){
+            fehlerMelden("Kundenunterlagen",
+                "Drag & Drop Upload fehlgeschlagen.", err);
+        }
+    });
+
+    // Wenn der Nutzer den Drag ausserhalb des Fensters loslaesst,
+    // faengt kein drop-Event — trotzdem Overlay zuruecksetzen.
+    window.addEventListener("dragend", zoneDeaktivieren);
+    window.addEventListener("blur", zoneDeaktivieren);
+}
