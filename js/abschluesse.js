@@ -5,11 +5,17 @@ function abschlussAnlegen(){
     document.getElementById("abschlussDatum").value =
         new Date().toISOString().split("T")[0];
 
-    document.getElementById("abschlussVertriebsweg").value = "Kunde";
+    document.getElementById("abschlussVertriebsweg").value = "Außendienst";
     document.getElementById("abschlussProdukt").value = "Neuer BSV";
     document.getElementById("abschlussBausparsumme").value = "";
     document.getElementById("abschlussMonatsbeitrag").value = "";
     document.getElementById("abschlussNotiz").value = "";
+
+    // Beim Neu-Anlegen Termin-Koppel-Checkbox aktivieren und einblenden
+    const cb = document.getElementById("abschlussAlsTermin");
+    if(cb){ cb.checked = true; }
+    const cbLabel = document.querySelector(".abschluss-terminkoppel-label");
+    if(cbLabel){ cbLabel.style.display = ""; }
 
     window.abschlussAusgewaehlterKunde = null;
     abschlussKundeAnzeigeAktualisieren();
@@ -119,6 +125,8 @@ function abschlussSpeichern(){
     const bausparsumme = document.getElementById("abschlussBausparsumme").value;
     const monatsbeitrag = document.getElementById("abschlussMonatsbeitrag").value;
     const notiz = document.getElementById("abschlussNotiz").value;
+    const alsTerminCheckbox = document.getElementById("abschlussAlsTermin");
+    const alsTermin = alsTerminCheckbox ? alsTerminCheckbox.checked : false;
 
     let kundenId = null;
     let kundenName = "";
@@ -128,7 +136,9 @@ function abschlussSpeichern(){
         kundenName = window.abschlussAusgewaehlterKunde.name;
     }
 
-    if(window.bearbeiteAbschlussId){
+    const istBearbeitung = !!window.bearbeiteAbschlussId;
+
+    if(istBearbeitung){
 
         const abschluss = abschluesse.find(
             a => a.id === window.bearbeiteAbschlussId
@@ -159,11 +169,57 @@ function abschlussSpeichern(){
         });
     }
 
+    // Nur beim Neu-Anlegen einen Termin mit anlegen — beim
+    // Bearbeiten waere die Gefahr eines Doppel-Termins zu gross.
+    if(!istBearbeitung && alsTermin && kundenId){
+        terminAusAbschlussAnlegen(kundenId, datum, vertriebsweg, produkt, notiz);
+    }
+
     window.abschlussAusgewaehlterKunde = null;
+    window.bearbeiteAbschlussId = null;
     abschlussModalSchliessen();
     renderAbschluesse();
     dashboardAktualisieren();
+    kontaktListenAktualisieren();
     triggerAutoSave();
+}
+
+/* =====================================================
+   ABSCHLUSS → TERMIN
+   -----------------------------------------------------
+   Legt beim Speichern eines Abschlusses (Neu-Anlegen) einen
+   passenden Kontakt-Termin beim verknuepften Kunden an.
+   Kategorie-Mapping: Vertriebsweg → Termin-Kategorie
+     Online       → Online
+     Telefon      → Telefon
+     Aussendienst → Aussendienst
+     Buero        → Buero
+===================================================== */
+
+function terminAusAbschlussAnlegen(kundenId, datum, vertriebsweg, produkt, notiz){
+    const kunde = findeKunde(kundenId);
+    if(!kunde){ return; }
+
+    const kategorieMap = {
+        "Online":       "Online",
+        "Telefon":      "Telefon",
+        "Außendienst":  "Außendienst",
+        "Büro":         "Büro"
+    };
+    const kategorie = kategorieMap[vertriebsweg] || "Büro";
+
+    if(!Array.isArray(kunde.termine)){ kunde.termine = []; }
+
+    kunde.termine.push({
+        id: neueId(),
+        datum: datum || new Date().toISOString().split("T")[0],
+        kategorie: kategorie,
+        titel: "Abschluss: " + (produkt || "-"),
+        zusammenfassung: notiz || "",
+        wochentag: (function(){
+            try{ return ermittleWochentag(datum); }catch(_){ return ""; }
+        })()
+    });
 }
 
 /* =====================================================
@@ -589,6 +645,13 @@ function abschlussBearbeiten(id){
     document.getElementById("abschlussBausparsumme").value = abschluss.bausparsumme || "";
     document.getElementById("abschlussMonatsbeitrag").value = abschluss.monatsbeitrag || "";
     document.getElementById("abschlussNotiz").value = abschluss.notiz || "";
+
+    // Beim Bearbeiten: Termin-Koppel-Checkbox nicht anzeigen —
+    // sonst besteht Gefahr, denselben Termin doppelt anzulegen.
+    const cb = document.getElementById("abschlussAlsTermin");
+    if(cb){ cb.checked = false; }
+    const cbLabel = document.querySelector(".abschluss-terminkoppel-label");
+    if(cbLabel){ cbLabel.style.display = "none"; }
 
     window.abschlussAusgewaehlterKunde =
     abschluss.kundenId ?

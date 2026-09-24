@@ -2674,3 +2674,55 @@ select.crm-input.filter-select-aktiv{
     color:var(--c-text-schwach);
     font-style:italic;
 }
+
+/* =====================================================
+   ABSCHLUSS ↔ TERMIN — Koppel-Checkbox
+===================================================== */
+
+.abschluss-terminkoppel-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:10px 0 4px 0;
+    padding:8px 10px;
+    background:#faf3f4;
+    border:1px solid #e3d5d9;
+    border-radius:5px;
+    font-size:13px;
+    cursor:pointer;
+    user-select:none;
+    flex-wrap:wrap;
+}
+
+.abschluss-terminkoppel-label input[type=checkbox]{
+    cursor:pointer;
+}
+
+.abschluss-terminkoppel-hinweis{
+    color:var(--c-text-schwach);
+    font-size:11px;
+    font-style:italic;
+    margin-left:auto;
+}
+
+/* =====================================================
+   TERMIN-NOTIZ-VORSCHAU (Anriss in der Zeile)
+===================================================== */
+
+.termin-notiz-vorschau{
+    color:var(--c-text-schwach);
+    font-size:12px;
+    line-height:1.35;
+    margin-top:4px;
+    padding-left:2px;
+    font-style:italic;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:100%;
+}
+
+.termin-zeile.termin-info .termin-notiz-vorschau{
+    color:var(--c-text-schwach);
+    opacity:0.85;
+}

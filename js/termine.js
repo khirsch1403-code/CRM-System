@@ -392,10 +392,21 @@ function renderTerminHistorie(){
 
         const kategorieAnzeige = istInfo ? "Info" : termin.kategorie;
 
+        const hatNotiz = termin.zusammenfassung &&
+                         termin.zusammenfassung.trim().length > 0;
+
+        // Kurzer Notiz-Anriss direkt in der Zeile — konsistent mit
+        // der Abschluss-Uebersicht.
+        const vorschau = hatNotiz
+            ? (typeof notizVorschau === "function"
+                ? notizVorschau(termin.zusammenfassung, 90)
+                : termin.zusammenfassung.trim().slice(0, 90))
+            : "";
+
         const notizHtml =
-        termin.zusammenfassung
+        hatNotiz
         ? `<details class="klapp-panel klapp-panel-mini termin-notiz">
-               <summary>Notiz</summary>
+               <summary>Notiz anzeigen</summary>
                <div class="klapp-inhalt">${esc(termin.zusammenfassung)}</div>
            </details>`
         : "";
@@ -421,6 +432,10 @@ function renderTerminHistorie(){
                 </span>
 
             </div>
+
+            ${hatNotiz
+                ? `<div class="termin-notiz-vorschau">${esc(vorschau)}</div>`
+                : ""}
 
             ${notizHtml}
 

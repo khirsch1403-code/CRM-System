@@ -145,6 +145,14 @@ function migriereVertraege(){
             typeof v === "string" ? { nummer: v } : v
         );
     });
+    // Abschluss-Vertriebsweg "Kunde" → "Aussendienst" vereinheitlichen
+    if(Array.isArray(abschluesse)){
+        abschluesse.forEach(a => {
+            if(a && a.vertriebsweg === "Kunde"){
+                a.vertriebsweg = "Außendienst";
+            }
+        });
+    }
     bereinigeAlleKontaktdaten();
     // ID-Merkliste an frisch geladenen Bestand neu ausrichten,
     // dann Kollisionen bereinigen.
