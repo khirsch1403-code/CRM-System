@@ -5,6 +5,9 @@
 // Aktive Filter der laufenden Session
 let selektionFilter = [];
 
+// Verknuepfungsmodus: "und" (alle muessen matchen) oder "oder" (einer reicht)
+let selektionModus = "und";
+
 // Aktuell geladene gespeicherte Selektion (Name)
 let selektionAktuellerName = null;
 
@@ -23,29 +26,42 @@ const SELEKTIONS_FELDER = {
         gruppe: "Person",
         wert: kunde => {
             if(!kunde.geburtsdatum){ return null; }
-            const g = kunde.geburtsdatum;
-            // Format kann sein: "TT.MM.JJJJ" oder ISO
+            const g = String(kunde.geburtsdatum).trim();
+            if(!g){ return null; }
             let jahr, monat, tag;
-            if(g.includes(".")){
+            if(g.indexOf(".") !== -1){
                 const t = g.split(".");
                 if(t.length !== 3){ return null; }
-                tag = parseInt(t[0],10);
-                monat = parseInt(t[1],10) - 1;
-                jahr = parseInt(t[2],10);
+                tag   = parseInt(t[0], 10);
+                monat = parseInt(t[1], 10);
+                jahr  = parseInt(t[2], 10);
+            }else if(g.indexOf("-") !== -1){
+                const t = g.split("-");
+                if(t.length < 3){ return null; }
+                jahr  = parseInt(t[0], 10);
+                monat = parseInt(t[1], 10);
+                tag   = parseInt(t[2], 10);
             }else{
-                const d = new Date(g);
-                if(isNaN(d)){ return null; }
-                jahr = d.getFullYear();
-                monat = d.getMonth();
-                tag = d.getDate();
+                return null;
             }
+            if(isNaN(jahr) || isNaN(monat) || isNaN(tag)){ return null; }
+            if(monat < 1 || monat > 12){ return null; }
+            if(tag < 1 || tag > 31){ return null; }
             const heute = new Date();
+            if(jahr < 1900 || jahr > heute.getFullYear()){ return null; }
+            // Konsistenzcheck: 31.02.1990 muss "invalid" liefern
+            const d = new Date(jahr, monat - 1, tag);
+            if(d.getFullYear() !== jahr ||
+               d.getMonth()    !== monat - 1 ||
+               d.getDate()     !== tag){
+                return null;
+            }
             let a = heute.getFullYear() - jahr;
-            if(heute.getMonth() < monat ||
-               (heute.getMonth() === monat && heute.getDate() < tag)){
+            if(heute.getMonth() < monat - 1 ||
+               (heute.getMonth() === monat - 1 && heute.getDate() < tag)){
                 a--;
             }
-            return a;
+            return a < 0 ? null : a;
         }
     },
 
@@ -106,7 +122,13 @@ const SELEKTIONS_FELDER = {
         gruppe: "Aktivität",
         wert: k => {
             if(!k.termine || k.termine.length === 0){ return null; }
-            const letzter = k.termine
+            // "Info (kein Kontakt)" zaehlt NICHT — konsistent mit Dashboard
+            // und Kontaktueberwachung.
+            const echt = k.termine.filter(
+                t => t.kategorie !== "Info (kein Kontakt)"
+            );
+            if(echt.length === 0){ return null; }
+            const letzter = echt
                 .slice()
                 .sort((a,b) => new Date(b.datum) - new Date(a.datum))[0];
             return tageSeit(letzter.datum);
@@ -206,12 +228,54 @@ const SELEKTIONS_OPERATOREN = {
 
 function zahlParsen(wert){
     if(wert === null || wert === undefined || wert === ""){ return null; }
-    // Deutsches Format: "1.234,56" oder "50,5" oder englisch
-    const str = String(wert)
-        .replace(/[€\s]/g, "")
-        .replace(/\./g, "")
-        .replace(",", ".");
-    const n = parseFloat(str);
+    // Bereits eine Zahl? Direkt durchreichen — keine String-Konvertierung,
+    // die den Dezimalpunkt zerschiessen koennte.
+    if(typeof wert === "number"){
+        return isFinite(wert) ? wert : null;
+    }
+
+    let s = String(wert).replace(/[€\s%]/g, "");
+    // Excel-Apostroph am Anfang abfangen
+    while(s.length &&
+          (s.charCodeAt(0) === 39     ||   // '
+           s.charCodeAt(0) === 0x2018 ||   // ‘
+           s.charCodeAt(0) === 0x2019 ||   // ’
+           s.charCodeAt(0) === 0x00B4)){   // ´
+        s = s.substring(1);
+    }
+    s = s.trim();
+    if(!s){ return null; }
+
+    const hatKomma = s.indexOf(",") !== -1;
+    const hatPunkt = s.indexOf(".") !== -1;
+
+    if(hatKomma && hatPunkt){
+        // Beide Zeichen vorhanden — der spaetere ist der Dezimaltrenner.
+        // "1.234,56" (deutsch)  vs.  "1,234.56" (englisch)
+        if(s.lastIndexOf(",") > s.lastIndexOf(".")){
+            s = s.replace(/\./g, "").replace(",", ".");
+        }else{
+            s = s.replace(/,/g, "");
+        }
+    }else if(hatKomma){
+        // Nur Komma. Mehrfach → Tausendertrenner; einfach → Dezimaltrenner.
+        if((s.match(/,/g) || []).length > 1){
+            s = s.replace(/,/g, "");
+        }else{
+            s = s.replace(",", ".");
+        }
+    }else if(hatPunkt){
+        // Nur Punkt. Mehrfach → Tausendertrenner.
+        // Einfach: 1-3 Ziffern + "." + genau 3 Ziffern → Tausendertrenner
+        // (deutsches "1.234"), sonst englischer Dezimalpunkt ("50.5", "0.15").
+        if((s.match(/\./g) || []).length > 1){
+            s = s.replace(/\./g, "");
+        }else if(/^\d{1,3}\.\d{3}$/.test(s)){
+            s = s.replace(".", "");
+        }
+    }
+
+    const n = parseFloat(s);
     return isNaN(n) ? null : n;
 }
 
@@ -283,8 +347,8 @@ function operatorPasst(typ, wert, filter){
     }
 
     if(typ === "text"){
-        const w = String(wert).toLowerCase();
-        const v = String(filter.wert1 || "").toLowerCase();
+        const w = String(wert).trim().toLowerCase();
+        const v = String(filter.wert1 || "").trim().toLowerCase();
         if(op === "enthaelt"){ return w.includes(v); }
         if(op === "gleich"){ return w === v; }
         if(op === "nicht"){ return !w.includes(v); }
@@ -310,10 +374,14 @@ function operatorPasst(typ, wert, filter){
 }
 
 function selektionAnwenden(){
+    if(selektionFilter.length === 0){
+        return kunden.filter(k => !k.archiviert);
+    }
+    const kombinator = selektionModus === "oder" ? "some" : "every";
     return kunden
         .filter(k => !k.archiviert)
         .filter(k =>
-            selektionFilter.every(f => selektionKundeMatcht(k, f))
+            selektionFilter[kombinator](f => selektionKundeMatcht(k, f))
         );
 }
 
@@ -468,12 +536,39 @@ function selektionWertGeaendert(idx, welche, wert){
 
 function selektionAlleZuruecksetzen(){
     selektionFilter = [];
+    selektionModus = "und";
     selektionAktuellerName = null;
     document.getElementById("selektionGespeicherteAuswahl").value = "";
     document.getElementById("selektionLoeschenButton").style.display = "none";
+    selektionModusAnzeigen();
     selektionFilterListeRendern();
     document.getElementById("selektionErgebnis").innerHTML = "";
     document.getElementById("selektionExportButton").disabled = true;
+}
+
+/* =====================================================
+   UND / ODER-VERKNUEPFUNG
+===================================================== */
+
+function selektionModusUmschalten(neuerModus){
+    if(neuerModus !== "und" && neuerModus !== "oder"){ return; }
+    selektionModus = neuerModus;
+    selektionModusAnzeigen();
+    selektionTrefferAnzeigen();
+}
+
+function selektionModusAnzeigen(){
+    const btnUnd  = document.getElementById("selektionModusUnd");
+    const btnOder = document.getElementById("selektionModusOder");
+    const hinweis = document.getElementById("selektionModusHinweis");
+    if(!btnUnd || !btnOder){ return; }
+    btnUnd.classList.toggle("aktiv", selektionModus === "und");
+    btnOder.classList.toggle("aktiv", selektionModus === "oder");
+    if(hinweis){
+        hinweis.textContent = selektionModus === "oder"
+            ? "Mindestens ein Filter muss zutreffen"
+            : "Alle Filter müssen zutreffen";
+    }
 }
 
 /* =====================================================
@@ -493,8 +588,11 @@ function selektionTrefferAnzeigen(){
     }
 
     const treffer = selektionAnwenden();
+    const modusText = selektionFilter.length > 1
+        ? (selektionModus === "oder" ? " (ODER)" : " (UND)")
+        : "";
     live.textContent =
-        `Filter aktiv: ${selektionFilter.length} · ` +
+        `Filter aktiv: ${selektionFilter.length}${modusText} · ` +
         `Treffer: ${treffer.length}`;
 
     exportBtn.disabled = treffer.length === 0;
@@ -602,7 +700,10 @@ function selektionSpeichern(){
     if(!name || !name.trim()){ return; }
 
     const gespeichert = gespeicherteSelektionenLaden();
-    gespeichert[name.trim()] = JSON.parse(JSON.stringify(selektionFilter));
+    gespeichert[name.trim()] = {
+        modus:  selektionModus,
+        filter: JSON.parse(JSON.stringify(selektionFilter))
+    };
     gespeicherteSelektionenSpeichern(gespeichert);
 
     selektionAktuellerName = name.trim();
@@ -622,9 +723,17 @@ function selektionLaden(name){
     }
 
     const gespeichert = gespeicherteSelektionenLaden();
-    if(!gespeichert[name]){ return; }
+    const eintrag = gespeichert[name];
+    if(!eintrag){ return; }
 
-    selektionFilter = JSON.parse(JSON.stringify(gespeichert[name]));
+    // Rueckwaertskompatibilitaet: alte Selektionen sind reine Arrays
+    if(Array.isArray(eintrag)){
+        selektionFilter = JSON.parse(JSON.stringify(eintrag));
+        selektionModus = "und";
+    }else{
+        selektionFilter = JSON.parse(JSON.stringify(eintrag.filter || []));
+        selektionModus = eintrag.modus === "oder" ? "oder" : "und";
+    }
     selektionAktuellerName = name;
     document.getElementById("selektionLoeschenButton").style.display = "";
     selektionFilterListeRendern();
@@ -770,5 +879,6 @@ function selektionExportieren(){
 
 function selektionenInitialisieren(){
     selektionDropdownAktualisieren();
+    selektionModusAnzeigen();
     selektionFilterListeRendern();
 }

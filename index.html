@@ -684,6 +684,30 @@
 
     </div>
 
+    <div class="selektion-modus-zeile">
+        <span class="selektion-modus-label">Verknüpfung:</span>
+        <div class="selektion-modus-toggle">
+            <button
+                id="selektionModusUnd"
+                class="selektion-modus-btn aktiv"
+                onclick="selektionModusUmschalten('und')"
+                title="Alle Filter müssen zutreffen">
+                UND
+            </button>
+            <button
+                id="selektionModusOder"
+                class="selektion-modus-btn"
+                onclick="selektionModusUmschalten('oder')"
+                title="Mindestens ein Filter muss zutreffen">
+                ODER
+            </button>
+        </div>
+        <span class="selektion-modus-hinweis"
+            id="selektionModusHinweis">
+            Alle Filter müssen zutreffen
+        </span>
+    </div>
+
     <div class="selektion-filter-liste" id="selektionFilterListe">
     </div>
 

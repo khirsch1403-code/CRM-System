@@ -2616,3 +2616,61 @@ select.crm-input.filter-select-aktiv{
 @media (prefers-reduced-motion:reduce){
     .ku-drop-zone{ transition:none; }
 }
+
+/* =====================================================
+   SELEKTIONEN — UND/ODER-Toggle
+===================================================== */
+
+.selektion-modus-zeile{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:8px 0 14px 0;
+    flex-wrap:wrap;
+}
+
+.selektion-modus-label{
+    font-size:13px;
+    color:var(--c-text-schwach);
+    font-weight:500;
+}
+
+.selektion-modus-toggle{
+    display:inline-flex;
+    border:1px solid var(--c-border);
+    border-radius:6px;
+    overflow:hidden;
+    background:var(--c-bg-input, #fff);
+}
+
+.selektion-modus-btn{
+    padding:5px 14px;
+    font-size:12px;
+    font-weight:600;
+    background:transparent;
+    color:var(--c-text-schwach);
+    border:none;
+    cursor:pointer;
+    transition:background 100ms, color 100ms;
+    letter-spacing:0.5px;
+}
+
+.selektion-modus-btn + .selektion-modus-btn{
+    border-left:1px solid var(--c-border);
+}
+
+.selektion-modus-btn:hover:not(.aktiv){
+    background:#f0e6e8;
+    color:var(--c-text);
+}
+
+.selektion-modus-btn.aktiv{
+    background:#7a1e35;
+    color:#ffffff;
+}
+
+.selektion-modus-hinweis{
+    font-size:12px;
+    color:var(--c-text-schwach);
+    font-style:italic;
+}
