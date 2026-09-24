@@ -372,6 +372,21 @@ function terminLoeschen(terminId){
 
 }
 
+/* =====================================================
+   NOTIZ AUS-/EINKLAPPEN
+   -----------------------------------------------------
+   Baugleich zur Abschluss-Notiz (abschlussNotizToggle),
+   damit sich beide Uebersichten einheitlich verhalten.
+===================================================== */
+
+function terminNotizToggle(id){
+    const el = document.getElementById("termin-notiz-" + id);
+    const chevron = document.getElementById("termin-notiz-chevron-" + id);
+    if(!el){ return; }
+    const offen = el.classList.toggle("termin-notiz-offen");
+    if(chevron){ chevron.textContent = offen ? "▾" : "▸"; }
+}
+
 function renderTerminHistorie(){
 
     if(!aktuellerKunde){ return ""; }
@@ -395,21 +410,29 @@ function renderTerminHistorie(){
         const hatNotiz = termin.zusammenfassung &&
                          termin.zusammenfassung.trim().length > 0;
 
-        // Kurzer Notiz-Anriss direkt in der Zeile — konsistent mit
-        // der Abschluss-Uebersicht.
+        // Notiz-Vorschau: einheitlich zur Abschluss-Uebersicht.
+        // Klickbare Zeile mit Chevron + Vorschautext, aufklappbarer
+        // Vollinhalt darunter.
         const vorschau = hatNotiz
             ? (typeof notizVorschau === "function"
                 ? notizVorschau(termin.zusammenfassung, 90)
                 : termin.zusammenfassung.trim().slice(0, 90))
             : "";
 
-        const notizHtml =
-        hatNotiz
-        ? `<details class="klapp-panel klapp-panel-mini termin-notiz">
-               <summary>Notiz anzeigen</summary>
-               <div class="klapp-inhalt">${esc(termin.zusammenfassung)}</div>
-           </details>`
-        : "";
+        const vorschauSpalte = hatNotiz
+            ? `<div class="tm-notiz-vorschau"
+                    onclick="terminNotizToggle(${termin.id})"
+                    title="Notiz ein-/ausblenden">
+                    <span class="tm-notiz-chevron" id="termin-notiz-chevron-${termin.id}">▸</span>
+                    <span class="tm-notiz-vorschautext">${esc(vorschau)}</span>
+               </div>`
+            : "";
+
+        const notizInhalt = hatNotiz
+            ? `<div id="termin-notiz-${termin.id}" class="termin-notiz-inhalt">
+                    ${esc(termin.zusammenfassung)}
+               </div>`
+            : "";
 
         return `<div class="termin-zeile ${istInfo ? "termin-info" : ""}">
 
@@ -433,11 +456,9 @@ function renderTerminHistorie(){
 
             </div>
 
-            ${hatNotiz
-                ? `<div class="termin-notiz-vorschau">${esc(vorschau)}</div>`
-                : ""}
+            ${vorschauSpalte}
 
-            ${notizHtml}
+            ${notizInhalt}
 
         </div>`;
 
