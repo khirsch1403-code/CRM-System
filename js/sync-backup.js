@@ -527,7 +527,8 @@ if(!kunde){
                         nurBuero:false,
                         nurTelefon:false,
                         nurMail:false,
-                        bestandVerlassen:false
+                        bestandVerlassen:false,
+                        wichtigbrief:false
                     }
 
                 };
@@ -1028,10 +1029,16 @@ function datenPruefen(){
 
             }
 
-            if(!kunde.kennzeichen){
+            if(!kunde.kennzeichen || typeof kunde.kennzeichen !== "object"
+               || Array.isArray(kunde.kennzeichen)){
+                // Alt-Bug: manche Kunden hatten kennzeichen = [] statt {}.
+                // Objekt sicherstellen, damit .wichtigbrief etc. lesbar bleibt.
+                kunde.kennzeichen = {};
+            }
 
-                kunde.kennzeichen = [];
-
+            // Neues Feld "wichtigbrief" bei Alt-Kunden nach-initialisieren
+            if(typeof kunde.kennzeichen.wichtigbrief !== "boolean"){
+                kunde.kennzeichen.wichtigbrief = false;
             }
 
             if(!kunde.notiz){

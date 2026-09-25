@@ -26,7 +26,8 @@ kennzeichen:{
     nurBuero:false,
     nurTelefon:false,
     nurMail:false,
-    bestandVerlassen:false
+    bestandVerlassen:false,
+    wichtigbrief:false
 },
 
         termine:[],
@@ -143,6 +144,7 @@ function renderKunden(){
     ${kunde.kennzeichen.nurTelefon ? '<span class="tag" style="background:#0d6efd;color:white;">T</span>' : ''}
     ${kunde.kennzeichen.nurMail ? '<span class="tag" style="background:#198754;color:white;">M</span>' : ''}
     ${kunde.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#561526;color:white;">BV</span>' : ''}
+    ${kunde.kennzeichen.wichtigbrief ? '<span class="tag" style="background:#d9822b;color:white;">WB</span>' : ''}
     </strong>
     <br>
     <span class="kk-ort">${esc(kunde.plz)} ${esc(kunde.ort)}</span>
@@ -206,7 +208,8 @@ function sidebarBadges(k){
            (k.kennzeichen.nurBuero ? '<span class="tag" style="background:#6c757d;color:white;">B</span>' : '') +
            (k.kennzeichen.nurTelefon ? '<span class="tag" style="background:#3d2c7a;color:white;">T</span>' : '') +
            (k.kennzeichen.nurMail ? '<span class="tag" style="background:#2d6a4f;color:white;">M</span>' : '') +
-           (k.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#4e1220;color:white;">BV</span>' : '');
+           (k.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#4e1220;color:white;">BV</span>' : '') +
+           (k.kennzeichen.wichtigbrief ? '<span class="tag" style="background:#d9822b;color:white;">WB</span>' : '');
 }
 
 function sidebarKarteAktualisieren(){
@@ -262,6 +265,10 @@ function kundeOeffnen(id){
 
             <button class="kennzeichen-btn ${k.kennzeichen.bestandVerlassen ? 'kennzeichen-aktiv-dunkelrot' : ''}"
             onclick="toggleKennzeichen('bestandVerlassen')">Bestand verlassen</button>
+
+            <button class="kennzeichen-btn ${k.kennzeichen.wichtigbrief ? 'kennzeichen-aktiv-orange' : ''}"
+            onclick="toggleKennzeichen('wichtigbrief')"
+            title="Kontaktdaten fehlen oder sind falsch — Kunde per Brief anschreiben">Wichtigbrief</button>
 
         </div>
 
@@ -431,6 +438,7 @@ function kundeOeffnen(id){
             ${person.kennzeichen.nurTelefon ? '<span class="kennzeichen-badge kennzeichen-badge-blau">Telefon</span>' : ''}
             ${person.kennzeichen.nurMail ? '<span class="kennzeichen-badge kennzeichen-badge-gruen">Mail</span>' : ''}
             ${person.kennzeichen.bestandVerlassen ? '<span class="kennzeichen-badge kennzeichen-badge-dunkelrot">BV</span>' : ''}
+            ${person.kennzeichen.wichtigbrief ? '<span class="kennzeichen-badge kennzeichen-badge-orange">WB</span>' : ''}
             </div>
         </div>`;
 
@@ -818,7 +826,8 @@ function toggleKennzeichen(name){
             nurBuero:      "kennzeichen-aktiv-grau",
             nurTelefon:    "kennzeichen-aktiv-blau",
             nurMail:       "kennzeichen-aktiv-gruen",
-            bestandVerlassen: "kennzeichen-aktiv-dunkelrot"
+            bestandVerlassen: "kennzeichen-aktiv-dunkelrot",
+            wichtigbrief:  "kennzeichen-aktiv-orange"
         };
         const klasse = klassenMap[name];
         if(klasse){

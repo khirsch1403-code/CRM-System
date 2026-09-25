@@ -144,7 +144,7 @@ function mergeKunden(sieger, verlierer){
     // Kennzeichen: OR-Verknüpfung (Marker gehen nicht verloren)
     sieger.kennzeichen = sieger.kennzeichen || {};
     const v_kz = verlierer.kennzeichen || {};
-    ["keineBeratung","nurBuero","nurTelefon","nurMail","bestandVerlassen"]
+    ["keineBeratung","nurBuero","nurTelefon","nurMail","bestandVerlassen","wichtigbrief"]
         .forEach(name => {
             if(v_kz[name]){ sieger.kennzeichen[name] = true; }
         });

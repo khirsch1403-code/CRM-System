@@ -115,6 +115,13 @@ const SELEKTIONS_FELDER = {
         wert: k => !!(k.kennzeichen && k.kennzeichen.bestandVerlassen)
     },
 
+    wichtigbrief: {
+        label: "Wichtigbrief (Kontaktdaten fehlen/falsch)",
+        typ: "boolean",
+        gruppe: "Kennzeichen",
+        wert: k => !!(k.kennzeichen && k.kennzeichen.wichtigbrief)
+    },
+
     // --- Aktivität ---
     letzterTerminTage: {
         label: "Letzter Termin (Tage her)",
@@ -779,7 +786,8 @@ function selektionExportieren(){
         "Letzter Termin",
         "Keine Beratung", "Nur Büro",
         "Nur Telefon", "Nur Mail",
-        "Bestand verlassen"
+        "Bestand verlassen",
+        "Wichtigbrief"
     ];
 
     const zeilen = [kopf];
@@ -812,7 +820,8 @@ function selektionExportieren(){
             k.kennzeichen && k.kennzeichen.nurBuero ? "ja" : "",
             k.kennzeichen && k.kennzeichen.nurTelefon ? "ja" : "",
             k.kennzeichen && k.kennzeichen.nurMail ? "ja" : "",
-            k.kennzeichen && k.kennzeichen.bestandVerlassen ? "ja" : ""
+            k.kennzeichen && k.kennzeichen.bestandVerlassen ? "ja" : "",
+            k.kennzeichen && k.kennzeichen.wichtigbrief ? "ja" : ""
         ];
 
         const vertraege = k.vertraege || [];
