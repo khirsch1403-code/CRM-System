@@ -12,9 +12,14 @@
        localStorage (Adress-Key)
 ===================================================== */
 
-const SB_LS_TEXT      = "crmSerienbriefText";
-const SB_LS_SIGNATUR  = "crmSerienbriefSignatur";
-const SB_LS_GETRENNT  = "crmSerienbriefGetrennt"; // Set von Adress-Keys
+const SB_LS_TEXT         = "crmSerienbriefText";
+const SB_LS_SIGNATUR     = "crmSerienbriefSignatur";
+const SB_LS_BETREFF      = "crmSerienbriefBetreff";
+const SB_LS_SCHRIFT      = "crmSerienbriefSchriftgroesse";
+const SB_LS_GETRENNT     = "crmSerienbriefGetrennt"; // Set von Adress-Keys
+
+const SB_SCHRIFTGROESSEN = [9, 10, 11, 12, 13, 14];
+const SB_DEFAULT_SCHRIFT = 11;
 
 const SB_DEFAULT_TEXT = "Hallo {anrede_kombiniert},\n\n"
     + "in unseren Unterlagen sind Ihre Kontaktdaten leider "
@@ -167,10 +172,16 @@ function serienbriefPanelRendern(){
     ).length;
 
     // Persistente Werte laden
-    const gespText = localStorage.getItem(SB_LS_TEXT);
-    const gespSig  = localStorage.getItem(SB_LS_SIGNATUR);
-    const text = gespText !== null ? gespText : SB_DEFAULT_TEXT;
+    const gespText    = localStorage.getItem(SB_LS_TEXT);
+    const gespSig     = localStorage.getItem(SB_LS_SIGNATUR);
+    const gespBetreff = localStorage.getItem(SB_LS_BETREFF);
+    const gespSchrift = parseInt(localStorage.getItem(SB_LS_SCHRIFT), 10);
+    const text     = gespText !== null ? gespText : SB_DEFAULT_TEXT;
     const signatur = gespSig !== null ? gespSig : "";
+    const betreff  = gespBetreff !== null ? gespBetreff : "";
+    const schrift  = (SB_SCHRIFTGROESSEN.indexOf(gespSchrift) !== -1)
+        ? gespSchrift
+        : SB_DEFAULT_SCHRIFT;
 
     container.innerHTML = `
         <div class="sb-info-zeile">
@@ -234,6 +245,24 @@ function serienbriefPanelRendern(){
             </details>
         ` : ""}
 
+        <div class="sb-optionen-zeile">
+            <label class="sb-optionen-label">
+                Schriftgröße:
+                <select id="sbSchriftgroesse" class="crm-input sb-schrift-select"
+                    onchange="sbFeldGespeichert('${SB_LS_SCHRIFT}', this.value)">
+                    ${SB_SCHRIFTGROESSEN.map(g =>
+                        `<option value="${g}" ${g === schrift ? "selected" : ""}>${g} pt</option>`
+                    ).join("")}
+                </select>
+            </label>
+        </div>
+
+        <label class="sb-feld-label">Betreff <span class="sb-feld-hinweis">(erscheint fett über der Anrede)</span></label>
+        <input type="text" id="sbBetreff" class="crm-input sb-betreff-input"
+            oninput="sbFeldGespeichert('${SB_LS_BETREFF}', this.value)"
+            placeholder="z. B. Wichtige Mitteilung — bitte Kontaktdaten aktualisieren"
+            value="${esc(betreff)}">
+
         <label class="sb-feld-label">Brieftext (Platzhalter: <code>{anrede_kombiniert}</code>, <code>{vorname}</code>, <code>{nachname}</code>, <code>{ort}</code>, <code>{heute}</code>)</label>
         <textarea id="sbBrieftext" class="crm-textarea sb-brieftext"
             oninput="sbFeldGespeichert('${SB_LS_TEXT}', this.value)"
@@ -285,6 +314,11 @@ function sbHaushaltGetrenntToggle(adressKey, aktiv){
 function serienbriefErstellen(){
     const text     = document.getElementById("sbBrieftext").value;
     const signatur = document.getElementById("sbSignatur").value;
+    const betreff  = document.getElementById("sbBetreff").value;
+    const schriftSel = document.getElementById("sbSchriftgroesse");
+    const schrift  = schriftSel ? parseInt(schriftSel.value, 10) : SB_DEFAULT_SCHRIFT;
+    const schriftPt = (SB_SCHRIFTGROESSEN.indexOf(schrift) !== -1)
+        ? schrift : SB_DEFAULT_SCHRIFT;
 
     const treffer = (typeof selektionAnwenden === "function")
         ? selektionAnwenden()
@@ -332,9 +366,10 @@ function serienbriefErstellen(){
             ? sigZeilen.slice(0, 3).map(z => z.trim()).join(" · ")
             : "";
 
-        const gefuellterText = sbTextFuellen(text, s.personen);
+        const gefuellterText    = sbTextFuellen(text, s.personen);
+        const gefuellterBetreff = sbTextFuellen(betreff, s.personen);
 
-        return `<div class="brief-seite">
+        return `<div class="brief-seite" style="font-size:${schriftPt}pt;">
             <div class="brief-falzmarke brief-falzmarke-oben"></div>
             <div class="brief-falzmarke brief-falzmarke-unten"></div>
 
@@ -347,6 +382,10 @@ function serienbriefErstellen(){
             <div class="brief-datum">
                 ${esc(p.ort || "")}, ${heute}
             </div>
+
+            ${gefuellterBetreff.trim()
+                ? `<div class="brief-betreff">${esc(gefuellterBetreff)}</div>`
+                : ""}
 
             <div class="brief-inhalt">${esc(gefuellterText)}</div>
 
