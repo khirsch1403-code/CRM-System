@@ -741,6 +741,21 @@
     <div id="selektionErgebnis" class="selektion-ergebnis">
     </div>
 
+    <details class="klapp-panel klapp-panel-gross serienbrief-klapp">
+
+        <summary>📄 Serienbrief</summary>
+
+        <div class="klapp-inhalt">
+            <div id="serienbriefPanel">
+                <div class="eintrag-leer">
+                    Setze mindestens einen Filter (z. B. Kennzeichen „Wichtigbrief")
+                    — dann kannst du hier einen Serienbrief für die Trefferliste erstellen.
+                </div>
+            </div>
+        </div>
+
+    </details>
+
 </div>
 
 <!-- =====================================================
@@ -1140,6 +1155,34 @@
 <script src="js/benachrichtigungen.js"></script>
 <script src="js/sync-backup.js"></script>
 <script src="js/auto-backup.js"></script>
+<script src="js/serienbrief.js"></script>
+
+<!-- =====================================================
+     SERIENBRIEF-DRUCKVORSCHAU (Vollbild)
+===================================================== -->
+
+<div id="serienbriefDruckansicht" class="serienbrief-druckansicht"></div>
+
+<!-- =====================================================
+     SERIENBRIEF POST-AKTION MODAL
+===================================================== -->
+
+<div id="serienbriefPostModal" class="modal-overlay">
+    <div class="modal">
+        <h2>Nach dem Druck</h2>
+        <div id="serienbriefPostInhalt"></div>
+        <div class="modal-buttons">
+            <button class="crm-button"
+                onclick="serienbriefPostAbbrechen()">
+                Nichts tun
+            </button>
+            <button class="crm-button crm-button-primary"
+                onclick="serienbriefPostBestaetigen()">
+                Übernehmen
+            </button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

@@ -2770,3 +2770,320 @@ select.crm-input.filter-select-aktiv{
 .termin-notiz-offen{
     display:block;
 }
+
+/* =====================================================
+   SERIENBRIEF — Klapp-Panel im Selektionen-Tab
+===================================================== */
+
+.serienbrief-klapp{
+    margin-top:20px;
+}
+
+#serienbriefPanel .sb-info-zeile{
+    padding:8px 10px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:13px;
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.sb-haushalt-hinweis{
+    color:var(--c-primary-dunkel, #4d1220);
+    font-style:italic;
+}
+
+.sb-warn-hinweis{
+    color:#8a5a00;
+    font-weight:500;
+    background:#fff4dc;
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:12px;
+}
+
+.sb-haushalts-details{
+    margin-bottom:12px;
+    background:#faf7f8;
+    border:1px solid #eadde0;
+    border-radius:5px;
+    padding:6px 10px;
+    font-size:13px;
+}
+
+.sb-haushalts-details summary{
+    cursor:pointer;
+    font-weight:500;
+    color:var(--c-primary-dunkel, #4d1220);
+}
+
+.sb-haushalts-liste{
+    margin-top:8px;
+}
+
+.sb-haushalt-eintrag{
+    padding:8px 10px;
+    background:#fff;
+    border-left:3px solid #d9822b;
+    margin:6px 0;
+    border-radius:3px;
+    font-size:12px;
+}
+
+.sb-haushalt-eintrag.sb-eintrag-warn{
+    border-left-color:#c8102e;
+    color:#8a0f1a;
+}
+
+.sb-haushalt-adr{
+    color:var(--c-text, #333);
+    margin-bottom:3px;
+}
+
+.sb-haushalt-name-kombiniert{
+    color:var(--c-text-schwach);
+    font-style:italic;
+    display:block;
+    margin-top:2px;
+}
+
+.sb-haushalt-personen{
+    color:var(--c-text-schwach);
+    font-size:11px;
+    margin-bottom:4px;
+}
+
+.sb-haushalt-person{
+    display:inline-block;
+}
+
+.sb-haushalt-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:var(--c-text-schwach);
+    cursor:pointer;
+    margin-top:4px;
+}
+
+.sb-feld-label{
+    display:block;
+    font-size:12px;
+    font-weight:500;
+    color:var(--c-text-schwach);
+    margin:10px 0 4px 0;
+}
+
+.sb-feld-label code{
+    background:#f0e6e8;
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:11px;
+    color:var(--c-primary-dunkel, #4d1220);
+}
+
+.sb-brieftext{
+    width:100%;
+    min-height:180px;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.sb-signatur{
+    width:100%;
+    min-height:80px;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.4;
+}
+
+.sb-aktionen{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.sb-post-checkbox{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding:8px 10px;
+    margin:6px 0;
+    background:#faf3f4;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+/* =====================================================
+   SERIENBRIEF — VOLLBILD-DRUCKVORSCHAU
+===================================================== */
+
+.serienbrief-druckansicht{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#e8e8e8;
+    z-index:10000;
+    overflow-y:auto;
+    padding:20px 0;
+}
+
+body.serienbrief-modus{
+    overflow:hidden;
+}
+
+.brief-vorschau-header{
+    position:sticky;
+    top:0;
+    z-index:1;
+    background:#fff;
+    padding:10px 20px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:0 auto 12px auto;
+    max-width:210mm;
+    border-radius:4px;
+    font-size:14px;
+}
+
+.brief-vorschau-buttons{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.brief-vorschau-hinweis{
+    max-width:210mm;
+    margin:0 auto 20px auto;
+    padding:8px 14px;
+    background:#fff4dc;
+    color:#5a3d00;
+    font-size:12px;
+    border-radius:4px;
+    border-left:3px solid #d9822b;
+}
+
+.brief-seite{
+    background:#fff;
+    width:210mm;
+    min-height:297mm;
+    box-sizing:border-box;
+    margin:0 auto 20px auto;
+    padding:25mm 20mm 20mm 25mm;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    position:relative;
+    font-family:"Helvetica","Arial",sans-serif;
+    font-size:11pt;
+    line-height:1.5;
+    color:#000;
+    page-break-after:always;
+}
+
+.brief-seite:last-child{
+    page-break-after:auto;
+}
+
+.brief-falzmarke{
+    position:absolute;
+    left:6mm;
+    width:6mm;
+    height:0;
+    border-top:1px solid #333;
+}
+
+.brief-falzmarke-oben{ top:105mm; }
+.brief-falzmarke-unten{ top:210mm; }
+
+.brief-absender-klein{
+    position:absolute;
+    top:45mm;
+    left:25mm;
+    font-size:7pt;
+    color:#555;
+    text-decoration:underline;
+    padding-bottom:2mm;
+    max-width:80mm;
+    line-height:1.2;
+}
+
+.brief-anschrift{
+    position:absolute;
+    top:50mm;
+    left:25mm;
+    max-width:85mm;
+    font-size:11pt;
+    line-height:1.35;
+}
+
+.brief-datum{
+    position:absolute;
+    top:95mm;
+    right:20mm;
+    font-size:10pt;
+    color:#333;
+    text-align:right;
+}
+
+.brief-inhalt{
+    margin-top:110mm;
+    white-space:pre-wrap;
+    text-align:left;
+}
+
+.brief-signatur{
+    margin-top:20mm;
+    white-space:pre-wrap;
+    font-size:11pt;
+    line-height:1.35;
+}
+
+/* =====================================================
+   SERIENBRIEF — PRINT
+===================================================== */
+
+@media print{
+    body > *:not(.serienbrief-druckansicht){
+        display:none !important;
+    }
+    body.serienbrief-modus{
+        overflow:visible !important;
+        background:#fff !important;
+    }
+    .serienbrief-druckansicht{
+        display:block !important;
+        position:static !important;
+        background:#fff !important;
+        padding:0 !important;
+        overflow:visible !important;
+    }
+    .brief-vorschau-header,
+    .brief-vorschau-hinweis{
+        display:none !important;
+    }
+    .brief-seite{
+        margin:0 !important;
+        box-shadow:none !important;
+        width:auto !important;
+        min-height:0 !important;
+        page-break-after:always;
+    }
+    .brief-seite:last-child{
+        page-break-after:auto;
+    }
+    @page{
+        size:A4;
+        margin:0;
+    }
+}
