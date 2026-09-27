@@ -3145,3 +3145,40 @@ body.serienbrief-modus{
 .brief-betreff + .brief-inhalt{
     margin-top:0;
 }
+
+/* =====================================================
+   SERIENBRIEF — Absender-Block (Kopf oben rechts)
+===================================================== */
+
+.sb-absender{
+    width:100%;
+    min-height:110px;
+    font-family:inherit;
+    font-size:12px;
+    line-height:1.4;
+}
+
+.sb-ruecksender-vorschau{
+    margin:4px 0 6px 4px;
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-style:italic;
+}
+
+.sb-ruecksender-vorschau span{
+    color:var(--c-primary-dunkel, #4d1220);
+    font-style:normal;
+    font-weight:500;
+}
+
+/* Absender-Block rechts oben im Brief (mehrzeilig, DIN 5008) */
+.brief-absender-block{
+    position:absolute;
+    top:25mm;
+    right:20mm;
+    width:75mm;
+    font-size:0.8em;   /* relativ zur Brief-Schriftgroesse */
+    line-height:1.35;
+    white-space:pre-wrap;
+    color:#000;
+}

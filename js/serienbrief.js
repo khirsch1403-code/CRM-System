@@ -14,6 +14,7 @@
 
 const SB_LS_TEXT         = "crmSerienbriefText";
 const SB_LS_SIGNATUR     = "crmSerienbriefSignatur";
+const SB_LS_ABSENDER     = "crmSerienbriefAbsender";
 const SB_LS_BETREFF      = "crmSerienbriefBetreff";
 const SB_LS_SCHRIFT      = "crmSerienbriefSchriftgroesse";
 const SB_LS_GETRENNT     = "crmSerienbriefGetrennt"; // Set von Adress-Keys
@@ -145,6 +146,36 @@ function sbTextFuellen(vorlage, personen){
 }
 
 /* =====================================================
+   RUECKSENDER-ZEILE AUS ABSENDER-BLOCK
+   -----------------------------------------------------
+   Heuristik: nimmt Zeile 1 als Name; sucht die Zeile,
+   die mit einer 5-stelligen PLZ beginnt (PLZ Ort); und
+   die Zeile direkt davor (Strasse). Ergebnis wird als
+   "Name, Strasse, PLZ Ort" komma-getrennt zurueckgegeben.
+   Diese Zeile steht klein und unterstrichen ueber dem
+   Anschriftfeld (DIN-Rueckadresse fuer Sichtfenster).
+===================================================== */
+
+function sbRuecksenderZeile(absenderText){
+    const zeilen = String(absenderText||"")
+        .split("\n")
+        .map(z => z.trim())
+        .filter(z => z);
+    if(zeilen.length === 0){ return ""; }
+    const name = zeilen[0];
+    const plzIdx = zeilen.findIndex(z => /^\d{5}\s/.test(z));
+    if(plzIdx === -1 || plzIdx === 0){
+        return name;
+    }
+    const plzOrt  = zeilen[plzIdx];
+    const strasse = zeilen[plzIdx - 1];
+    const teile = [name];
+    if(strasse && strasse !== name){ teile.push(strasse); }
+    teile.push(plzOrt);
+    return teile.join(", ");
+}
+
+/* =====================================================
    KLAPP-PANEL RENDERN
 ===================================================== */
 
@@ -172,12 +203,14 @@ function serienbriefPanelRendern(){
     ).length;
 
     // Persistente Werte laden
-    const gespText    = localStorage.getItem(SB_LS_TEXT);
-    const gespSig     = localStorage.getItem(SB_LS_SIGNATUR);
-    const gespBetreff = localStorage.getItem(SB_LS_BETREFF);
-    const gespSchrift = parseInt(localStorage.getItem(SB_LS_SCHRIFT), 10);
+    const gespText     = localStorage.getItem(SB_LS_TEXT);
+    const gespSig      = localStorage.getItem(SB_LS_SIGNATUR);
+    const gespAbsender = localStorage.getItem(SB_LS_ABSENDER);
+    const gespBetreff  = localStorage.getItem(SB_LS_BETREFF);
+    const gespSchrift  = parseInt(localStorage.getItem(SB_LS_SCHRIFT), 10);
     const text     = gespText !== null ? gespText : SB_DEFAULT_TEXT;
     const signatur = gespSig !== null ? gespSig : "";
+    const absender = gespAbsender !== null ? gespAbsender : "";
     const betreff  = gespBetreff !== null ? gespBetreff : "";
     const schrift  = (SB_SCHRIFTGROESSEN.indexOf(gespSchrift) !== -1)
         ? gespSchrift
@@ -257,6 +290,16 @@ function serienbriefPanelRendern(){
             </label>
         </div>
 
+        <label class="sb-feld-label">
+            Absender <span class="sb-feld-hinweis">(Kopf oben rechts — die kleine Rücksenderzeile über der Anschrift wird automatisch daraus abgeleitet)</span>
+        </label>
+        <textarea id="sbAbsender" class="crm-textarea sb-absender"
+            oninput="sbFeldGespeichert('${SB_LS_ABSENDER}', this.value); sbRuecksenderVorschauAktualisieren()"
+            placeholder="Vorname Nachname&#10;Berufsbezeichnung&#10;Firma&#10;Straße Hausnummer&#10;PLZ Ort&#10;Telefon    …&#10;E-Mail     …">${esc(absender)}</textarea>
+        <div class="sb-ruecksender-vorschau">
+            Rücksenderzeile: <span id="sbRuecksenderVorschau">${esc(sbRuecksenderZeile(absender) || "(noch leer — bitte Absender ausfüllen)")}</span>
+        </div>
+
         <label class="sb-feld-label">Betreff <span class="sb-feld-hinweis">(erscheint fett über der Anrede)</span></label>
         <input type="text" id="sbBetreff" class="crm-input sb-betreff-input"
             oninput="sbFeldGespeichert('${SB_LS_BETREFF}', this.value)"
@@ -292,6 +335,14 @@ function sbFeldGespeichert(schluessel, wert){
     try{ localStorage.setItem(schluessel, wert); }catch(_){}
 }
 
+function sbRuecksenderVorschauAktualisieren(){
+    const ta   = document.getElementById("sbAbsender");
+    const ziel = document.getElementById("sbRuecksenderVorschau");
+    if(!ta || !ziel){ return; }
+    const zeile = sbRuecksenderZeile(ta.value);
+    ziel.textContent = zeile || "(noch leer — bitte Absender ausfüllen)";
+}
+
 function sbVorlageZuruecksetzen(){
     if(!confirm("Brieftext auf den Standardtext zurücksetzen? "
         + "Deine eingegebene Version wird überschrieben.")){ return; }
@@ -314,11 +365,13 @@ function sbHaushaltGetrenntToggle(adressKey, aktiv){
 function serienbriefErstellen(){
     const text     = document.getElementById("sbBrieftext").value;
     const signatur = document.getElementById("sbSignatur").value;
+    const absender = document.getElementById("sbAbsender").value;
     const betreff  = document.getElementById("sbBetreff").value;
     const schriftSel = document.getElementById("sbSchriftgroesse");
     const schrift  = schriftSel ? parseInt(schriftSel.value, 10) : SB_DEFAULT_SCHRIFT;
     const schriftPt = (SB_SCHRIFTGROESSEN.indexOf(schrift) !== -1)
         ? schrift : SB_DEFAULT_SCHRIFT;
+    const rueckSender = sbRuecksenderZeile(absender);
 
     const treffer = (typeof selektionAnwenden === "function")
         ? selektionAnwenden()
@@ -359,13 +412,6 @@ function serienbriefErstellen(){
             `${esc(p.plz||"")} ${esc(p.ort||"")}`.trim()
         ];
 
-        // Absender-Zeile aus erster Signaturzeile ableiten (fuer die
-        // schmale Zeile oberhalb des Anschriftfeldes ("...")
-        const sigZeilen = (signatur||"").split("\n").filter(z => z.trim());
-        const absenderKurz = sigZeilen.length >= 2
-            ? sigZeilen.slice(0, 3).map(z => z.trim()).join(" · ")
-            : "";
-
         const gefuellterText    = sbTextFuellen(text, s.personen);
         const gefuellterBetreff = sbTextFuellen(betreff, s.personen);
 
@@ -373,7 +419,13 @@ function serienbriefErstellen(){
             <div class="brief-falzmarke brief-falzmarke-oben"></div>
             <div class="brief-falzmarke brief-falzmarke-unten"></div>
 
-            ${absenderKurz ? `<div class="brief-absender-klein">${esc(absenderKurz)}</div>` : ""}
+            ${absender.trim()
+                ? `<div class="brief-absender-block">${esc(absender)}</div>`
+                : ""}
+
+            ${rueckSender
+                ? `<div class="brief-absender-klein">${esc(rueckSender)}</div>`
+                : ""}
 
             <div class="brief-anschrift">
                 ${anschriftZeilen.map(z => `<div>${z}</div>`).join("")}
