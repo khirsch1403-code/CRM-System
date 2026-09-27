@@ -149,77 +149,50 @@ function sbTextFuellen(vorlage, personen){
 /* =====================================================
    FORMELLE ANREDE
    -----------------------------------------------------
-   Einzeln  Frau:  "Sehr geehrte Frau Müller"
-   Einzeln  Herr:  "Sehr geehrter Herr Meier"
-   Divers/leer:    "Sehr geehrte/r <Vorname Nachname>" (Notloesung)
-   Haushalt Frau + Herr:
-      "Sehr geehrte Frau Müller, sehr geehrter Herr Müller"
-   Haushalt alle Frauen:
-      "Sehr geehrte Frau Müller und Frau Schmidt"
-   Haushalt alle Herren:
-      "Sehr geehrter Herr Müller und Herr Schmidt"
-   Wenn eine Anrede in der Gruppe fehlt:
-      "Sehr geehrte Damen und Herren"
+   Einzelperson Frau:  "Sehr geehrte Frau Müller"
+   Einzelperson Herr:  "Sehr geehrter Herr Meier"
+   Einzelperson ohne Anrede: "Sehr geehrte Damen und Herren"
+
+   Ab 2 Personen wird zur Familien-Anrede gewechselt
+   (persoenlicher als das steife "Frau X und Herr Y"):
+     Gleicher Nachname:       "Sehr geehrte Familie Müller"
+     Verschiedene Nachnamen:  "Sehr geehrte Familie Müller/Schmidt"
+     Nachname fehlt bei irgendwem: Fallback "Damen und Herren"
 ===================================================== */
 
 function sbAnredeFormal(personen){
     if(personen.length === 0){ return "Sehr geehrte Damen und Herren"; }
 
-    // Wenn irgendwer keine Anrede hat: Sammelanrede
-    const alleHabenAnrede = personen.every(
-        p => p.anrede === "Frau" || p.anrede === "Herr"
-    );
-    if(!alleHabenAnrede){
-        return "Sehr geehrte Damen und Herren";
-    }
-
-    function personTeil(p){
-        const nn = String(p.nachname||"").trim();
-        if(p.anrede === "Frau"){ return "Frau " + nn; }
-        return "Herr " + nn;
-    }
-
-    // Einzelperson
+    // Einzelperson: formelle DIN-Anrede (Familie X waere komisch bei 1)
     if(personen.length === 1){
         const p = personen[0];
         const nn = String(p.nachname||"").trim();
+        if(!nn){ return "Sehr geehrte Damen und Herren"; }
         if(p.anrede === "Frau"){ return "Sehr geehrte Frau " + nn; }
-        return "Sehr geehrter Herr " + nn;
+        if(p.anrede === "Herr"){ return "Sehr geehrter Herr " + nn; }
+        return "Sehr geehrte Damen und Herren";
     }
 
-    // Haushalt: pruefe ob alle gleiches Geschlecht
-    const nurFrauen = personen.every(p => p.anrede === "Frau");
-    const nurHerren = personen.every(p => p.anrede === "Herr");
-
-    if(nurFrauen || nurHerren){
-        const nachnamenTeile = personen.map(p =>
-            (nurFrauen ? "Frau " : "Herr ") + String(p.nachname||"").trim()
-        );
-        const einleitung = nurFrauen ? "Sehr geehrte " : "Sehr geehrter ";
-        // "Frau Müller und Frau Schmidt"  oder
-        // "Frau Müller, Frau Schmidt und Frau Weber"
-        let liste;
-        if(nachnamenTeile.length === 2){
-            liste = nachnamenTeile.join(" und ");
-        }else{
-            liste = nachnamenTeile.slice(0, -1).join(", ") + " und " +
-                    nachnamenTeile[nachnamenTeile.length - 1];
-        }
-        return einleitung + liste;
+    // Ab 2 Personen: Familien-Anrede
+    const nachnamen = personen
+        .map(p => String(p.nachname||"").trim())
+        .filter(n => n);
+    if(nachnamen.length === 0){
+        return "Sehr geehrte Damen und Herren";
     }
 
-    // Gemischtes Geschlecht: "Sehr geehrte Frau X, sehr geehrter Herr Y"
-    const stuecke = personen.map(p => {
-        const nn = String(p.nachname||"").trim();
-        if(p.anrede === "Frau"){ return "Sehr geehrte Frau " + nn; }
-        return "sehr geehrter Herr " + nn;
+    // Einheitliche Nachnamen zusammenfassen (case-insensitiv)
+    const seen = new Set();
+    const eindeutig = [];
+    nachnamen.forEach(n => {
+        const k = n.toLowerCase();
+        if(!seen.has(k)){ seen.add(k); eindeutig.push(n); }
     });
-    // Erste Stueck mit Grossbuchstabe, folgende klein
-    stuecke[0] = stuecke[0].charAt(0).toUpperCase() + stuecke[0].slice(1);
-    for(let i = 1; i < stuecke.length; i++){
-        stuecke[i] = stuecke[i].charAt(0).toLowerCase() + stuecke[i].slice(1);
+
+    if(eindeutig.length === 1){
+        return "Sehr geehrte Familie " + eindeutig[0];
     }
-    return stuecke.join(", ");
+    return "Sehr geehrte Familie " + eindeutig.join("/");
 }
 
 /* =====================================================

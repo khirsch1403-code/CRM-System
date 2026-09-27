@@ -3035,7 +3035,7 @@ body.serienbrief-modus{
 
 .brief-datum{
     position:absolute;
-    top:95mm;
+    top:105mm;
     right:20mm;
     font-size:10pt;
     color:#333;
@@ -3043,7 +3043,7 @@ body.serienbrief-modus{
 }
 
 .brief-inhalt{
-    margin-top:110mm;
+    margin-top:120mm;
     white-space:pre-wrap;
     text-align:left;
 }
@@ -3140,7 +3140,7 @@ body.serienbrief-modus{
 ===================================================== */
 
 .brief-betreff{
-    margin-top:110mm;
+    margin-top:120mm;
     margin-bottom:8mm;
     font-weight:700;
     line-height:1.35;
@@ -3177,12 +3177,15 @@ body.serienbrief-modus{
     font-weight:500;
 }
 
-/* Absender-Block rechts oben im Brief (mehrzeilig, DIN 5008) */
+/* Absender-Block rechts oben im Brief (mehrzeilig, DIN 5008)
+   Position: auf gleicher Hoehe wie das Anschriftfeld (top:50mm)
+   und weit genug rechts, dass er ausserhalb des Kuvert-Sicht-
+   fensters landet. */
 .brief-absender-block{
     position:absolute;
-    top:25mm;
-    right:20mm;
-    width:75mm;
+    top:50mm;
+    right:15mm;
+    width:68mm;
     font-size:0.8em;   /* relativ zur Brief-Schriftgroesse */
     line-height:1.35;
     white-space:pre-wrap;
