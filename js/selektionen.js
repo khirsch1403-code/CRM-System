@@ -777,6 +777,7 @@ function selektionExportieren(){
 
     // Datenmatrix: Kopf + Zeilen (jeder Kunde × jeder Vertrag oder einmal)
     const kopf = [
+        "Anrede",
         "Vorname", "Nachname", "Alter", "Geburtsdatum",
         "Straße", "Hausnummer", "PLZ", "Ort",
         "Telefon", "E-Mail",
@@ -802,6 +803,7 @@ function selektionExportieren(){
             : "";
 
         const basisZeile = [
+            k.anrede || "",
             k.vorname || "",
             k.nachname || "",
             alter !== null ? alter : "",

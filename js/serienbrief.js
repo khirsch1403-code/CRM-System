@@ -22,7 +22,7 @@ const SB_LS_GETRENNT     = "crmSerienbriefGetrennt"; // Set von Adress-Keys
 const SB_SCHRIFTGROESSEN = [9, 10, 11, 12, 13, 14];
 const SB_DEFAULT_SCHRIFT = 11;
 
-const SB_DEFAULT_TEXT = "Hallo {anrede_kombiniert},\n\n"
+const SB_DEFAULT_TEXT = "{anrede_formal},\n\n"
     + "in unseren Unterlagen sind Ihre Kontaktdaten leider "
     + "nicht mehr aktuell.\n\n"
     + "Bitte melden Sie sich kurz bei mir, damit ich Sie "
@@ -129,8 +129,10 @@ function sbTextFuellen(vorlage, personen){
     const heute = new Date().toLocaleDateString("de-DE");
     const map = {
         "{anrede_kombiniert}": sbAnredeKombiniert(personen),
+        "{anrede_formal}":     sbAnredeFormal(personen),
         "{vorname}":  String(first.vorname||"").trim(),
         "{nachname}": String(first.nachname||"").trim(),
+        "{anrede}":   String(first.anrede||"").trim(),
         "{strasse}":  String(first.strasse||"").trim(),
         "{hausnummer}": String(first.hausnummer||"").trim(),
         "{plz}":      String(first.plz||"").trim(),
@@ -139,10 +141,105 @@ function sbTextFuellen(vorlage, personen){
     };
     let out = String(vorlage||"");
     Object.keys(map).forEach(k => {
-        // globales Ersetzen, ohne Regex-Falle
         out = out.split(k).join(map[k]);
     });
     return out;
+}
+
+/* =====================================================
+   FORMELLE ANREDE
+   -----------------------------------------------------
+   Einzeln  Frau:  "Sehr geehrte Frau Müller"
+   Einzeln  Herr:  "Sehr geehrter Herr Meier"
+   Divers/leer:    "Sehr geehrte/r <Vorname Nachname>" (Notloesung)
+   Haushalt Frau + Herr:
+      "Sehr geehrte Frau Müller, sehr geehrter Herr Müller"
+   Haushalt alle Frauen:
+      "Sehr geehrte Frau Müller und Frau Schmidt"
+   Haushalt alle Herren:
+      "Sehr geehrter Herr Müller und Herr Schmidt"
+   Wenn eine Anrede in der Gruppe fehlt:
+      "Sehr geehrte Damen und Herren"
+===================================================== */
+
+function sbAnredeFormal(personen){
+    if(personen.length === 0){ return "Sehr geehrte Damen und Herren"; }
+
+    // Wenn irgendwer keine Anrede hat: Sammelanrede
+    const alleHabenAnrede = personen.every(
+        p => p.anrede === "Frau" || p.anrede === "Herr"
+    );
+    if(!alleHabenAnrede){
+        return "Sehr geehrte Damen und Herren";
+    }
+
+    function personTeil(p){
+        const nn = String(p.nachname||"").trim();
+        if(p.anrede === "Frau"){ return "Frau " + nn; }
+        return "Herr " + nn;
+    }
+
+    // Einzelperson
+    if(personen.length === 1){
+        const p = personen[0];
+        const nn = String(p.nachname||"").trim();
+        if(p.anrede === "Frau"){ return "Sehr geehrte Frau " + nn; }
+        return "Sehr geehrter Herr " + nn;
+    }
+
+    // Haushalt: pruefe ob alle gleiches Geschlecht
+    const nurFrauen = personen.every(p => p.anrede === "Frau");
+    const nurHerren = personen.every(p => p.anrede === "Herr");
+
+    if(nurFrauen || nurHerren){
+        const nachnamenTeile = personen.map(p =>
+            (nurFrauen ? "Frau " : "Herr ") + String(p.nachname||"").trim()
+        );
+        const einleitung = nurFrauen ? "Sehr geehrte " : "Sehr geehrter ";
+        // "Frau Müller und Frau Schmidt"  oder
+        // "Frau Müller, Frau Schmidt und Frau Weber"
+        let liste;
+        if(nachnamenTeile.length === 2){
+            liste = nachnamenTeile.join(" und ");
+        }else{
+            liste = nachnamenTeile.slice(0, -1).join(", ") + " und " +
+                    nachnamenTeile[nachnamenTeile.length - 1];
+        }
+        return einleitung + liste;
+    }
+
+    // Gemischtes Geschlecht: "Sehr geehrte Frau X, sehr geehrter Herr Y"
+    const stuecke = personen.map(p => {
+        const nn = String(p.nachname||"").trim();
+        if(p.anrede === "Frau"){ return "Sehr geehrte Frau " + nn; }
+        return "sehr geehrter Herr " + nn;
+    });
+    // Erste Stueck mit Grossbuchstabe, folgende klein
+    stuecke[0] = stuecke[0].charAt(0).toUpperCase() + stuecke[0].slice(1);
+    for(let i = 1; i < stuecke.length; i++){
+        stuecke[i] = stuecke[i].charAt(0).toLowerCase() + stuecke[i].slice(1);
+    }
+    return stuecke.join(", ");
+}
+
+/* =====================================================
+   ABSENDER-ORT (fuer die Datumszeile)
+   -----------------------------------------------------
+   DIN 5008: Datumszeile = "<Absender-Ort>, DD.MM.YYYY".
+   Ableitung: erste Zeile im Absender-Feld, die mit einer
+   5-stelligen PLZ beginnt → Text nach der PLZ = Ort.
+===================================================== */
+
+function sbAbsenderOrt(absenderText){
+    const zeilen = String(absenderText||"")
+        .split("\n")
+        .map(z => z.trim())
+        .filter(z => z);
+    for(const z of zeilen){
+        const m = z.match(/^\d{5}\s+(.+)$/);
+        if(m){ return m[1].trim(); }
+    }
+    return "";
 }
 
 /* =====================================================
@@ -306,7 +403,7 @@ function serienbriefPanelRendern(){
             placeholder="z. B. Wichtige Mitteilung — bitte Kontaktdaten aktualisieren"
             value="${esc(betreff)}">
 
-        <label class="sb-feld-label">Brieftext (Platzhalter: <code>{anrede_kombiniert}</code>, <code>{vorname}</code>, <code>{nachname}</code>, <code>{ort}</code>, <code>{heute}</code>)</label>
+        <label class="sb-feld-label">Brieftext (Platzhalter: <code>{anrede_formal}</code>, <code>{anrede_kombiniert}</code>, <code>{vorname}</code>, <code>{nachname}</code>, <code>{ort}</code>, <code>{heute}</code>)</label>
         <textarea id="sbBrieftext" class="crm-textarea sb-brieftext"
             oninput="sbFeldGespeichert('${SB_LS_TEXT}', this.value)"
             placeholder="Hallo {anrede_kombiniert},&#10;&#10;dein Brieftext …">${esc(text)}</textarea>
@@ -372,6 +469,7 @@ function serienbriefErstellen(){
     const schriftPt = (SB_SCHRIFTGROESSEN.indexOf(schrift) !== -1)
         ? schrift : SB_DEFAULT_SCHRIFT;
     const rueckSender = sbRuecksenderZeile(absender);
+    const absenderOrt = sbAbsenderOrt(absender);
 
     const treffer = (typeof selektionAnwenden === "function")
         ? selektionAnwenden()
@@ -406,14 +504,29 @@ function serienbriefErstellen(){
 
     const briefeHtml = sendungen.map(s => {
         const p = s.personen[0];
+
+        // Anschriftzeilen mit "Frau"/"Herr" pro Person (DIN 5008).
+        // Wenn keine Anrede: nur Vorname + Nachname.
+        const personenZeilen = s.personen.map(pp => {
+            const name = `${esc(pp.vorname||"")} ${esc(pp.nachname||"")}`.trim();
+            if(pp.anrede === "Frau" || pp.anrede === "Herr"){
+                return esc(pp.anrede) + " " + name;
+            }
+            return name;
+        });
         const anschriftZeilen = [
-            ...s.personen.map(pp => `${esc(pp.vorname||"")} ${esc(pp.nachname||"")}`.trim()),
+            ...personenZeilen,
             `${esc(p.strasse||"")} ${esc(p.hausnummer||"")}`.trim(),
             `${esc(p.plz||"")} ${esc(p.ort||"")}`.trim()
         ];
 
         const gefuellterText    = sbTextFuellen(text, s.personen);
         const gefuellterBetreff = sbTextFuellen(betreff, s.personen);
+
+        // DIN-5008-Datumszeile: Absender-Ort statt Empfaenger-Ort
+        const datumZeile = absenderOrt
+            ? esc(absenderOrt) + ", " + heute
+            : heute;
 
         return `<div class="brief-seite" style="font-size:${schriftPt}pt;">
             <div class="brief-falzmarke brief-falzmarke-oben"></div>
@@ -431,9 +544,7 @@ function serienbriefErstellen(){
                 ${anschriftZeilen.map(z => `<div>${z}</div>`).join("")}
             </div>
 
-            <div class="brief-datum">
-                ${esc(p.ort || "")}, ${heute}
-            </div>
+            <div class="brief-datum">${datumZeile}</div>
 
             ${gefuellterBetreff.trim()
                 ? `<div class="brief-betreff">${esc(gefuellterBetreff)}</div>`

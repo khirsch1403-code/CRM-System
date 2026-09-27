@@ -997,6 +997,12 @@ input.crm-input{
     gap:8px;
 }
 
+.kd-grid-anrede{
+    display:grid;
+    grid-template-columns:90px 1fr 1fr;
+    gap:8px;
+}
+
 .kd-grid-adresse{
     display:grid;
     grid-template-columns:1fr 90px;

@@ -6,6 +6,7 @@ function kundeAnlegen(){
 
         partyIds: [],
         letzterImport: "",
+        anrede:"",
         vorname:"",
         nachname:"",
         geburtsdatum:"",
@@ -280,7 +281,13 @@ function kundeOeffnen(id){
 
     <div class="kd-stamm">
 
-        <div class="kd-grid-2">
+        <div class="kd-grid-anrede">
+            <select class="crm-input" id="editAnrede" onchange="kundeSpeichern()" title="Anrede">
+                <option value=""       ${!k.anrede ? "selected" : ""}>–</option>
+                <option value="Frau"   ${k.anrede === "Frau" ? "selected" : ""}>Frau</option>
+                <option value="Herr"   ${k.anrede === "Herr" ? "selected" : ""}>Herr</option>
+                <option value="Divers" ${k.anrede === "Divers" ? "selected" : ""}>Divers</option>
+            </select>
             <input class="crm-input" id="editVorname" placeholder="Vorname" onblur="kundeSpeichern()" value="${esc(k.vorname)}">
             <input class="crm-input" id="editNachname" placeholder="Nachname" onblur="kundeSpeichern()" value="${esc(k.nachname)}">
         </div>
@@ -486,6 +493,11 @@ function kundeSpeichern(){
     if(!aktuellerKunde){ return; }
 
     // Daten leise aktualisieren — kein Panel-Rebuild
+    const anredeEl = document.getElementById("editAnrede");
+    if(anredeEl){
+        aktuellerKunde.anrede = anredeEl.value;
+    }
+
     aktuellerKunde.vorname =
         document.getElementById("editVorname").value.trim();
 

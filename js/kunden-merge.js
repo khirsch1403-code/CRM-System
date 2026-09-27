@@ -141,6 +141,11 @@ function mergeKunden(sieger, verlierer){
         sieger.notiz = (sieger.notiz || "") + trenner + verlierer.notiz;
     }
 
+    // Anrede: Sieger-Wert behalten, sonst vom Verlierer uebernehmen
+    if(!sieger.anrede && verlierer.anrede){
+        sieger.anrede = verlierer.anrede;
+    }
+
     // Kennzeichen: OR-Verknüpfung (Marker gehen nicht verloren)
     sieger.kennzeichen = sieger.kennzeichen || {};
     const v_kz = verlierer.kennzeichen || {};

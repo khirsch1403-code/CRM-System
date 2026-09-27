@@ -2,6 +2,23 @@
    LETZTER SYNC ANZEIGE
 ===================================================== */
 
+/* Anrede-Normalisierung fuer den Excel-Import.
+   Akzeptiert Varianten wie "Frau", "Herr", "f"/"m"/"w"/"d". */
+function _anredeNormalisieren(wert){
+    if(wert === null || wert === undefined){ return ""; }
+    const s = String(wert).trim().toLowerCase();
+    if(!s){ return ""; }
+    if(s === "frau" || s === "f" || s === "w" || s === "weiblich"){
+        return "Frau";
+    }
+    if(s === "herr" || s === "hr" || s === "m" || s === "maennlich"
+       || s === "männlich"){
+        return "Herr";
+    }
+    if(s === "divers" || s === "d"){ return "Divers"; }
+    return "";
+}
+
 function letzterSyncAnzeigeAktualisieren(){
     const el = document.getElementById("letzterSyncAnzeige");
     if(!el){ return; }
@@ -475,6 +492,8 @@ if(!kunde){
                         "de-DE"
                     ),
 
+                    anrede: _anredeNormalisieren(zeile["Anrede"]),
+
                     vorname:
                     String(
                         zeile["Vorname"] || ""
@@ -578,6 +597,15 @@ if(
                 zeile["Vorname"] ||
                 kunde.vorname
             ).trim();
+
+            // Anrede: nur setzen wenn in der Zeile vorhanden — sonst
+            // bestehenden Wert (evtl. manuell gepflegt) nicht ueberschreiben.
+            const importAnrede = _anredeNormalisieren(zeile["Anrede"]);
+            if(importAnrede){
+                kunde.anrede = importAnrede;
+            }else if(typeof kunde.anrede !== "string"){
+                kunde.anrede = "";
+            }
 
             kunde.nachname =
             String(
@@ -1039,6 +1067,10 @@ function datenPruefen(){
             // Neues Feld "wichtigbrief" bei Alt-Kunden nach-initialisieren
             if(typeof kunde.kennzeichen.wichtigbrief !== "boolean"){
                 kunde.kennzeichen.wichtigbrief = false;
+            }
+
+            if(typeof kunde.anrede !== "string"){
+                kunde.anrede = "";
             }
 
             if(!kunde.notiz){
