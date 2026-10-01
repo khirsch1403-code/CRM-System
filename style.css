@@ -3191,3 +3191,128 @@ body.serienbrief-modus{
     white-space:pre-wrap;
     color:#000;
 }
+
+/* =====================================================
+   SELEKTIONS-RUECKIMPORT — Panel im Selektionen-Tab
+===================================================== */
+
+.selektion-rueckimport-klapp{
+    margin-top:14px;
+}
+
+.sr-hinweis{
+    padding:8px 10px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:12px;
+    color:var(--c-text-schwach);
+    margin-bottom:12px;
+    line-height:1.4;
+}
+
+.sr-feld-label{
+    display:block;
+    font-size:12px;
+    font-weight:500;
+    color:var(--c-text-schwach);
+    margin:10px 0 4px 0;
+}
+
+.sr-datei-input{
+    padding:5px;
+}
+
+.sr-zwei-spalten{
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:12px;
+    margin-top:6px;
+}
+
+.sr-haushalt-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 10px;
+    margin-top:12px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:13px;
+    cursor:pointer;
+}
+
+#srVorschau{
+    margin-top:14px;
+}
+
+.sr-vorschau-zeile{
+    padding:8px 10px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.sr-vorschau-titelzeile{
+    padding:6px 10px;
+    margin-top:6px;
+    font-size:13px;
+    color:var(--c-text-schwach);
+}
+
+.sr-warn{
+    color:#8a5a00;
+    font-weight:500;
+    background:#fff4dc;
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:12px;
+}
+
+.sr-haushalt-hinweis{
+    color:var(--c-primary-dunkel, #4d1220);
+    font-style:italic;
+    font-size:12px;
+}
+
+.sr-details{
+    margin-top:8px;
+    background:#faf7f8;
+    border:1px solid #eadde0;
+    border-radius:5px;
+    padding:6px 10px;
+    font-size:12px;
+}
+
+.sr-details summary{
+    cursor:pointer;
+    font-weight:500;
+    color:var(--c-text, #333);
+}
+
+.sr-nicht-liste{
+    margin-top:8px;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.sr-nicht-eintrag{
+    padding:4px 8px;
+    margin:3px 0;
+    background:#fff5f5;
+    border-left:3px solid #c8102e;
+    border-radius:3px;
+    font-size:11px;
+    color:#5a0f1a;
+}
+
+.sr-aktionen{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}

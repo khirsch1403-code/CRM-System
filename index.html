@@ -756,6 +756,53 @@
 
     </details>
 
+    <details class="klapp-panel klapp-panel-gross selektion-rueckimport-klapp"
+             ontoggle="if(this.open) sr_panelInitialisieren()">
+
+        <summary>📥 Selektion rückimportieren — Info-Termin erzeugen</summary>
+
+        <div class="klapp-inhalt">
+            <div class="sr-hinweis">
+                Lade hier eine zuvor exportierte Selektion wieder hoch.
+                Alle zuordenbaren Kunden erhalten einen Info-Termin —
+                Titel ist der Dateiname.
+            </div>
+
+            <label class="sr-feld-label">Excel-Datei (.xlsx)</label>
+            <input type="file"
+                id="srDateiInput"
+                accept=".xlsx,.xls"
+                class="crm-input sr-datei-input"
+                onchange="sr_dateiAusgewaehlt(this)">
+
+            <div class="sr-zwei-spalten">
+                <div>
+                    <label class="sr-feld-label">Datum des Info-Termins</label>
+                    <input type="date"
+                        id="srDatum"
+                        class="crm-input">
+                </div>
+                <div>
+                    <label class="sr-feld-label">Zusammenfassung (optional)</label>
+                    <input type="text"
+                        id="srZusammenfassung"
+                        class="crm-input"
+                        placeholder="z. B. Kampagne versandt, Mailing XY, …">
+                </div>
+            </div>
+
+            <label class="sr-haushalt-label">
+                <input type="checkbox"
+                    id="srHaushalt"
+                    onchange="sr_haushaltUmgeschaltet()">
+                Auch Haushaltsmitglieder (gleiche Adresse) erhalten den Termin
+            </label>
+
+            <div id="srVorschau"></div>
+        </div>
+
+    </details>
+
 </div>
 
 <!-- =====================================================
@@ -1156,6 +1203,7 @@
 <script src="js/sync-backup.js"></script>
 <script src="js/auto-backup.js"></script>
 <script src="js/serienbrief.js"></script>
+<script src="js/selektions-rueckimport.js"></script>
 
 <!-- =====================================================
      SERIENBRIEF-DRUCKVORSCHAU (Vollbild)
