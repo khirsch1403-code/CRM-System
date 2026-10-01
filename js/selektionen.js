@@ -805,7 +805,7 @@ function selektionExportieren(){
 
         const basisZeile = [
             k.anrede || "",
-            (k.partyIds || []).join(" | "),
+            (k.partyIds && k.partyIds[0]) || "",
             k.vorname || "",
             k.nachname || "",
             alter !== null ? alter : "",
