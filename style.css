@@ -2981,18 +2981,26 @@ body.serienbrief-modus{
     border-left:3px solid #d9822b;
 }
 
+/* =====================================================
+   SERIENBRIEF — Brief-Seite (Flow-Layout, 1:1 Vorlage)
+   Keine absolute Positionierung mehr. Kopf ist eine
+   2-Spalten-Tabelle (Anschrift links, Absender rechts),
+   darunter fließen Datum, Betreff, Inhalt, Signatur und
+   ggf. der Rückantwort-Teil direkt im Text.
+===================================================== */
+
 .brief-seite{
     background:#fff;
     width:210mm;
     min-height:297mm;
     box-sizing:border-box;
     margin:0 auto 20px auto;
-    padding:25mm 20mm 20mm 25mm;
+    /* Vorlagen-Ränder: 45mm top, 20mm right, 15mm bottom, 25mm left */
+    padding:45mm 20mm 15mm 25mm;
     box-shadow:0 2px 8px rgba(0,0,0,0.2);
-    position:relative;
     font-family:"Helvetica","Arial",sans-serif;
     font-size:11pt;
-    line-height:1.5;
+    line-height:1.4;
     color:#000;
     page-break-after:always;
 }
@@ -3001,58 +3009,141 @@ body.serienbrief-modus{
     page-break-after:auto;
 }
 
-.brief-falzmarke{
-    position:absolute;
-    left:6mm;
-    width:6mm;
-    height:0;
-    border-top:1px solid #333;
+/* Kopf: 2-Spalten-Tabelle (Anschrift / Absender) */
+.brief-kopf{
+    display:grid;
+    grid-template-columns:85mm 1fr;
+    gap:8mm;
+    margin-bottom:12mm;
+    min-height:50mm;
 }
 
-.brief-falzmarke-oben{ top:105mm; }
-.brief-falzmarke-unten{ top:210mm; }
+.brief-kopf-links{
+    display:flex;
+    flex-direction:column;
+}
 
-.brief-absender-klein{
-    position:absolute;
-    top:45mm;
-    left:25mm;
-    font-size:7pt;
+.brief-ruecksender{
+    font-size:0.65em;
     color:#555;
     text-decoration:underline;
     padding-bottom:2mm;
-    max-width:80mm;
+    margin-bottom:4mm;
     line-height:1.2;
 }
 
 .brief-anschrift{
-    position:absolute;
-    top:50mm;
-    left:25mm;
-    max-width:85mm;
-    font-size:11pt;
+    font-size:1em;
     line-height:1.35;
+}
+
+.brief-kopf-rechts{
+    font-size:0.8em;
+    line-height:1.35;
+    color:#000;
+}
+
+.brief-absender-block{
+    white-space:pre-wrap;
 }
 
 .brief-datum{
-    position:absolute;
-    top:105mm;
-    right:20mm;
-    font-size:10pt;
-    color:#333;
     text-align:right;
+    font-size:0.9em;
+    color:#333;
+    margin-bottom:6mm;
+}
+
+.brief-betreff{
+    font-weight:700;
+    line-height:1.3;
+    margin-bottom:6mm;
 }
 
 .brief-inhalt{
-    margin-top:120mm;
     white-space:pre-wrap;
     text-align:left;
+    margin-bottom:6mm;
+}
+
+.brief-inhalt strong{
+    font-weight:700;
 }
 
 .brief-signatur{
-    margin-top:20mm;
-    white-space:pre-wrap;
-    font-size:11pt;
+    margin-top:6mm;
     line-height:1.35;
+    margin-bottom:8mm;
+}
+
+.brief-signatur strong{
+    font-weight:700;
+}
+
+.brief-sig-leer{
+    height:0.9em;
+}
+
+/* =====================================================
+   SERIENBRIEF — RUECKANTWORT (direkt im Textfluss)
+===================================================== */
+
+.brief-schere{
+    font-size:0.75em;
+    letter-spacing:0.5mm;
+    color:#555;
+    margin:4mm 0 3mm 0;
+    overflow:hidden;
+    white-space:nowrap;
+}
+
+.brief-rueck-titel{
+    font-size:1em;
+    margin-bottom:4mm;
+}
+
+.brief-rueck-tabelle{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8mm;
+    margin-bottom:4mm;
+}
+
+.brief-rueck-adresse{
+    font-size:0.9em;
+    line-height:1.4;
+}
+
+.brief-rueck-adresse-label{
+    color:#555;
+    margin-bottom:2mm;
+    font-size:0.85em;
+}
+
+.brief-rueck-felder{
+    display:flex;
+    flex-direction:column;
+    gap:4mm;
+}
+
+.brief-rueck-feld-label{
+    font-size:0.85em;
+    margin-bottom:1mm;
+}
+
+.brief-rueck-linie{
+    border-bottom:1px solid #000;
+    height:6mm;
+}
+
+.brief-datenschutz{
+    margin-top:4mm;
+    padding-top:2mm;
+    border-top:1px solid #ccc;
+    font-size:0.7em;
+    color:#555;
+    line-height:1.3;
+    font-style:italic;
 }
 
 /* =====================================================
@@ -3088,17 +3179,8 @@ body.serienbrief-modus{
     .brief-seite:last-child{
         page-break-after:auto;
     }
-    .brief-rueckantwort{
-        margin:0 !important;
-        box-shadow:none !important;
-        width:auto !important;
-        min-height:0 !important;
-        page-break-before:always;
-        page-break-after:always;
-    }
-    .brief-rueckantwort:last-child{
-        page-break-after:auto;
-    }
+    /* Rueckantwort ist jetzt im Textfluss der .brief-seite —
+       keine separaten Print-Regeln noetig */
     @page{
         size:A4;
         margin:0;
@@ -3147,14 +3229,13 @@ body.serienbrief-modus{
 }
 
 /* =====================================================
-   SERIENBRIEF — Betreff-Zeile im gedruckten Brief
+   LEGACY — alte Serienbrief-Regeln ohne Wirkung
+   Werden durch das neue Flow-Layout oben ersetzt.
 ===================================================== */
 
-.brief-betreff{
+/* Alte Betreff-Position (absolute Layout) — abgeloest */
+.brief-betreff-legacy-margin{
     margin-top:120mm;
-    margin-bottom:8mm;
-    font-weight:700;
-    line-height:1.35;
 }
 
 /* Wenn Betreff da ist, ruecht der Inhalt darunter zusammen
@@ -3192,12 +3273,18 @@ body.serienbrief-modus{
    Position: auf gleicher Hoehe wie das Anschriftfeld (top:50mm)
    und weit genug rechts, dass er ausserhalb des Kuvert-Sicht-
    fensters landet. */
-.brief-absender-block{
+/* =====================================================
+   LEGACY — alter absolut-positionierter Absender-Block
+   Wird durch .brief-kopf-rechts > .brief-absender-block
+   im Flow-Layout ersetzt.
+===================================================== */
+
+.brief-absender-block-legacy{
     position:absolute;
     top:50mm;
     right:15mm;
     width:68mm;
-    font-size:0.8em;   /* relativ zur Brief-Schriftgroesse */
+    font-size:0.8em;
     line-height:1.35;
     white-space:pre-wrap;
     color:#000;
@@ -3418,71 +3505,7 @@ body.serienbrief-modus{
    SERIENBRIEF v2 — RUECKANTWORT auf eigener Seite
 ===================================================== */
 
-.brief-rueckantwort{
-    background:#fff;
-    width:210mm;
-    min-height:297mm;
-    box-sizing:border-box;
-    margin:0 auto 20px auto;
-    padding:25mm 20mm 20mm 25mm;
-    box-shadow:0 2px 8px rgba(0,0,0,0.2);
-    position:relative;
-    font-family:"Helvetica","Arial",sans-serif;
-    line-height:1.5;
-    color:#000;
-    page-break-after:always;
-    page-break-before:always;
-}
-
-.brief-rueckantwort:last-child{
-    page-break-after:auto;
-}
-
-.ra-schere{
-    font-size:10pt;
-    letter-spacing:0.5mm;
-    margin-bottom:10mm;
-    color:#555;
-}
-
-.ra-titel{
-    font-size:1.15em;
-    font-weight:700;
-    margin:0 0 8mm 0;
-}
-
-.ra-adresse{
-    margin-bottom:10mm;
-    line-height:1.4;
-}
-
-.ra-adresse-label{
-    font-size:0.85em;
-    color:#555;
-    margin-bottom:2mm;
-}
-
-.ra-feld{
-    margin-bottom:8mm;
-}
-
-.ra-feld-label{
-    font-size:0.9em;
-    margin-bottom:3mm;
-}
-
-.ra-feld-linie{
-    border-bottom:1px solid #000;
-    height:8mm;
-    width:100%;
-}
-
-.ra-datenschutz{
-    margin-top:12mm;
-    padding-top:4mm;
-    border-top:1px solid #ccc;
-    font-size:0.75em;
-    color:#555;
-    line-height:1.4;
-    font-style:italic;
+/* Legacy — alte Rueckantwort als eigene Seite (jetzt im Textfluss) */
+.brief-rueckantwort-legacy{
+    display:none;
 }

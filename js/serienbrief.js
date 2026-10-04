@@ -47,7 +47,9 @@ const SB_DEFAULT_BETREFF =
     "Wichtige Unterlagen zu Ihrem Vertrag – bitte kurz bei uns melden";
 
 const SB_DEFAULT_TEXT =
-    "Sie sind uns als {kundenwort} wichtig – und genau deshalb "
+    "{anrede_formal},"
+  + "\n\n"
+  + "Sie sind uns als {kundenwort} wichtig – und genau deshalb "
   + "möchten wir Sie persönlich erreichen. In den vergangenen Wochen "
   + "haben wir mehrfach versucht, Sie telefonisch und per E-Mail zu "
   + "kontaktieren. Leider ist uns das bislang nicht gelungen; "
@@ -59,11 +61,11 @@ const SB_DEFAULT_TEXT =
   + "diese kurz gemeinsam mit Ihnen klären – unkompliziert, in wenigen "
   + "Minuten und selbstverständlich kostenfrei."
   + "\n\n"
-  + "Bitte geben Sie uns bis zum {frist} eine kurze Rückmeldung. "
+  + "**Bitte geben Sie uns bis zum {frist} eine kurze Rückmeldung. "
   + "Am schnellsten erreichen Sie uns telefonisch oder per WhatsApp "
   + "unter {tel} oder per E-Mail unter {email}. Alternativ nutzen Sie "
   + "einfach den vorbereiteten Antwortabschnitt unten – er ist in "
-  + "weniger als einer Minute ausgefüllt."
+  + "weniger als einer Minute ausgefüllt.**"
   + "\n\n"
   + "Ihre Zufriedenheit und die Sicherheit Ihrer Vorsorge liegen uns "
   + "am Herzen. Wir freuen uns, bald von Ihnen zu hören.";
@@ -316,6 +318,19 @@ function sbSignaturText(fd){
         .filter(Boolean).join(" · ");
     if(funkFirma) zeilen.push(funkFirma);
     return zeilen.join("\n");
+}
+
+/* =====================================================
+   MARKDOWN-FETT  (**text** → <strong>text</strong>)
+   -----------------------------------------------------
+   Reihenfolge: erst Platzhalter einsetzen, dann HTML
+   escapen, dann hier **…** in <strong>…</strong> wandeln.
+===================================================== */
+
+function sbMarkdownFett(escapedText){
+    return String(escapedText||"").replace(
+        /\*\*([^*]+)\*\*/g, '<strong>$1</strong>'
+    );
 }
 
 function sbFirmenDatenVollstaendig(fd){
@@ -684,8 +699,11 @@ function _serienbriefErstellenImpl(){
 
     const heute = new Date().toLocaleDateString("de-DE");
 
-    // Rueckantwort-HTML (statisch, wird nur eingesetzt wenn aktiv)
-    function rueckantwortSeite(){
+    // Rueckantwort-HTML (direkt im Textfluss, keine neue Seite,
+    // genau wie in der Word-Vorlage: Schere → fetter Titel →
+    // 2-Spalten (Rueckadresse links, Antwortfelder rechts) →
+    // Datenschutz-Hinweis.
+    function rueckantwortBlock(){
         if(!fd.rueckantwortAktiv){ return ""; }
         const adrZeilen = [];
         if(fd.firma.name)       adrZeilen.push(fd.firma.name);
@@ -693,33 +711,37 @@ function _serienbriefErstellenImpl(){
         if(fd.firma.strasse)    adrZeilen.push(fd.firma.strasse);
         if(fd.firma.plzOrt)     adrZeilen.push(fd.firma.plzOrt);
         return `
-          <div class="brief-rueckantwort" style="font-size:${schriftPt}pt;">
-            <div class="ra-schere">✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</div>
-            <h3 class="ra-titel">Ihre Rückmeldung – bitte ausfüllen und zurücksenden</h3>
-            <div class="ra-adresse">
-                <div class="ra-adresse-label">Bitte zurücksenden an:</div>
+          <div class="brief-schere">
+            ✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          </div>
+          <div class="brief-rueck-titel"><strong>Ihre Rückmeldung – bitte ausfüllen und zurücksenden</strong></div>
+          <div class="brief-rueck-tabelle">
+            <div class="brief-rueck-adresse">
+                <div class="brief-rueck-adresse-label">Bitte zurücksenden an:</div>
                 ${adrZeilen.map(z => `<div>${esc(z)}</div>`).join("")}
             </div>
-            <div class="ra-feld">
-                <div class="ra-feld-label">Meine Telefon-/WhatsApp-Nr.:</div>
-                <div class="ra-feld-linie"></div>
+            <div class="brief-rueck-felder">
+                <div class="brief-rueck-feld">
+                    <div class="brief-rueck-feld-label">Meine Telefon-/WhatsApp-Nr.:</div>
+                    <div class="brief-rueck-linie"></div>
+                </div>
+                <div class="brief-rueck-feld">
+                    <div class="brief-rueck-feld-label">Meine E-Mail:</div>
+                    <div class="brief-rueck-linie"></div>
+                </div>
+                <div class="brief-rueck-feld">
+                    <div class="brief-rueck-feld-label">Erreichbar / Terminwunsch:</div>
+                    <div class="brief-rueck-linie"></div>
+                </div>
+                <div class="brief-rueck-feld">
+                    <div class="brief-rueck-feld-label">Name, Datum, Unterschrift:</div>
+                    <div class="brief-rueck-linie"></div>
+                </div>
             </div>
-            <div class="ra-feld">
-                <div class="ra-feld-label">Meine E-Mail:</div>
-                <div class="ra-feld-linie"></div>
-            </div>
-            <div class="ra-feld">
-                <div class="ra-feld-label">Erreichbar / Terminwunsch:</div>
-                <div class="ra-feld-linie"></div>
-            </div>
-            <div class="ra-feld">
-                <div class="ra-feld-label">Name, Datum, Unterschrift:</div>
-                <div class="ra-feld-linie"></div>
-            </div>
-            <div class="ra-datenschutz">
-                Hinweis: Ihre Daten werden ausschließlich zur Bearbeitung
-                Ihres Anliegens verwendet und nicht an Dritte weitergegeben.
-            </div>
+          </div>
+          <div class="brief-datenschutz">
+            Hinweis: Ihre Daten werden ausschließlich zur Bearbeitung
+            Ihres Anliegens verwendet und nicht an Dritte weitergegeben.
           </div>`;
     }
 
@@ -740,41 +762,63 @@ function _serienbriefErstellenImpl(){
             `${esc(p.plz||"")} ${esc(p.ort||"")}`.trim()
         ];
 
-        const gefuellterText    = sbTextFuellen(text, s.personen, fd);
-        const gefuellterBetreff = sbTextFuellen(betreff, s.personen, fd);
+        // Platzhalter einsetzen, dann escapen, dann Markdown-Fett rendern
+        const gefuellterText    = sbMarkdownFett(
+            esc(sbTextFuellen(text, s.personen, fd))
+        );
+        const gefuellterBetreff = esc(sbTextFuellen(betreff, s.personen, fd));
 
         const datumZeile = absenderOrt
             ? esc(absenderOrt) + ", " + heute
             : heute;
 
-        const briefSeite = `<div class="brief-seite" style="font-size:${schriftPt}pt;">
-            <div class="brief-falzmarke brief-falzmarke-oben"></div>
-            <div class="brief-falzmarke brief-falzmarke-unten"></div>
+        // Signatur mit erster Zeile (Name) fett
+        const sigZeilen = signaturBlock.split("\n");
+        const sigHtml = sigZeilen.map((z, i) => {
+            if(z === ""){ return "<div class='brief-sig-leer'></div>"; }
+            // "Mit freundlichen Grüßen" nicht fett, Name fett (2. nicht-leere Zeile)
+            // Index 2 ist typischerweise der Name
+            if(i === 2){ return `<div><strong>${esc(z)}</strong></div>`; }
+            return `<div>${esc(z)}</div>`;
+        }).join("");
 
-            ${absenderBlock
-                ? `<div class="brief-absender-block">${esc(absenderBlock)}</div>`
-                : ""}
+        return `<div class="brief-seite" style="font-size:${schriftPt}pt;">
 
-            ${rueckSender
-                ? `<div class="brief-absender-klein">${esc(rueckSender)}</div>`
-                : ""}
-
-            <div class="brief-anschrift">
-                ${anschriftZeilen.map(z => `<div>${z}</div>`).join("")}
+            <!-- KOPF: 2-Spalten-Tabelle (links Anschrift, rechts Absender) -->
+            <div class="brief-kopf">
+                <div class="brief-kopf-links">
+                    ${rueckSender
+                        ? `<div class="brief-ruecksender">${esc(rueckSender)}</div>`
+                        : ""}
+                    <div class="brief-anschrift">
+                        ${anschriftZeilen.map(z => `<div>${z}</div>`).join("")}
+                    </div>
+                </div>
+                <div class="brief-kopf-rechts">
+                    ${absenderBlock
+                        ? `<div class="brief-absender-block">${esc(absenderBlock)}</div>`
+                        : ""}
+                </div>
             </div>
 
+            <!-- Datum rechtsbündig -->
             <div class="brief-datum">${datumZeile}</div>
 
+            <!-- Betreff (fett, kein Wort "Betreff:" davor) -->
             ${gefuellterBetreff.trim()
-                ? `<div class="brief-betreff">${esc(gefuellterBetreff)}</div>`
+                ? `<div class="brief-betreff">${gefuellterBetreff}</div>`
                 : ""}
 
-            <div class="brief-inhalt">${esc(gefuellterText)}</div>
+            <!-- Anrede ist Teil des Brieftexts (steht als erste Zeile drin
+                 — vom User frei formulierbar, Default ist {anrede_formal},) -->
+            <div class="brief-inhalt">${gefuellterText}</div>
 
-            <div class="brief-signatur">${esc(signaturBlock)}</div>
+            <!-- Grußformel + Signatur -->
+            <div class="brief-signatur">${sigHtml}</div>
+
+            ${rueckantwortBlock()}
+
         </div>`;
-
-        return briefSeite + rueckantwortSeite();
     }).join("");
 
     ansicht.innerHTML = `
