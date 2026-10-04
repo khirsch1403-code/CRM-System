@@ -870,17 +870,48 @@ function serienbriefPostAktion(){
 }
 
 function serienbriefPostBestaetigen(){
+    try{
+        _serienbriefPostBestaetigenImpl();
+    }catch(e){
+        if(typeof fehlerMelden === "function"){
+            fehlerMelden("Serienbrief",
+                "Post-Aktion fehlgeschlagen: " + (e && e.message || e), e);
+        }
+        alert("Beim Übernehmen ist ein Fehler aufgetreten. "
+            + "Details im Fehler-Log (rotes Ausrufezeichen oben links).");
+    }
+}
+
+function _serienbriefPostBestaetigenImpl(){
     const sendungen = window.__sbSendungen;
-    if(!sendungen){ serienbriefPostModalSchliessen(); return; }
-    const macheTermin = document.getElementById("sbPostTermin").checked;
-    const macheMarker = document.getElementById("sbPostMarker").checked;
+    if(!sendungen || sendungen.length === 0){
+        serienbriefPostModalSchliessen();
+        alert("Keine Sendungsdaten mehr vorhanden. "
+            + "Bitte den Serienbrief neu erstellen.");
+        return;
+    }
+
+    const terminChk = document.getElementById("sbPostTermin");
+    const markerChk = document.getElementById("sbPostMarker");
+    const macheTermin = terminChk ? terminChk.checked : false;
+    const macheMarker = markerChk ? markerChk.checked : false;
+
     const heute = new Date().toISOString().split("T")[0];
+
     let terminCount = 0;
     let markerCount = 0;
+    const gesehen = new Set();   // Dedup: jede Person max. 1x
+
     sendungen.forEach(s => {
         s.personen.forEach(p => {
-            const k = findeKunde(p.id);
+            if(!p || p.id == null){ return; }
+            if(gesehen.has(p.id)){ return; }
+            gesehen.add(p.id);
+
+            const k = (typeof findeKunde === "function")
+                ? findeKunde(p.id) : null;
             if(!k){ return; }
+
             if(macheTermin){
                 if(!Array.isArray(k.termine)){ k.termine = []; }
                 k.termine.push({
@@ -895,8 +926,10 @@ function serienbriefPostBestaetigen(){
                 });
                 terminCount++;
             }
+
             if(macheMarker){
-                if(!k.kennzeichen || typeof k.kennzeichen !== "object"){
+                if(!k.kennzeichen || typeof k.kennzeichen !== "object"
+                   || Array.isArray(k.kennzeichen)){
                     k.kennzeichen = {};
                 }
                 if(k.kennzeichen.wichtigbrief){
@@ -906,17 +939,27 @@ function serienbriefPostBestaetigen(){
             }
         });
     });
+
+    // Erst speichern, dann UI aufraeumen — Reihenfolge wichtig
     if(typeof triggerAutoSave === "function"){ triggerAutoSave(); }
-    if(typeof renderKunden === "function"){ renderKunden(); }
-    if(typeof kontaktListenAktualisieren === "function"){
-        kontaktListenAktualisieren();
-    }
+    try{
+        if(typeof renderKunden === "function"){ renderKunden(); }
+    }catch(_){}
+    try{
+        if(typeof kontaktListenAktualisieren === "function"){
+            kontaktListenAktualisieren();
+        }
+    }catch(_){}
+
     serienbriefPostModalSchliessen();
     serienbriefSchliessen();
     serienbriefPanelRendern();
-    alert("Fertig. " +
-          (macheTermin ? terminCount + " Info-Termine angelegt. " : "") +
-          (macheMarker ? markerCount + " WB-Marker entfernt." : ""));
+
+    alert("Fertig.\n" +
+          (macheTermin ? "• " + terminCount + " Info-Termin"
+                        + (terminCount === 1 ? "" : "e") + " angelegt\n" : "") +
+          (macheMarker ? "• " + markerCount + " WB-Marker entfernt"
+                        : ""));
 }
 
 function serienbriefPostAbbrechen(){
