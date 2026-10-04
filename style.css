@@ -2983,25 +2983,27 @@ body.serienbrief-modus{
 
 /* =====================================================
    SERIENBRIEF — Brief-Seite (Flow-Layout, 1:1 Vorlage)
-   Keine absolute Positionierung mehr. Kopf ist eine
-   2-Spalten-Tabelle (Anschrift links, Absender rechts),
-   darunter fließen Datum, Betreff, Inhalt, Signatur und
-   ggf. der Rückantwort-Teil direkt im Text.
+   Dichter gepackt, damit Hauptbrief + Rueckantwort auf
+   EINER A4-Seite Platz haben.
+   Dezente Falzmarken links (105mm / 210mm) via Pseudo-
+   Elementen.
 ===================================================== */
 
 .brief-seite{
     background:#fff;
     width:210mm;
     min-height:297mm;
+    max-height:297mm;
     box-sizing:border-box;
     margin:0 auto 20px auto;
-    /* Vorlagen-Ränder: 45mm top, 20mm right, 15mm bottom, 25mm left */
-    padding:45mm 20mm 15mm 25mm;
+    /* Kompaktere Raender als DIN-Standard, damit alles passt */
+    padding:35mm 18mm 10mm 25mm;
     box-shadow:0 2px 8px rgba(0,0,0,0.2);
     font-family:"Helvetica","Arial",sans-serif;
     font-size:11pt;
-    line-height:1.4;
+    line-height:1.3;
     color:#000;
+    position:relative;
     page-break-after:always;
 }
 
@@ -3009,12 +3011,28 @@ body.serienbrief-modus{
     page-break-after:auto;
 }
 
-/* Kopf: 2-Spalten-Tabelle (Anschrift / Absender) */
+/* Dezente Falzmarken bei 105mm und 210mm vom Papier-Oberrand */
+.brief-seite::before,
+.brief-seite::after{
+    content:"";
+    position:absolute;
+    left:4mm;
+    width:4mm;
+    height:0;
+    border-top:0.3mm solid #bbb;
+}
+.brief-seite::before{ top:105mm; }
+.brief-seite::after{  top:210mm; }
+
+/* Kopf: 2-Spalten-Grid. Anschriftfeld muss im Bereich
+   50mm–85mm vom Papier-Oberrand liegen (DIN-676 Form B,
+   Kuvert-Sichtfenster). padding-top:35mm + Ruecksender-
+   Zeile ≈15mm → Anschrift startet bei ~50mm. */
 .brief-kopf{
     display:grid;
     grid-template-columns:85mm 1fr;
-    gap:8mm;
-    margin-bottom:12mm;
+    gap:6mm;
+    margin-bottom:7mm;
     min-height:50mm;
 }
 
@@ -3027,19 +3045,19 @@ body.serienbrief-modus{
     font-size:0.65em;
     color:#555;
     text-decoration:underline;
-    padding-bottom:2mm;
-    margin-bottom:4mm;
+    padding-bottom:1.5mm;
+    margin-bottom:3mm;
     line-height:1.2;
 }
 
 .brief-anschrift{
     font-size:1em;
-    line-height:1.35;
+    line-height:1.3;
 }
 
 .brief-kopf-rechts{
-    font-size:0.8em;
-    line-height:1.35;
+    font-size:0.78em;
+    line-height:1.3;
     color:#000;
 }
 
@@ -3051,62 +3069,63 @@ body.serienbrief-modus{
     text-align:right;
     font-size:0.9em;
     color:#333;
-    margin-bottom:6mm;
+    margin-bottom:4mm;
 }
 
 .brief-betreff{
     font-weight:700;
-    line-height:1.3;
-    margin-bottom:6mm;
+    line-height:1.25;
+    margin-bottom:4mm;
 }
 
 .brief-inhalt{
     white-space:pre-wrap;
     text-align:left;
-    margin-bottom:6mm;
+    margin-bottom:4mm;
 }
 
-.brief-inhalt strong{
-    font-weight:700;
-}
+.brief-inhalt strong{ font-weight:700; }
 
 .brief-signatur{
-    margin-top:6mm;
-    line-height:1.35;
-    margin-bottom:8mm;
+    margin-top:4mm;
+    line-height:1.3;
+    margin-bottom:4mm;
 }
 
-.brief-signatur strong{
-    font-weight:700;
-}
+.brief-signatur strong{ font-weight:700; }
 
-.brief-sig-leer{
-    height:0.9em;
-}
+.brief-sig-leer{ height:0.8em; }
 
 /* =====================================================
    SERIENBRIEF — RUECKANTWORT (direkt im Textfluss)
+   Nach der Schere-Linie steht die Rueckadresse DIN-naeher
+   positioniert, sodass sie nach dem Abschneiden/Falten im
+   Sichtfenster eines DIN-Lang-Kuverts liegen koennte.
 ===================================================== */
 
 .brief-schere{
-    font-size:0.75em;
+    font-size:0.72em;
     letter-spacing:0.5mm;
-    color:#555;
-    margin:4mm 0 3mm 0;
+    color:#777;
+    margin:3mm 0 2mm 0;
     overflow:hidden;
     white-space:nowrap;
 }
 
 .brief-rueck-titel{
-    font-size:1em;
-    margin-bottom:4mm;
+    font-size:0.95em;
+    margin-bottom:3mm;
 }
 
 .brief-rueck-tabelle{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:8mm;
-    margin-bottom:4mm;
+    gap:6mm;
+    margin-bottom:3mm;
+    /* Abstand vom Titel zur Adresse — DIN-naeher:
+       Adresse liegt dann ca. 30mm unterhalb der Schere, damit
+       sie nach dem Falten im Kuvert-Fenster erscheinen koennte */
+    padding-top:18mm;
 }
 
 .brief-rueck-adresse{
@@ -3116,31 +3135,31 @@ body.serienbrief-modus{
 
 .brief-rueck-adresse-label{
     color:#555;
-    margin-bottom:2mm;
+    margin-bottom:1.5mm;
     font-size:0.85em;
 }
 
 .brief-rueck-felder{
     display:flex;
     flex-direction:column;
-    gap:4mm;
+    gap:3mm;
 }
 
 .brief-rueck-feld-label{
-    font-size:0.85em;
-    margin-bottom:1mm;
+    font-size:0.82em;
+    margin-bottom:0.5mm;
 }
 
 .brief-rueck-linie{
     border-bottom:1px solid #000;
-    height:6mm;
+    height:5mm;
 }
 
 .brief-datenschutz{
-    margin-top:4mm;
+    margin-top:3mm;
     padding-top:2mm;
     border-top:1px solid #ccc;
-    font-size:0.7em;
+    font-size:0.68em;
     color:#555;
     line-height:1.3;
     font-style:italic;
