@@ -2942,6 +2942,13 @@ select.crm-input.filter-select-aktiv{
     padding:20px 0;
 }
 
+/* Post-Aktion-Modal MUSS ueber der Druckvorschau liegen,
+   sonst gehen Klicks auf den Uebernehmen-Button in die
+   darunterliegende Vorschau — und die Aktion scheitert still. */
+#serienbriefPostModal{
+    z-index:10001;
+}
+
 body.serienbrief-modus{
     overflow:hidden;
 }
