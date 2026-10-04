@@ -510,9 +510,9 @@ function serienbriefPanelRendern(){
                         <input type="number" class="crm-input"
                             min="1" max="365"
                             value="${fd.fristTage}"
-                            oninput="sbFeldGespeichert('${SB_LS_FRIST_TAGE}', this.value)">
+                            oninput="sbFeldGespeichert('${SB_LS_FRIST_TAGE}', this.value); sbFristAnzeigeAktualisieren(this.value)">
                         <div class="sb-feld-hinweis-klein">
-                            Ergibt im Brief: bis zum <strong>${esc(sbFristDatum(fd.fristTage))}</strong>
+                            Ergibt im Brief: bis zum <strong id="sbFristAnzeige">${esc(sbFristDatum(fd.fristTage))}</strong>
                         </div>
                     </div>
                     <div>
@@ -558,7 +558,7 @@ function serienbriefPanelRendern(){
         <div class="sb-aktionen">
             <button class="crm-button crm-button-primary"
                 onclick="serienbriefErstellen()"
-                ${briefeGesamt === 0 || !basisVollstaendig ? "disabled" : ""}
+                ${briefeGesamt === 0 ? "disabled" : ""}
                 title="${!basisVollstaendig ? "Bitte zuerst Firma & Kontakt vollständig ausfüllen" : ""}">
                 📄 ${briefeGesamt} Serienbrief${briefeGesamt === 1 ? "" : "e"} erstellen
             </button>
@@ -572,6 +572,12 @@ function serienbriefPanelRendern(){
 
 function sbFeldGespeichert(schluessel, wert){
     try{ localStorage.setItem(schluessel, wert); }catch(_){}
+}
+
+function sbFristAnzeigeAktualisieren(tage){
+    const el = document.getElementById("sbFristAnzeige");
+    if(!el){ return; }
+    el.textContent = sbFristDatum(tage);
 }
 
 function sbBlockHeaderAktualisieren(){
@@ -609,9 +615,31 @@ function sbHaushaltGetrenntToggle(adressKey, aktiv){
 ===================================================== */
 
 function serienbriefErstellen(){
+    try{
+        _serienbriefErstellenImpl();
+    }catch(e){
+        if(typeof fehlerMelden === "function"){
+            fehlerMelden("Serienbrief",
+                "Fehler beim Erstellen der Briefe: " + (e && e.message || e),
+                e);
+        }
+        alert("Beim Erstellen ist ein Fehler aufgetreten. "
+            + "Details im Fehler-Log (rotes Ausrufezeichen oben links).");
+    }
+}
+
+function _serienbriefErstellenImpl(){
     const fd = sbFirmenDatenLaden();
     if(!sbFirmenDatenVollstaendig(fd)){
-        alert("Bitte zuerst Firma & Kontakt vollständig ausfüllen.");
+        const fehlt = [];
+        if(!fd.firma.name)    fehlt.push("Firmenname");
+        if(!fd.firma.plzOrt)  fehlt.push("Firmen-PLZ+Ort");
+        if(!fd.kontakt.name)  fehlt.push("Ansprechpartner");
+        if(!fd.kontakt.tel)   fehlt.push("Telefon/WhatsApp");
+        if(!fd.kontakt.email) fehlt.push("E-Mail");
+        alert('Noch nicht ausgefüllt im Block „Firma & Kontakt":\n\n• '
+            + fehlt.join("\n• ")
+            + "\n\nBitte den oberen Block ausklappen und ergänzen.");
         return;
     }
 
