@@ -1,36 +1,105 @@
 /* =====================================================
    SERIENBRIEF — Wichtigbriefe drucken
    -----------------------------------------------------
-   Nimmt die aktuelle Selektions-Trefferliste, gruppiert
-   sie nach identischer Anschrift zu Haushalten, erzeugt
-   pro Haushalt einen Brief und zeigt eine Druckvorschau
-   fuer "Strg+P → als PDF speichern".
+   DIN-5008-Geschaeftsbrief mit optionalem Rueckantwort-
+   Abschnitt (zweite Seite). Felder werden strukturiert
+   erfasst, sodass sie konsistent an mehreren Stellen
+   im Brief auftauchen (Ruecksenderzeile, Absender-Block,
+   Signatur, Rueckantwort-Adresse).
 
-   Persistierung:
-     - Brieftext + Signatur in localStorage
-     - Getrennt-anschreiben-Overrides pro Haushalt in
-       localStorage (Adress-Key)
+   Persistierung (localStorage):
+     - Firma: Name, Straße, PLZ+Ort
+     - Kontakt: Ansprechpartner, Funktion, Tel/WhatsApp,
+       E-Mail, Website
+     - Öffnungszeiten (mehrzeilig)
+     - Rückmelde-Frist (Tage)
+     - Rückantwort-Teil ein/aus
+     - Betreff, Brieftext, Schriftgröße
+     - Haushalts-Overrides (getrennt anschreiben)
 ===================================================== */
 
-const SB_LS_TEXT         = "crmSerienbriefText";
-const SB_LS_SIGNATUR     = "crmSerienbriefSignatur";
-const SB_LS_ABSENDER     = "crmSerienbriefAbsender";
-const SB_LS_BETREFF      = "crmSerienbriefBetreff";
-const SB_LS_SCHRIFT      = "crmSerienbriefSchriftgroesse";
-const SB_LS_GETRENNT     = "crmSerienbriefGetrennt"; // Set von Adress-Keys
+const SB_LS_FIRMA_NAME      = "crmSerienbriefFirmaName";
+const SB_LS_FIRMA_STRASSE   = "crmSerienbriefFirmaStrasse";
+const SB_LS_FIRMA_PLZORT    = "crmSerienbriefFirmaPlzOrt";
+const SB_LS_KONTAKT_NAME    = "crmSerienbriefKontaktName";
+const SB_LS_KONTAKT_FUNKTION= "crmSerienbriefKontaktFunktion";
+const SB_LS_KONTAKT_TEL     = "crmSerienbriefKontaktTel";
+const SB_LS_KONTAKT_EMAIL   = "crmSerienbriefKontaktEmail";
+const SB_LS_KONTAKT_WEB     = "crmSerienbriefKontaktWeb";
+const SB_LS_OEFFNUNGSZEITEN = "crmSerienbriefOeffnungszeiten";
+const SB_LS_FRIST_TAGE      = "crmSerienbriefFristTage";
+const SB_LS_RUECKANTWORT    = "crmSerienbriefRueckantwort";
+const SB_LS_TEXT            = "crmSerienbriefText";
+const SB_LS_BETREFF         = "crmSerienbriefBetreff";
+const SB_LS_SCHRIFT         = "crmSerienbriefSchriftgroesse";
+const SB_LS_GETRENNT        = "crmSerienbriefGetrennt";
 
 const SB_SCHRIFTGROESSEN = [9, 10, 11, 12, 13, 14];
 const SB_DEFAULT_SCHRIFT = 11;
+const SB_DEFAULT_FRIST_TAGE = 21;
 
-const SB_DEFAULT_TEXT = "{anrede_formal},\n\n"
-    + "in unseren Unterlagen sind Ihre Kontaktdaten leider "
-    + "nicht mehr aktuell.\n\n"
-    + "Bitte melden Sie sich kurz bei mir, damit ich Sie "
-    + "wieder erreichen kann.\n\n"
-    + "Vielen Dank.";
+const SB_DEFAULT_OEFFNUNGSZEITEN =
+    "Mo–Do  9:00–17:00 Uhr\n"
+  + "Fr  9:00–13:00 Uhr\n"
+  + "weitere Termine nach Vereinbarung";
+
+const SB_DEFAULT_BETREFF =
+    "Wichtige Unterlagen zu Ihrem Vertrag – bitte kurz bei uns melden";
+
+const SB_DEFAULT_TEXT =
+    "Sie sind uns als {kundenwort} wichtig – und genau deshalb "
+  + "möchten wir Sie persönlich erreichen. In den vergangenen Wochen "
+  + "haben wir mehrfach versucht, Sie telefonisch und per E-Mail zu "
+  + "kontaktieren. Leider ist uns das bislang nicht gelungen; "
+  + "vermutlich haben sich Ihre Kontaktdaten zwischenzeitlich geändert."
+  + "\n\n"
+  + "Uns liegen aktuell Unterlagen zu Ihrem Vertrag vor, die Ihre "
+  + "persönliche Aufmerksamkeit erfordern. Damit Ihnen keine Fristen, "
+  + "Leistungen oder wichtigen Informationen entgehen, möchten wir "
+  + "diese kurz gemeinsam mit Ihnen klären – unkompliziert, in wenigen "
+  + "Minuten und selbstverständlich kostenfrei."
+  + "\n\n"
+  + "Bitte geben Sie uns bis zum {frist} eine kurze Rückmeldung. "
+  + "Am schnellsten erreichen Sie uns telefonisch oder per WhatsApp "
+  + "unter {tel} oder per E-Mail unter {email}. Alternativ nutzen Sie "
+  + "einfach den vorbereiteten Antwortabschnitt unten – er ist in "
+  + "weniger als einer Minute ausgefüllt."
+  + "\n\n"
+  + "Ihre Zufriedenheit und die Sicherheit Ihrer Vorsorge liegen uns "
+  + "am Herzen. Wir freuen uns, bald von Ihnen zu hören.";
 
 /* =====================================================
-   ADRESS-KEY / HAUSHALTS-GRUPPIERUNG
+   FIRMEN-/KONTAKT-DATEN LADEN
+===================================================== */
+
+function sbFirmenDatenLaden(){
+    return {
+        firma: {
+            name:    localStorage.getItem(SB_LS_FIRMA_NAME) || "",
+            strasse: localStorage.getItem(SB_LS_FIRMA_STRASSE) || "",
+            plzOrt:  localStorage.getItem(SB_LS_FIRMA_PLZORT) || ""
+        },
+        kontakt: {
+            name:     localStorage.getItem(SB_LS_KONTAKT_NAME) || "",
+            funktion: localStorage.getItem(SB_LS_KONTAKT_FUNKTION) || "",
+            tel:      localStorage.getItem(SB_LS_KONTAKT_TEL) || "",
+            email:    localStorage.getItem(SB_LS_KONTAKT_EMAIL) || "",
+            web:      localStorage.getItem(SB_LS_KONTAKT_WEB) || ""
+        },
+        oeffnungszeiten:
+            localStorage.getItem(SB_LS_OEFFNUNGSZEITEN) !== null
+                ? localStorage.getItem(SB_LS_OEFFNUNGSZEITEN)
+                : SB_DEFAULT_OEFFNUNGSZEITEN,
+        fristTage: (function(){
+            const n = parseInt(localStorage.getItem(SB_LS_FRIST_TAGE), 10);
+            return (isNaN(n) || n < 1) ? SB_DEFAULT_FRIST_TAGE : n;
+        })(),
+        rueckantwortAktiv: localStorage.getItem(SB_LS_RUECKANTWORT) !== "0"
+    };
+}
+
+/* =====================================================
+   HAUSHALTS-GRUPPIERUNG
 ===================================================== */
 
 function sbAdressKey(k){
@@ -63,16 +132,12 @@ function sbGetrenntSetSpeichern(set){
 }
 
 function sbHaushalteBilden(personen){
-    // Gibt Array von { adressKey, personen[], getrennt } zurueck.
-    // Wenn getrennt=true: die Personen bekommen JEWEILS einen eigenen
-    // Brief (also ein Sub-Array pro Person).
     const map = new Map();
     personen.forEach(p => {
         const k = sbAdressKey(p);
         if(!map.has(k)){ map.set(k, []); }
         map.get(k).push(p);
     });
-
     const getrenntSet = sbGetrenntSetLaden();
     const gruppen = [];
     map.forEach((leute, key) => {
@@ -86,12 +151,7 @@ function sbHaushalteBilden(personen){
 }
 
 /* =====================================================
-   ANREDE-KOMBINATOR
-   -----------------------------------------------------
-   Einzeln           → "Max Müller"
-   Ehepaar (=Name)   → "Max und Petra Müller"
-   Familie (=Name)   → "Max, Petra und Lisa Müller"
-   Gemischte Namen   → "Max Müller, Petra Müller und Lisa Schmidt"
+   ANREDE-KOMBINATOR (fuer {anrede_kombiniert})
 ===================================================== */
 
 function sbAnredeKombiniert(personen){
@@ -101,7 +161,6 @@ function sbAnredeKombiniert(personen){
     }
     const nachnamen = personen.map(p => String(p.nachname||"").trim().toLowerCase());
     const alleGleich = nachnamen.every(n => n === nachnamen[0] && n !== "");
-
     if(alleGleich){
         const vornamen = personen.map(p => String(p.vorname||"").trim());
         const nachname = String(personen[0].nachname||"").trim();
@@ -112,7 +171,6 @@ function sbAnredeKombiniert(personen){
         return ohneLetzten + " und " + vornamen[vornamen.length - 1]
              + " " + nachname;
     }
-
     const namen = personen.map(p =>
         (String(p.vorname||"").trim() + " " + String(p.nachname||"").trim()).trim()
     );
@@ -121,15 +179,83 @@ function sbAnredeKombiniert(personen){
 }
 
 /* =====================================================
+   FORMELLE ANREDE (fuer {anrede_formal})
+===================================================== */
+
+function sbAnredeFormal(personen){
+    if(personen.length === 0){ return "Sehr geehrte Damen und Herren"; }
+    if(personen.length === 1){
+        const p = personen[0];
+        const nn = String(p.nachname||"").trim();
+        if(!nn){ return "Sehr geehrte Damen und Herren"; }
+        if(p.anrede === "Frau"){ return "Sehr geehrte Frau " + nn; }
+        if(p.anrede === "Herr"){ return "Sehr geehrter Herr " + nn; }
+        return "Sehr geehrte Damen und Herren";
+    }
+    const nachnamen = personen
+        .map(p => String(p.nachname||"").trim())
+        .filter(n => n);
+    if(nachnamen.length === 0){
+        return "Sehr geehrte Damen und Herren";
+    }
+    const seen = new Set();
+    const eindeutig = [];
+    nachnamen.forEach(n => {
+        const k = n.toLowerCase();
+        if(!seen.has(k)){ seen.add(k); eindeutig.push(n); }
+    });
+    if(eindeutig.length === 1){
+        return "Sehr geehrte Familie " + eindeutig[0];
+    }
+    return "Sehr geehrte Familie " + eindeutig.join("/");
+}
+
+/* =====================================================
+   KUNDENWORT  (fuer "Sie sind uns als {kundenwort} wichtig")
+   -----------------------------------------------------
+   1 Person Frau:   "Kundin"
+   1 Person Herr:   "Kunde"
+   1 Person unklar: "Kundin bzw. Kunde"
+   ≥2 Personen:     "Kunden"
+===================================================== */
+
+function sbKundenwort(personen){
+    if(!personen || personen.length === 0){ return "Kundin bzw. Kunde"; }
+    if(personen.length >= 2){ return "Kunden"; }
+    const p = personen[0];
+    if(p.anrede === "Frau"){ return "Kundin"; }
+    if(p.anrede === "Herr"){ return "Kunde"; }
+    return "Kundin bzw. Kunde";
+}
+
+/* =====================================================
+   FRIST BERECHNEN  (fuer {frist})
+===================================================== */
+
+function sbFristDatum(tage){
+    const d = new Date();
+    d.setDate(d.getDate() + (parseInt(tage, 10) || SB_DEFAULT_FRIST_TAGE));
+    return d.toLocaleDateString("de-DE");
+}
+
+/* =====================================================
    PLATZHALTER EINSETZEN
 ===================================================== */
 
-function sbTextFuellen(vorlage, personen){
+function sbTextFuellen(vorlage, personen, fd){
     const first = personen[0];
     const heute = new Date().toLocaleDateString("de-DE");
+    fd = fd || sbFirmenDatenLaden();
     const map = {
         "{anrede_kombiniert}": sbAnredeKombiniert(personen),
         "{anrede_formal}":     sbAnredeFormal(personen),
+        "{kundenwort}":        sbKundenwort(personen),
+        "{frist}":             sbFristDatum(fd.fristTage),
+        "{tel}":               fd.kontakt.tel,
+        "{email}":             fd.kontakt.email,
+        "{website}":           fd.kontakt.web,
+        "{firma}":             fd.firma.name,
+        "{ansprechpartner}":   fd.kontakt.name,
         "{vorname}":  String(first.vorname||"").trim(),
         "{nachname}": String(first.nachname||"").trim(),
         "{anrede}":   String(first.anrede||"").trim(),
@@ -147,102 +273,54 @@ function sbTextFuellen(vorlage, personen){
 }
 
 /* =====================================================
-   FORMELLE ANREDE
-   -----------------------------------------------------
-   Einzelperson Frau:  "Sehr geehrte Frau Müller"
-   Einzelperson Herr:  "Sehr geehrter Herr Meier"
-   Einzelperson ohne Anrede: "Sehr geehrte Damen und Herren"
-
-   Ab 2 Personen wird zur Familien-Anrede gewechselt
-   (persoenlicher als das steife "Frau X und Herr Y"):
-     Gleicher Nachname:       "Sehr geehrte Familie Müller"
-     Verschiedene Nachnamen:  "Sehr geehrte Familie Müller/Schmidt"
-     Nachname fehlt bei irgendwem: Fallback "Damen und Herren"
+   ABLEITUNGEN AUS FIRMEN-DATEN
 ===================================================== */
 
-function sbAnredeFormal(personen){
-    if(personen.length === 0){ return "Sehr geehrte Damen und Herren"; }
-
-    // Einzelperson: formelle DIN-Anrede (Familie X waere komisch bei 1)
-    if(personen.length === 1){
-        const p = personen[0];
-        const nn = String(p.nachname||"").trim();
-        if(!nn){ return "Sehr geehrte Damen und Herren"; }
-        if(p.anrede === "Frau"){ return "Sehr geehrte Frau " + nn; }
-        if(p.anrede === "Herr"){ return "Sehr geehrter Herr " + nn; }
-        return "Sehr geehrte Damen und Herren";
-    }
-
-    // Ab 2 Personen: Familien-Anrede
-    const nachnamen = personen
-        .map(p => String(p.nachname||"").trim())
-        .filter(n => n);
-    if(nachnamen.length === 0){
-        return "Sehr geehrte Damen und Herren";
-    }
-
-    // Einheitliche Nachnamen zusammenfassen (case-insensitiv)
-    const seen = new Set();
-    const eindeutig = [];
-    nachnamen.forEach(n => {
-        const k = n.toLowerCase();
-        if(!seen.has(k)){ seen.add(k); eindeutig.push(n); }
-    });
-
-    if(eindeutig.length === 1){
-        return "Sehr geehrte Familie " + eindeutig[0];
-    }
-    return "Sehr geehrte Familie " + eindeutig.join("/");
+function sbRuecksenderZeile(fd){
+    const parts = [];
+    if(fd.firma.name)    parts.push(fd.firma.name);
+    if(fd.firma.strasse) parts.push(fd.firma.strasse);
+    if(fd.firma.plzOrt)  parts.push(fd.firma.plzOrt);
+    return parts.join(" · ");
 }
 
-/* =====================================================
-   ABSENDER-ORT (fuer die Datumszeile)
-   -----------------------------------------------------
-   DIN 5008: Datumszeile = "<Absender-Ort>, DD.MM.YYYY".
-   Ableitung: erste Zeile im Absender-Feld, die mit einer
-   5-stelligen PLZ beginnt → Text nach der PLZ = Ort.
-===================================================== */
-
-function sbAbsenderOrt(absenderText){
-    const zeilen = String(absenderText||"")
-        .split("\n")
-        .map(z => z.trim())
-        .filter(z => z);
-    for(const z of zeilen){
-        const m = z.match(/^\d{5}\s+(.+)$/);
-        if(m){ return m[1].trim(); }
-    }
-    return "";
+function sbAbsenderOrt(fd){
+    // "57072 Siegen" → "Siegen"
+    const m = String(fd.firma.plzOrt||"").trim().match(/^\d{5}\s+(.+)$/);
+    return m ? m[1].trim() : String(fd.firma.plzOrt||"").trim();
 }
 
-/* =====================================================
-   RUECKSENDER-ZEILE AUS ABSENDER-BLOCK
-   -----------------------------------------------------
-   Heuristik: nimmt Zeile 1 als Name; sucht die Zeile,
-   die mit einer 5-stelligen PLZ beginnt (PLZ Ort); und
-   die Zeile direkt davor (Strasse). Ergebnis wird als
-   "Name, Strasse, PLZ Ort" komma-getrennt zurueckgegeben.
-   Diese Zeile steht klein und unterstrichen ueber dem
-   Anschriftfeld (DIN-Rueckadresse fuer Sichtfenster).
-===================================================== */
-
-function sbRuecksenderZeile(absenderText){
-    const zeilen = String(absenderText||"")
-        .split("\n")
-        .map(z => z.trim())
-        .filter(z => z);
-    if(zeilen.length === 0){ return ""; }
-    const name = zeilen[0];
-    const plzIdx = zeilen.findIndex(z => /^\d{5}\s/.test(z));
-    if(plzIdx === -1 || plzIdx === 0){
-        return name;
+function sbAbsenderBlockText(fd){
+    const zeilen = [];
+    if(fd.kontakt.name)     zeilen.push(fd.kontakt.name);
+    if(fd.kontakt.funktion) zeilen.push(fd.kontakt.funktion);
+    if(fd.firma.name)       zeilen.push(fd.firma.name);
+    if(fd.firma.strasse)    zeilen.push(fd.firma.strasse);
+    if(fd.firma.plzOrt)     zeilen.push(fd.firma.plzOrt);
+    zeilen.push("");  // Trennzeile
+    if(fd.kontakt.tel)      zeilen.push("Tel./WhatsApp: " + fd.kontakt.tel);
+    if(fd.kontakt.email)    zeilen.push("E-Mail: " + fd.kontakt.email);
+    if(fd.kontakt.web)      zeilen.push(fd.kontakt.web);
+    if(fd.oeffnungszeiten && fd.oeffnungszeiten.trim()){
+        zeilen.push("");
+        zeilen.push("Öffnungszeiten");
+        fd.oeffnungszeiten.split("\n").forEach(z => zeilen.push(z));
     }
-    const plzOrt  = zeilen[plzIdx];
-    const strasse = zeilen[plzIdx - 1];
-    const teile = [name];
-    if(strasse && strasse !== name){ teile.push(strasse); }
-    teile.push(plzOrt);
-    return teile.join(", ");
+    return zeilen.join("\n");
+}
+
+function sbSignaturText(fd){
+    const zeilen = ["Mit freundlichen Grüßen", ""];
+    if(fd.kontakt.name)     zeilen.push(fd.kontakt.name);
+    const funkFirma = [fd.kontakt.funktion, fd.firma.name]
+        .filter(Boolean).join(" · ");
+    if(funkFirma) zeilen.push(funkFirma);
+    return zeilen.join("\n");
+}
+
+function sbFirmenDatenVollstaendig(fd){
+    return !!(fd.firma.name && fd.firma.plzOrt
+           && fd.kontakt.name && fd.kontakt.tel && fd.kontakt.email);
 }
 
 /* =====================================================
@@ -253,17 +331,13 @@ function serienbriefPanelRendern(){
     const container = document.getElementById("serienbriefPanel");
     if(!container){ return; }
 
-    // Trefferliste aus der aktuellen Selektion (oder alle
-    // aktiven Kunden wenn keine Filter gesetzt sind)
     const treffer = (typeof selektionAnwenden === "function")
         ? selektionAnwenden()
         : kunden.filter(k => !k.archiviert);
+    const mitAdresse  = treffer.filter(sbHatAdresse);
+    const ohneAdresse = treffer.filter(k => !sbHatAdresse(k));
+    const gruppen     = sbHaushalteBilden(mitAdresse);
 
-    const mitAdresse   = treffer.filter(sbHatAdresse);
-    const ohneAdresse  = treffer.filter(k => !sbHatAdresse(k));
-    const gruppen      = sbHaushalteBilden(mitAdresse);
-
-    // Anzahl Briefe: pro Gruppe entweder 1 (zusammen) oder N (getrennt)
     let briefeGesamt = 0;
     gruppen.forEach(g => {
         briefeGesamt += g.getrennt ? g.personen.length : 1;
@@ -272,19 +346,16 @@ function serienbriefPanelRendern(){
         g => g.personen.length > 1 && !g.getrennt
     ).length;
 
-    // Persistente Werte laden
-    const gespText     = localStorage.getItem(SB_LS_TEXT);
-    const gespSig      = localStorage.getItem(SB_LS_SIGNATUR);
-    const gespAbsender = localStorage.getItem(SB_LS_ABSENDER);
-    const gespBetreff  = localStorage.getItem(SB_LS_BETREFF);
-    const gespSchrift  = parseInt(localStorage.getItem(SB_LS_SCHRIFT), 10);
-    const text     = gespText !== null ? gespText : SB_DEFAULT_TEXT;
-    const signatur = gespSig !== null ? gespSig : "";
-    const absender = gespAbsender !== null ? gespAbsender : "";
-    const betreff  = gespBetreff !== null ? gespBetreff : "";
-    const schrift  = (SB_SCHRIFTGROESSEN.indexOf(gespSchrift) !== -1)
-        ? gespSchrift
-        : SB_DEFAULT_SCHRIFT;
+    const fd = sbFirmenDatenLaden();
+    const gespText    = localStorage.getItem(SB_LS_TEXT);
+    const gespBetreff = localStorage.getItem(SB_LS_BETREFF);
+    const gespSchrift = parseInt(localStorage.getItem(SB_LS_SCHRIFT), 10);
+    const text    = gespText !== null ? gespText : SB_DEFAULT_TEXT;
+    const betreff = gespBetreff !== null ? gespBetreff : SB_DEFAULT_BETREFF;
+    const schrift = (SB_SCHRIFTGROESSEN.indexOf(gespSchrift) !== -1)
+        ? gespSchrift : SB_DEFAULT_SCHRIFT;
+
+    const basisVollstaendig = sbFirmenDatenVollstaendig(fd);
 
     container.innerHTML = `
         <div class="sb-info-zeile">
@@ -314,7 +385,7 @@ function serienbriefPanelRendern(){
                                 ${esc(g.personen[0].strasse || "")} ${esc(g.personen[0].hausnummer || "")},
                                 ${esc(g.personen[0].plz || "")} ${esc(g.personen[0].ort || "")}
                                 <span class="sb-haushalt-name-kombiniert">
-                                    → „Hallo ${esc(sbAnredeKombiniert(g.personen))},"
+                                    → „${esc(sbAnredeFormal(g.personen))},"
                                 </span>
                             </div>
                             <div class="sb-haushalt-personen">
@@ -348,54 +419,152 @@ function serienbriefPanelRendern(){
             </details>
         ` : ""}
 
-        <div class="sb-optionen-zeile">
-            <label class="sb-optionen-label">
-                Schriftgröße:
-                <select id="sbSchriftgroesse" class="crm-input sb-schrift-select"
-                    onchange="sbFeldGespeichert('${SB_LS_SCHRIFT}', this.value)">
-                    ${SB_SCHRIFTGROESSEN.map(g =>
-                        `<option value="${g}" ${g === schrift ? "selected" : ""}>${g} pt</option>`
-                    ).join("")}
-                </select>
-            </label>
-        </div>
+        <!-- BLOCK 1: Firma & Kontakt (einmalig, persistent) -->
+        <details class="sb-block" ${basisVollstaendig ? "" : "open"}>
+            <summary>
+                🏢 Firma & Kontakt  ${basisVollstaendig
+                    ? '<span class="sb-ok">✓ ausgefüllt</span>'
+                    : '<span class="sb-nok">bitte ausfüllen</span>'}
+            </summary>
+            <div class="sb-block-inhalt">
+                <label class="sb-feld-label">Firmenname</label>
+                <input type="text" class="crm-input"
+                    value="${esc(fd.firma.name)}"
+                    oninput="sbFeldGespeichert('${SB_LS_FIRMA_NAME}', this.value); sbBlockHeaderAktualisieren()"
+                    placeholder="z. B. Wüstenrot Service-Center">
 
-        <label class="sb-feld-label">
-            Absender <span class="sb-feld-hinweis">(Kopf oben rechts — die kleine Rücksenderzeile über der Anschrift wird automatisch daraus abgeleitet)</span>
-        </label>
-        <textarea id="sbAbsender" class="crm-textarea sb-absender"
-            oninput="sbFeldGespeichert('${SB_LS_ABSENDER}', this.value); sbRuecksenderVorschauAktualisieren()"
-            placeholder="Vorname Nachname&#10;Berufsbezeichnung&#10;Firma&#10;Straße Hausnummer&#10;PLZ Ort&#10;Telefon    …&#10;E-Mail     …">${esc(absender)}</textarea>
-        <div class="sb-ruecksender-vorschau">
-            Rücksenderzeile: <span id="sbRuecksenderVorschau">${esc(sbRuecksenderZeile(absender) || "(noch leer — bitte Absender ausfüllen)")}</span>
-        </div>
+                <div class="sb-zwei-spalten">
+                    <div>
+                        <label class="sb-feld-label">Firmen-Straße + Nr.</label>
+                        <input type="text" class="crm-input"
+                            value="${esc(fd.firma.strasse)}"
+                            oninput="sbFeldGespeichert('${SB_LS_FIRMA_STRASSE}', this.value)"
+                            placeholder="Musterstraße 1">
+                    </div>
+                    <div>
+                        <label class="sb-feld-label">Firmen-PLZ + Ort</label>
+                        <input type="text" class="crm-input"
+                            value="${esc(fd.firma.plzOrt)}"
+                            oninput="sbFeldGespeichert('${SB_LS_FIRMA_PLZORT}', this.value); sbBlockHeaderAktualisieren()"
+                            placeholder="57072 Siegen">
+                    </div>
+                </div>
 
-        <label class="sb-feld-label">Betreff <span class="sb-feld-hinweis">(erscheint fett über der Anrede)</span></label>
-        <input type="text" id="sbBetreff" class="crm-input sb-betreff-input"
-            oninput="sbFeldGespeichert('${SB_LS_BETREFF}', this.value)"
-            placeholder="z. B. Wichtige Mitteilung — bitte Kontaktdaten aktualisieren"
-            value="${esc(betreff)}">
+                <div class="sb-zwei-spalten">
+                    <div>
+                        <label class="sb-feld-label">Ansprechpartner (Name)</label>
+                        <input type="text" class="crm-input"
+                            value="${esc(fd.kontakt.name)}"
+                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_NAME}', this.value); sbBlockHeaderAktualisieren()"
+                            placeholder="Vorname Nachname">
+                    </div>
+                    <div>
+                        <label class="sb-feld-label">Funktion</label>
+                        <input type="text" class="crm-input"
+                            value="${esc(fd.kontakt.funktion)}"
+                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_FUNKTION}', this.value)"
+                            placeholder="z. B. Bezirksleiter">
+                    </div>
+                </div>
 
-        <label class="sb-feld-label">Brieftext (Platzhalter: <code>{anrede_formal}</code>, <code>{anrede_kombiniert}</code>, <code>{vorname}</code>, <code>{nachname}</code>, <code>{ort}</code>, <code>{heute}</code>)</label>
-        <textarea id="sbBrieftext" class="crm-textarea sb-brieftext"
-            oninput="sbFeldGespeichert('${SB_LS_TEXT}', this.value)"
-            placeholder="Hallo {anrede_kombiniert},&#10;&#10;dein Brieftext …">${esc(text)}</textarea>
+                <div class="sb-zwei-spalten">
+                    <div>
+                        <label class="sb-feld-label">Telefon / WhatsApp</label>
+                        <input type="text" class="crm-input"
+                            value="${esc(fd.kontakt.tel)}"
+                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_TEL}', this.value); sbBlockHeaderAktualisieren()"
+                            placeholder="0271 / 770280">
+                    </div>
+                    <div>
+                        <label class="sb-feld-label">E-Mail</label>
+                        <input type="text" class="crm-input"
+                            value="${esc(fd.kontakt.email)}"
+                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_EMAIL}', this.value); sbBlockHeaderAktualisieren()"
+                            placeholder="name@firma.de">
+                    </div>
+                </div>
 
-        <label class="sb-feld-label">Signatur</label>
-        <textarea id="sbSignatur" class="crm-textarea sb-signatur"
-            oninput="sbFeldGespeichert('${SB_LS_SIGNATUR}', this.value)"
-            placeholder="Mit freundlichen Grüßen&#10;Dein Name&#10;Straße · PLZ Ort · Telefon · E-Mail">${esc(signatur)}</textarea>
+                <label class="sb-feld-label">Website <span class="sb-feld-hinweis">(optional — wird nur gedruckt wenn ausgefüllt)</span></label>
+                <input type="text" class="crm-input"
+                    value="${esc(fd.kontakt.web)}"
+                    oninput="sbFeldGespeichert('${SB_LS_KONTAKT_WEB}', this.value)"
+                    placeholder="www.firma.de">
+
+                <label class="sb-feld-label">Öffnungszeiten</label>
+                <textarea class="crm-textarea sb-oeffnungszeiten"
+                    oninput="sbFeldGespeichert('${SB_LS_OEFFNUNGSZEITEN}', this.value)"
+                    placeholder="Mo–Do  9:00–17:00 Uhr&#10;Fr  9:00–13:00 Uhr">${esc(fd.oeffnungszeiten)}</textarea>
+            </div>
+        </details>
+
+        <!-- BLOCK 2: Pro Kampagne -->
+        <details class="sb-block" open>
+            <summary>✉️ Dieser Serienbrief</summary>
+            <div class="sb-block-inhalt">
+
+                <div class="sb-zwei-spalten">
+                    <div>
+                        <label class="sb-feld-label">
+                            Rückmelde-Frist (Tage ab heute)
+                        </label>
+                        <input type="number" class="crm-input"
+                            min="1" max="365"
+                            value="${fd.fristTage}"
+                            oninput="sbFeldGespeichert('${SB_LS_FRIST_TAGE}', this.value)">
+                        <div class="sb-feld-hinweis-klein">
+                            Ergibt im Brief: bis zum <strong>${esc(sbFristDatum(fd.fristTage))}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="sb-feld-label">Schriftgröße</label>
+                        <select class="crm-input"
+                            onchange="sbFeldGespeichert('${SB_LS_SCHRIFT}', this.value)">
+                            ${SB_SCHRIFTGROESSEN.map(g =>
+                                `<option value="${g}" ${g === schrift ? "selected" : ""}>${g} pt</option>`
+                            ).join("")}
+                        </select>
+                    </div>
+                </div>
+
+                <label class="sb-ruckantwort-label">
+                    <input type="checkbox"
+                        ${fd.rueckantwortAktiv ? "checked" : ""}
+                        onchange="sbFeldGespeichert('${SB_LS_RUECKANTWORT}', this.checked ? '1' : '0')">
+                    Rückantwort-Abschnitt mitdrucken (zweite Seite)
+                </label>
+
+                <label class="sb-feld-label">Betreff <span class="sb-feld-hinweis">(fett über der Anrede)</span></label>
+                <input type="text" class="crm-input sb-betreff-input"
+                    oninput="sbFeldGespeichert('${SB_LS_BETREFF}', this.value)"
+                    value="${esc(betreff)}">
+
+                <label class="sb-feld-label">Brieftext
+                    <span class="sb-feld-hinweis">
+                        Platzhalter:
+                        <code>{anrede_formal}</code>,
+                        <code>{kundenwort}</code>,
+                        <code>{frist}</code>,
+                        <code>{tel}</code>,
+                        <code>{email}</code>,
+                        <code>{nachname}</code>,
+                        <code>{heute}</code>
+                    </span>
+                </label>
+                <textarea class="crm-textarea sb-brieftext"
+                    oninput="sbFeldGespeichert('${SB_LS_TEXT}', this.value)">${esc(text)}</textarea>
+            </div>
+        </details>
 
         <div class="sb-aktionen">
             <button class="crm-button crm-button-primary"
                 onclick="serienbriefErstellen()"
-                ${briefeGesamt === 0 ? "disabled" : ""}>
+                ${briefeGesamt === 0 || !basisVollstaendig ? "disabled" : ""}
+                title="${!basisVollstaendig ? "Bitte zuerst Firma & Kontakt vollständig ausfüllen" : ""}">
                 📄 ${briefeGesamt} Serienbrief${briefeGesamt === 1 ? "" : "e"} erstellen
             </button>
             <button class="crm-button crm-button-klein"
-                onclick="sbVorlageZuruecksetzen()"
-                title="Brieftext auf den Standardtext zuruecksetzen">
-                Standardtext
+                onclick="sbVorlageZuruecksetzen()">
+                Standard-Brieftext
             </button>
         </div>
     `;
@@ -405,18 +574,25 @@ function sbFeldGespeichert(schluessel, wert){
     try{ localStorage.setItem(schluessel, wert); }catch(_){}
 }
 
-function sbRuecksenderVorschauAktualisieren(){
-    const ta   = document.getElementById("sbAbsender");
-    const ziel = document.getElementById("sbRuecksenderVorschau");
-    if(!ta || !ziel){ return; }
-    const zeile = sbRuecksenderZeile(ta.value);
-    ziel.textContent = zeile || "(noch leer — bitte Absender ausfüllen)";
+function sbBlockHeaderAktualisieren(){
+    // Nur den OK/NOK-Status im Block-1-Header refreshen,
+    // ohne das ganze Panel neu zu bauen (sonst verliert
+    // die aktuell editierte Eingabe den Fokus).
+    const fd = sbFirmenDatenLaden();
+    const headers = document.querySelectorAll("#serienbriefPanel .sb-block > summary");
+    if(headers.length === 0){ return; }
+    const h = headers[0];
+    const ok = sbFirmenDatenVollstaendig(fd);
+    h.innerHTML = "🏢 Firma & Kontakt  " +
+        (ok ? '<span class="sb-ok">✓ ausgefüllt</span>'
+            : '<span class="sb-nok">bitte ausfüllen</span>');
 }
 
 function sbVorlageZuruecksetzen(){
-    if(!confirm("Brieftext auf den Standardtext zurücksetzen? "
+    if(!confirm("Brieftext und Betreff auf den Standardtext zurücksetzen? "
         + "Deine eingegebene Version wird überschrieben.")){ return; }
     localStorage.removeItem(SB_LS_TEXT);
+    localStorage.removeItem(SB_LS_BETREFF);
     serienbriefPanelRendern();
 }
 
@@ -433,16 +609,25 @@ function sbHaushaltGetrenntToggle(adressKey, aktiv){
 ===================================================== */
 
 function serienbriefErstellen(){
-    const text     = document.getElementById("sbBrieftext").value;
-    const signatur = document.getElementById("sbSignatur").value;
-    const absender = document.getElementById("sbAbsender").value;
-    const betreff  = document.getElementById("sbBetreff").value;
-    const schriftSel = document.getElementById("sbSchriftgroesse");
-    const schrift  = schriftSel ? parseInt(schriftSel.value, 10) : SB_DEFAULT_SCHRIFT;
-    const schriftPt = (SB_SCHRIFTGROESSEN.indexOf(schrift) !== -1)
-        ? schrift : SB_DEFAULT_SCHRIFT;
-    const rueckSender = sbRuecksenderZeile(absender);
-    const absenderOrt = sbAbsenderOrt(absender);
+    const fd = sbFirmenDatenLaden();
+    if(!sbFirmenDatenVollstaendig(fd)){
+        alert("Bitte zuerst Firma & Kontakt vollständig ausfüllen.");
+        return;
+    }
+
+    const gespText    = localStorage.getItem(SB_LS_TEXT);
+    const gespBetreff = localStorage.getItem(SB_LS_BETREFF);
+    const text    = gespText !== null ? gespText : SB_DEFAULT_TEXT;
+    const betreff = gespBetreff !== null ? gespBetreff : SB_DEFAULT_BETREFF;
+
+    const gespSchrift = parseInt(localStorage.getItem(SB_LS_SCHRIFT), 10);
+    const schriftPt = (SB_SCHRIFTGROESSEN.indexOf(gespSchrift) !== -1)
+        ? gespSchrift : SB_DEFAULT_SCHRIFT;
+
+    const rueckSender    = sbRuecksenderZeile(fd);
+    const absenderOrt    = sbAbsenderOrt(fd);
+    const absenderBlock  = sbAbsenderBlockText(fd);
+    const signaturBlock  = sbSignaturText(fd);
 
     const treffer = (typeof selektionAnwenden === "function")
         ? selektionAnwenden()
@@ -450,14 +635,11 @@ function serienbriefErstellen(){
     const mitAdresse = treffer.filter(sbHatAdresse);
     const gruppen    = sbHaushalteBilden(mitAdresse);
 
-    // Zu Sendungen aufloesen — getrennte Haushalte werden zu
-    // Einzel-Sendungen zerlegt.
     const sendungen = [];
     gruppen.forEach(g => {
         if(g.getrennt){
             g.personen.forEach(p => sendungen.push({
-                personen: [p],
-                adressKey: g.adressKey
+                personen: [p], adressKey: g.adressKey
             }));
         }else{
             sendungen.push({ personen: g.personen, adressKey: g.adressKey });
@@ -469,17 +651,54 @@ function serienbriefErstellen(){
         return;
     }
 
-    // Vorschau aufbauen
     const ansicht = document.getElementById("serienbriefDruckansicht");
     if(!ansicht){ return; }
 
     const heute = new Date().toLocaleDateString("de-DE");
 
+    // Rueckantwort-HTML (statisch, wird nur eingesetzt wenn aktiv)
+    function rueckantwortSeite(){
+        if(!fd.rueckantwortAktiv){ return ""; }
+        const adrZeilen = [];
+        if(fd.firma.name)       adrZeilen.push(fd.firma.name);
+        if(fd.kontakt.name)     adrZeilen.push(fd.kontakt.name);
+        if(fd.firma.strasse)    adrZeilen.push(fd.firma.strasse);
+        if(fd.firma.plzOrt)     adrZeilen.push(fd.firma.plzOrt);
+        return `
+          <div class="brief-rueckantwort" style="font-size:${schriftPt}pt;">
+            <div class="ra-schere">✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</div>
+            <h3 class="ra-titel">Ihre Rückmeldung – bitte ausfüllen und zurücksenden</h3>
+            <div class="ra-adresse">
+                <div class="ra-adresse-label">Bitte zurücksenden an:</div>
+                ${adrZeilen.map(z => `<div>${esc(z)}</div>`).join("")}
+            </div>
+            <div class="ra-feld">
+                <div class="ra-feld-label">Meine Telefon-/WhatsApp-Nr.:</div>
+                <div class="ra-feld-linie"></div>
+            </div>
+            <div class="ra-feld">
+                <div class="ra-feld-label">Meine E-Mail:</div>
+                <div class="ra-feld-linie"></div>
+            </div>
+            <div class="ra-feld">
+                <div class="ra-feld-label">Erreichbar / Terminwunsch:</div>
+                <div class="ra-feld-linie"></div>
+            </div>
+            <div class="ra-feld">
+                <div class="ra-feld-label">Name, Datum, Unterschrift:</div>
+                <div class="ra-feld-linie"></div>
+            </div>
+            <div class="ra-datenschutz">
+                Hinweis: Ihre Daten werden ausschließlich zur Bearbeitung
+                Ihres Anliegens verwendet und nicht an Dritte weitergegeben.
+            </div>
+          </div>`;
+    }
+
     const briefeHtml = sendungen.map(s => {
         const p = s.personen[0];
 
-        // Anschriftzeilen mit "Frau"/"Herr" pro Person (DIN 5008).
-        // Wenn keine Anrede: nur Vorname + Nachname.
+        // Anschriftzeilen mit "Frau"/"Herr" pro Person
         const personenZeilen = s.personen.map(pp => {
             const name = `${esc(pp.vorname||"")} ${esc(pp.nachname||"")}`.trim();
             if(pp.anrede === "Frau" || pp.anrede === "Herr"){
@@ -493,20 +712,19 @@ function serienbriefErstellen(){
             `${esc(p.plz||"")} ${esc(p.ort||"")}`.trim()
         ];
 
-        const gefuellterText    = sbTextFuellen(text, s.personen);
-        const gefuellterBetreff = sbTextFuellen(betreff, s.personen);
+        const gefuellterText    = sbTextFuellen(text, s.personen, fd);
+        const gefuellterBetreff = sbTextFuellen(betreff, s.personen, fd);
 
-        // DIN-5008-Datumszeile: Absender-Ort statt Empfaenger-Ort
         const datumZeile = absenderOrt
             ? esc(absenderOrt) + ", " + heute
             : heute;
 
-        return `<div class="brief-seite" style="font-size:${schriftPt}pt;">
+        const briefSeite = `<div class="brief-seite" style="font-size:${schriftPt}pt;">
             <div class="brief-falzmarke brief-falzmarke-oben"></div>
             <div class="brief-falzmarke brief-falzmarke-unten"></div>
 
-            ${absender.trim()
-                ? `<div class="brief-absender-block">${esc(absender)}</div>`
+            ${absenderBlock
+                ? `<div class="brief-absender-block">${esc(absenderBlock)}</div>`
                 : ""}
 
             ${rueckSender
@@ -525,8 +743,10 @@ function serienbriefErstellen(){
 
             <div class="brief-inhalt">${esc(gefuellterText)}</div>
 
-            <div class="brief-signatur">${esc(signatur)}</div>
+            <div class="brief-signatur">${esc(signaturBlock)}</div>
         </div>`;
+
+        return briefSeite + rueckantwortSeite();
     }).join("");
 
     ansicht.innerHTML = `
@@ -554,25 +774,20 @@ function serienbriefErstellen(){
     ansicht.style.display = "block";
     document.body.classList.add("serienbrief-modus");
 
-    // Sendungen fuer die spaetere Post-Aktion merken
     window.__sbSendungen = sendungen;
 }
 
 function serienbriefDrucken(){
     window.print();
-    // Nach dem Druckdialog: Rueckfrage
     setTimeout(serienbriefPostAktion, 400);
 }
 
 function serienbriefPostAktion(){
     const sendungen = window.__sbSendungen;
     if(!sendungen || sendungen.length === 0){ return; }
-
     const alleKunden = [];
     sendungen.forEach(s => alleKunden.push(...s.personen));
     const anzahl = alleKunden.length;
-
-    // Rueckfrage mit den beiden Optionen
     const modal = document.getElementById("serienbriefPostModal");
     if(!modal){ return; }
     const inhalt = document.getElementById("serienbriefPostInhalt");
@@ -596,14 +811,11 @@ function serienbriefPostAktion(){
 function serienbriefPostBestaetigen(){
     const sendungen = window.__sbSendungen;
     if(!sendungen){ serienbriefPostModalSchliessen(); return; }
-
     const macheTermin = document.getElementById("sbPostTermin").checked;
     const macheMarker = document.getElementById("sbPostMarker").checked;
     const heute = new Date().toISOString().split("T")[0];
-
     let terminCount = 0;
     let markerCount = 0;
-
     sendungen.forEach(s => {
         s.personen.forEach(p => {
             const k = findeKunde(p.id);
@@ -633,17 +845,14 @@ function serienbriefPostBestaetigen(){
             }
         });
     });
-
     if(typeof triggerAutoSave === "function"){ triggerAutoSave(); }
     if(typeof renderKunden === "function"){ renderKunden(); }
     if(typeof kontaktListenAktualisieren === "function"){
         kontaktListenAktualisieren();
     }
-
     serienbriefPostModalSchliessen();
     serienbriefSchliessen();
     serienbriefPanelRendern();
-
     alert("Fertig. " +
           (macheTermin ? terminCount + " Info-Termine angelegt. " : "") +
           (macheMarker ? markerCount + " WB-Marker entfernt." : ""));
@@ -674,7 +883,6 @@ function serienbriefSchliessen(){
    automatisch aktualisieren
 ===================================================== */
 
-// Hook: wenn selektionTrefferAnzeigen bereits definiert ist, erweitern
 if(typeof selektionTrefferAnzeigen === "function"){
     const _origST = selektionTrefferAnzeigen;
     selektionTrefferAnzeigen = function(){

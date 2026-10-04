@@ -3088,6 +3088,17 @@ body.serienbrief-modus{
     .brief-seite:last-child{
         page-break-after:auto;
     }
+    .brief-rueckantwort{
+        margin:0 !important;
+        box-shadow:none !important;
+        width:auto !important;
+        min-height:0 !important;
+        page-break-before:always;
+        page-break-after:always;
+    }
+    .brief-rueckantwort:last-child{
+        page-break-after:auto;
+    }
     @page{
         size:A4;
         margin:0;
@@ -3315,4 +3326,163 @@ body.serienbrief-modus{
     margin-top:12px;
     align-items:center;
     flex-wrap:wrap;
+}
+
+/* =====================================================
+   SERIENBRIEF v2 — Panel-Bloecke (Firma / Kampagne)
+===================================================== */
+
+.sb-block{
+    margin:12px 0;
+    background:#faf7f8;
+    border:1px solid #eadde0;
+    border-radius:5px;
+    padding:0;
+}
+
+.sb-block > summary{
+    cursor:pointer;
+    padding:10px 14px;
+    font-weight:600;
+    color:var(--c-primary-dunkel, #4d1220);
+    user-select:none;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.sb-block > summary::marker{
+    color:var(--c-primary, #7a1e35);
+}
+
+.sb-block-inhalt{
+    padding:10px 14px 14px 14px;
+    border-top:1px solid #eadde0;
+}
+
+.sb-ok{
+    display:inline-block;
+    padding:2px 8px;
+    background:#d4edda;
+    color:#155724;
+    font-size:11px;
+    border-radius:3px;
+    font-weight:500;
+}
+
+.sb-nok{
+    display:inline-block;
+    padding:2px 8px;
+    background:#fff4dc;
+    color:#8a5a00;
+    font-size:11px;
+    border-radius:3px;
+    font-weight:500;
+}
+
+.sb-zwei-spalten{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:6px;
+}
+
+.sb-oeffnungszeiten{
+    width:100%;
+    min-height:70px;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.4;
+}
+
+.sb-ruckantwort-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:10px 0;
+    padding:8px 10px;
+    background:#fff;
+    border:1px solid #eadde0;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.sb-feld-hinweis-klein{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    margin-top:3px;
+}
+
+/* =====================================================
+   SERIENBRIEF v2 — RUECKANTWORT auf eigener Seite
+===================================================== */
+
+.brief-rueckantwort{
+    background:#fff;
+    width:210mm;
+    min-height:297mm;
+    box-sizing:border-box;
+    margin:0 auto 20px auto;
+    padding:25mm 20mm 20mm 25mm;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    position:relative;
+    font-family:"Helvetica","Arial",sans-serif;
+    line-height:1.5;
+    color:#000;
+    page-break-after:always;
+    page-break-before:always;
+}
+
+.brief-rueckantwort:last-child{
+    page-break-after:auto;
+}
+
+.ra-schere{
+    font-size:10pt;
+    letter-spacing:0.5mm;
+    margin-bottom:10mm;
+    color:#555;
+}
+
+.ra-titel{
+    font-size:1.15em;
+    font-weight:700;
+    margin:0 0 8mm 0;
+}
+
+.ra-adresse{
+    margin-bottom:10mm;
+    line-height:1.4;
+}
+
+.ra-adresse-label{
+    font-size:0.85em;
+    color:#555;
+    margin-bottom:2mm;
+}
+
+.ra-feld{
+    margin-bottom:8mm;
+}
+
+.ra-feld-label{
+    font-size:0.9em;
+    margin-bottom:3mm;
+}
+
+.ra-feld-linie{
+    border-bottom:1px solid #000;
+    height:8mm;
+    width:100%;
+}
+
+.ra-datenschutz{
+    margin-top:12mm;
+    padding-top:4mm;
+    border-top:1px solid #ccc;
+    font-size:0.75em;
+    color:#555;
+    line-height:1.4;
+    font-style:italic;
 }
