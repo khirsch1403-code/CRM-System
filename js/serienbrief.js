@@ -61,11 +61,9 @@ const SB_DEFAULT_TEXT =
   + "diese kurz gemeinsam mit Ihnen klären – unkompliziert, in wenigen "
   + "Minuten und selbstverständlich kostenfrei."
   + "\n\n"
-  + "**Bitte geben Sie uns bis zum {frist} eine kurze Rückmeldung. "
+  + "Bitte geben Sie uns bis zum **{frist}** eine kurze Rückmeldung. "
   + "Am schnellsten erreichen Sie uns telefonisch oder per WhatsApp "
-  + "unter {tel} oder per E-Mail unter {email}. Alternativ nutzen Sie "
-  + "einfach den vorbereiteten Antwortabschnitt unten – er ist in "
-  + "weniger als einer Minute ausgefüllt.**"
+  + "unter **{tel}** oder per E-Mail unter **{email}**."
   + "\n\n"
   + "Ihre Zufriedenheit und die Sicherheit Ihrer Vorsorge liegen uns "
   + "am Herzen. Wir freuen uns, bald von Ihnen zu hören.";
@@ -541,13 +539,6 @@ function serienbriefPanelRendern(){
                     </div>
                 </div>
 
-                <label class="sb-ruckantwort-label">
-                    <input type="checkbox"
-                        ${fd.rueckantwortAktiv ? "checked" : ""}
-                        onchange="sbFeldGespeichert('${SB_LS_RUECKANTWORT}', this.checked ? '1' : '0')">
-                    Rückantwort-Abschnitt mitdrucken (zweite Seite)
-                </label>
-
                 <label class="sb-feld-label">Betreff <span class="sb-feld-hinweis">(fett über der Anrede)</span></label>
                 <input type="text" class="crm-input sb-betreff-input"
                     oninput="sbFeldGespeichert('${SB_LS_BETREFF}', this.value)"
@@ -815,8 +806,6 @@ function _serienbriefErstellenImpl(){
 
             <!-- Grußformel + Signatur -->
             <div class="brief-signatur">${sigHtml}</div>
-
-            ${rueckantwortBlock()}
 
         </div>`;
     }).join("");
