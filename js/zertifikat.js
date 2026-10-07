@@ -201,9 +201,14 @@ function zertBetragFormatieren(n){
 }
 
 function zertAntragsnummer(kunde){
-    // Letzte 8 Ziffern der Kunden-ID (ab Fix: numerisch, lang)
-    const s = String(kunde && kunde.id != null ? kunde.id : "");
-    return s.slice(-8);
+    // Letzte 8 Ziffern der Party-ID (= das was oben am Kunden steht).
+    // Fallback auf die interne CRM-ID, wenn keine Party-ID vorhanden.
+    if(!kunde){ return ""; }
+    const party = (kunde.partyIds && kunde.partyIds[0]) || "";
+    const quelle = party ? String(party) : String(kunde.id != null ? kunde.id : "");
+    // Nur Ziffern (robust gegen Leerzeichen, Bindestriche etc.)
+    const nurZiffern = quelle.replace(/\D+/g, "");
+    return nurZiffern.slice(-8);
 }
 
 function zertAnrede(kunde){
@@ -331,8 +336,10 @@ async function _zertifikatErstellenImpl(kunde){
     const geburtsdatum = String(kunde.geburtsdatum || "").trim();
     const betragStr    = zertBetragFormatieren(betrag);
     const heute        = new Date();
-    const datumStr     = zertDatumMitGueltigkeit(heute);
     const gueltigBis   = zertGueltigBisDatum(heute);
+    // PDF-Feld "Datum" ist laut Vorlage "Bereitschaftserklärung bis zum Jahr"
+    // und hat MaxLen 10 → nur Gueltigkeitsdatum TT.MM.JJJJ
+    const datumStr     = gueltigBis;
     const adpBlock     = zertBeraterAdpBlock(berater);
 
     function _setField(name, wert){
