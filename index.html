@@ -284,6 +284,16 @@
                 accept=".xlsx,.xls,.xlsm"
                 style="display:none;">
 
+            <details class="klapp-panel" style="margin-top:18px;">
+
+                <summary>👤 Berater-Daten (für Finanzierungszertifikate)</summary>
+
+                <div class="klapp-inhalt" id="zertBeraterPanel">
+                    <!-- wird von zertifikat.js gerendert -->
+                </div>
+
+            </details>
+
         </div>
 
     </details>
@@ -1204,6 +1214,7 @@
 <script src="js/auto-backup.js"></script>
 <script src="js/serienbrief.js"></script>
 <script src="js/selektions-rueckimport.js"></script>
+<script src="js/zertifikat.js"></script>
 
 <!-- =====================================================
      SERIENBRIEF-DRUCKVORSCHAU (Vollbild)
@@ -1227,6 +1238,37 @@
             <button class="crm-button crm-button-primary"
                 onclick="serienbriefPostBestaetigen()">
                 Übernehmen
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================
+     ZERTIFIKAT: Betrags-Abfrage
+===================================================== -->
+
+<div id="zertBetragModal" class="modal-overlay" style="z-index:10002;">
+    <div class="modal">
+        <h2>Finanzierungszertifikat</h2>
+        <p style="margin:4px 0 10px 0;color:#555;">
+            Bitte den Finanzierungsbetrag in Euro eingeben.
+            Nur Ziffern (z.&nbsp;B. 350000).
+        </p>
+        <input
+            id="zertBetragInput"
+            type="text"
+            inputmode="numeric"
+            class="crm-input"
+            placeholder="350000"
+            onkeydown="if(event.key==='Enter'){ zertBetragBestaetigen(); }">
+        <div class="modal-buttons">
+            <button class="crm-button"
+                onclick="zertBetragAbbrechen()">
+                Abbrechen
+            </button>
+            <button class="crm-button crm-button-primary"
+                onclick="zertBetragBestaetigen()">
+                PDF erstellen
             </button>
         </div>
     </div>

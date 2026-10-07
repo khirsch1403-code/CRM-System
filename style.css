@@ -3539,3 +3539,43 @@ body.serienbrief-modus{
 .brief-rueckantwort-legacy{
     display:none;
 }
+
+/* =====================================================
+   FINANZIERUNGSZERTIFIKAT — Berater-Panel + Betrag-Modal
+===================================================== */
+
+#zertBeraterPanel .zert-berater-hinweis{
+    font-size:0.9em;
+    color:#555;
+    margin:4px 0 12px 0;
+}
+#zertBeraterPanel .zert-berater-hinweis .sb-ok{
+    color:#1a8a1a;
+    font-weight:600;
+    margin-left:6px;
+}
+#zertBeraterPanel .zert-berater-hinweis .sb-nok{
+    color:#c0392b;
+    font-weight:600;
+    margin-left:6px;
+}
+#zertBeraterPanel .zert-ber-grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:6px;
+}
+#zertBeraterPanel .sb-feld-label{
+    display:block;
+    font-size:0.85em;
+    color:#444;
+    margin-top:8px;
+    margin-bottom:3px;
+}
+#zertBetragModal .modal{
+    max-width:420px;
+}
+#zertBetragModal input{
+    font-size:1.1em;
+    text-align:right;
+}

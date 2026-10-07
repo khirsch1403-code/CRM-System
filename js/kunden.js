@@ -469,6 +469,10 @@ function kundeOeffnen(id){
 
 <div class="kd-archivieren">
 
+    <button class="crm-button crm-button-klein" onclick="zertifikatErstellen(aktuellerKunde)" title="Finanzierungszertifikat als PDF erzeugen">
+        📄 Zertifikat erstellen
+    </button>
+
     <button class="crm-button crm-button-klein crm-button-gefahr" onclick="kundeArchivieren()">
         Kunde archivieren
     </button>
