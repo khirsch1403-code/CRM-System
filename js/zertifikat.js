@@ -359,56 +359,11 @@ async function _zertifikatErstellenImpl(kunde){
 
     const neuesPdf = await pdfDoc.save();
 
-    // Blob + Dateiname fuer Download/Share aufbereiten
+    // Download
     const blob      = new Blob([neuesPdf], { type: "application/pdf" });
     const dateiname = zertDateiname(kunde);
-    const email     = (kunde.emails && kunde.emails[0]) || "";
-    const anredeTxt = (kunde.anrede === "Frau") ? "Sehr geehrte Frau " + kunde.nachname
-                    : (kunde.anrede === "Herr") ? "Sehr geehrter Herr " + kunde.nachname
-                    : "Sehr geehrte Damen und Herren";
-    const subject = "Ihr Finanzierungszertifikat";
-    const body =
-        anredeTxt + ",\n\n"
-      + "anbei erhalten Sie Ihr persönliches Finanzierungszertifikat "
-      + "mit der Angebotsnummer " + antragsnr + ".\n\n"
-      + "Das Zertifikat ist bis zum " + gueltigBis + " gültig.\n\n"
-      + "Bei Rückfragen stehe ich Ihnen jederzeit zur Verfügung.\n\n"
-      + "Mit freundlichen Grüßen\n"
-      + berater.name
-      + (berater.funktion ? "\n" + berater.funktion : "")
-      + (berater.firma ? "\n" + berater.firma : "");
-
-    // 1. Versuch: Web Share API — PDF kommt direkt als Anhang mit
-    //    (Chrome/Edge auf Windows oeffnen den System-Share-Dialog;
-    //    Mail/Outlook erscheint dort mit angehaengter Datei).
-    const file = new File([blob], dateiname, { type: "application/pdf" });
-    let geshart = false;
-    try{
-        if(navigator.canShare && navigator.canShare({ files: [file] })){
-            await navigator.share({
-                files: [file],
-                title: subject,
-                text:  body
-            });
-            geshart = true;
-        }
-    }catch(e){
-        // User hat Share-Dialog abgebrochen oder Fehler -> Fallback
-        if(e && e.name !== "AbortError"){
-            console.warn("Web Share fehlgeschlagen:", e);
-        } else if(e && e.name === "AbortError"){
-            // Nutzer hat Share bewusst abgebrochen -> nicht in Fallback laufen
-            return;
-        }
-    }
-
-    if(geshart){
-        return;
-    }
-
-    // 2. Fallback: Download + mailto (ohne Anhang, Browser-Limitierung)
-    const url = URL.createObjectURL(blob);
-    const a   = document.createElement("a");
+    const url       = URL.createObjectURL(blob);
+    const a         = document.createElement("a");
     a.href = url;
     a.download = dateiname;
     document.body.appendChild(a);
@@ -416,10 +371,28 @@ async function _zertifikatErstellenImpl(kunde){
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 60000);
 
+    // mailto-Vorschlag falls E-Mail vorhanden
+    const email = (kunde.emails && kunde.emails[0]) || "";
     if(email){
+        const subject = "Ihr Finanzierungszertifikat";
+        const anredeTxt = (kunde.anrede === "Frau") ? "Sehr geehrte Frau " + kunde.nachname
+                        : (kunde.anrede === "Herr") ? "Sehr geehrter Herr " + kunde.nachname
+                        : "Sehr geehrte Damen und Herren";
+        const body =
+            anredeTxt + ",\n\n"
+          + "anbei erhalten Sie Ihr persönliches Finanzierungszertifikat "
+          + "mit der Angebotsnummer " + antragsnr + ".\n\n"
+          + "Das Zertifikat ist bis zum " + gueltigBis + " gültig.\n\n"
+          + "Bei Rückfragen stehe ich Ihnen jederzeit zur Verfügung.\n\n"
+          + "Mit freundlichen Grüßen\n"
+          + berater.name
+          + (berater.funktion ? "\n" + berater.funktion : "")
+          + (berater.firma ? "\n" + berater.firma : "");
         const mailto = "mailto:" + encodeURIComponent(email)
                      + "?subject=" + encodeURIComponent(subject)
                      + "&body="    + encodeURIComponent(body);
+        // Erst nach kurzer Pause, damit der Download-Dialog nicht
+        // mit dem Mail-Programm kollidiert.
         setTimeout(() => { window.location.href = mailto; }, 500);
     }
 }
