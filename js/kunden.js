@@ -28,7 +28,8 @@ kennzeichen:{
     nurTelefon:false,
     nurMail:false,
     bestandVerlassen:false,
-    wichtigbrief:false
+    wichtigbrief:false,
+    googleReview:false
 },
 
         termine:[],
@@ -146,6 +147,7 @@ function renderKunden(){
     ${kunde.kennzeichen.nurMail ? '<span class="tag" style="background:#198754;color:white;">M</span>' : ''}
     ${kunde.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#561526;color:white;">BV</span>' : ''}
     ${kunde.kennzeichen.wichtigbrief ? '<span class="tag" style="background:#d9822b;color:white;">WB</span>' : ''}
+    ${kunde.kennzeichen.googleReview ? '<span class="tag" style="background:#DAA520;color:white;" title="Google-Review vorhanden">★</span>' : ''}
     </strong>
     <br>
     <span class="kk-ort">${esc(kunde.plz)} ${esc(kunde.ort)}</span>
@@ -210,7 +212,8 @@ function sidebarBadges(k){
            (k.kennzeichen.nurTelefon ? '<span class="tag" style="background:#3d2c7a;color:white;">T</span>' : '') +
            (k.kennzeichen.nurMail ? '<span class="tag" style="background:#2d6a4f;color:white;">M</span>' : '') +
            (k.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#4e1220;color:white;">BV</span>' : '') +
-           (k.kennzeichen.wichtigbrief ? '<span class="tag" style="background:#d9822b;color:white;">WB</span>' : '');
+           (k.kennzeichen.wichtigbrief ? '<span class="tag" style="background:#d9822b;color:white;">WB</span>' : '') +
+           (k.kennzeichen.googleReview ? '<span class="tag" style="background:#DAA520;color:white;" title="Google-Review vorhanden">★</span>' : '');
 }
 
 function sidebarKarteAktualisieren(){
@@ -270,6 +273,10 @@ function kundeOeffnen(id){
             <button class="kennzeichen-btn ${k.kennzeichen.wichtigbrief ? 'kennzeichen-aktiv-orange' : ''}"
             onclick="toggleKennzeichen('wichtigbrief')"
             title="Kontaktdaten fehlen oder sind falsch — Kunde per Brief anschreiben">Wichtigbrief</button>
+
+            <button class="kennzeichen-btn ${k.kennzeichen.googleReview ? 'kennzeichen-aktiv-gold' : ''}"
+            onclick="toggleKennzeichen('googleReview')"
+            title="Kunde hat bereits eine Google-Review hinterlassen">★ Google-Review</button>
 
         </div>
 
@@ -446,6 +453,7 @@ function kundeOeffnen(id){
             ${person.kennzeichen.nurMail ? '<span class="kennzeichen-badge kennzeichen-badge-gruen">Mail</span>' : ''}
             ${person.kennzeichen.bestandVerlassen ? '<span class="kennzeichen-badge kennzeichen-badge-dunkelrot">BV</span>' : ''}
             ${person.kennzeichen.wichtigbrief ? '<span class="kennzeichen-badge kennzeichen-badge-orange">WB</span>' : ''}
+            ${person.kennzeichen.googleReview ? '<span class="kennzeichen-badge kennzeichen-badge-gold" title="Google-Review vorhanden">★</span>' : ''}
             </div>
         </div>`;
 
@@ -843,7 +851,8 @@ function toggleKennzeichen(name){
             nurTelefon:    "kennzeichen-aktiv-blau",
             nurMail:       "kennzeichen-aktiv-gruen",
             bestandVerlassen: "kennzeichen-aktiv-dunkelrot",
-            wichtigbrief:  "kennzeichen-aktiv-orange"
+            wichtigbrief:  "kennzeichen-aktiv-orange",
+            googleReview:  "kennzeichen-aktiv-gold"
         };
         const klasse = klassenMap[name];
         if(klasse){

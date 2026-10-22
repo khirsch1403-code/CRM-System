@@ -122,6 +122,13 @@ const SELEKTIONS_FELDER = {
         wert: k => !!(k.kennzeichen && k.kennzeichen.wichtigbrief)
     },
 
+    googleReview: {
+        label: "Google-Review vorhanden",
+        typ: "boolean",
+        gruppe: "Kennzeichen",
+        wert: k => !!(k.kennzeichen && k.kennzeichen.googleReview)
+    },
+
     // --- Aktivität ---
     letzterTerminTage: {
         label: "Letzter Termin (Tage her)",
@@ -789,7 +796,8 @@ function selektionExportieren(){
         "Keine Beratung", "Nur Büro",
         "Nur Telefon", "Nur Mail",
         "Bestand verlassen",
-        "Wichtigbrief"
+        "Wichtigbrief",
+        "Google-Review"
     ];
 
     const zeilen = [kopf];
@@ -825,7 +833,8 @@ function selektionExportieren(){
             k.kennzeichen && k.kennzeichen.nurTelefon ? "ja" : "",
             k.kennzeichen && k.kennzeichen.nurMail ? "ja" : "",
             k.kennzeichen && k.kennzeichen.bestandVerlassen ? "ja" : "",
-            k.kennzeichen && k.kennzeichen.wichtigbrief ? "ja" : ""
+            k.kennzeichen && k.kennzeichen.wichtigbrief ? "ja" : "",
+            k.kennzeichen && k.kennzeichen.googleReview ? "ja" : ""
         ];
 
         const vertraege = k.vertraege || [];

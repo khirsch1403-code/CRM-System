@@ -547,7 +547,8 @@ if(!kunde){
                         nurTelefon:false,
                         nurMail:false,
                         bestandVerlassen:false,
-                        wichtigbrief:false
+                        wichtigbrief:false,
+                        googleReview:false
                     }
 
                 };
@@ -1067,6 +1068,11 @@ function datenPruefen(){
             // Neues Feld "wichtigbrief" bei Alt-Kunden nach-initialisieren
             if(typeof kunde.kennzeichen.wichtigbrief !== "boolean"){
                 kunde.kennzeichen.wichtigbrief = false;
+            }
+
+            // Neues Feld "googleReview" bei Alt-Kunden nach-initialisieren
+            if(typeof kunde.kennzeichen.googleReview !== "boolean"){
+                kunde.kennzeichen.googleReview = false;
             }
 
             if(typeof kunde.anrede !== "string"){

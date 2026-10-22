@@ -697,6 +697,7 @@ input.crm-input{
 .kennzeichen-badge-gruen{ background:var(--c-accent); }
 .kennzeichen-badge-dunkelrot{ background:var(--c-primary-dunkel); }
 .kennzeichen-badge-orange{ background:#d9822b; color:#fff; }
+.kennzeichen-badge-gold{ background:#DAA520; color:#fff; }
 
 /* =====================================================
    TERMIN MODAL HAUSHALT-CHECKBOX
@@ -1313,6 +1314,12 @@ input.crm-input{
 .kennzeichen-aktiv-dunkelrot{
     background:var(--c-primary-dunkel);
     border-color:var(--c-primary-dunkel);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-gold{
+    background:#DAA520;
+    border-color:#DAA520;
     color:#fff;
 }
 
