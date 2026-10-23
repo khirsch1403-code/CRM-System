@@ -3641,3 +3641,58 @@ body.serienbrief-modus{
     color:var(--c-text-schwach);
     font-size:0.85em;
 }
+
+/* =====================================================
+   DESIGN — Preset-Leiste im Design-Modal
+===================================================== */
+
+.design-presets-label{
+    font-size:0.85em;
+    font-weight:600;
+    color:var(--c-text-muted);
+    margin:4px 0 8px 0;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+.design-presets{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:8px;
+    margin-bottom:14px;
+}
+.design-preset{
+    cursor:pointer;
+    border:1.5px solid var(--c-border);
+    border-radius:8px;
+    padding:6px 4px 4px 4px;
+    text-align:center;
+    background:var(--c-surface);
+    transition:border-color 0.15s ease, transform 0.1s ease;
+    user-select:none;
+}
+.design-preset:hover{
+    border-color:var(--c-primary);
+    transform:translateY(-1px);
+}
+.design-preset-vorschau{
+    display:flex;
+    height:28px;
+    border-radius:5px;
+    overflow:hidden;
+    margin-bottom:4px;
+    border:1px solid var(--c-border);
+}
+.design-preset-vorschau span{
+    flex:1;
+    display:block;
+}
+.design-preset-name{
+    font-size:0.75em;
+    color:var(--c-text);
+    font-weight:500;
+}
+.design-trenner{
+    height:1px;
+    background:var(--c-border);
+    margin:4px 0 10px 0;
+}

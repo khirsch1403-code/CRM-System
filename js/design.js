@@ -19,6 +19,51 @@ const DESIGN_STANDARD = {
     border:  "#e8d9d4"
 };
 
+/* 5 Presets — klickbar als Vorschau, einzelne Felder bleiben
+   nach Preset-Auswahl weiter manuell anpassbar. */
+const DESIGN_PRESETS = {
+    bordeaux: {
+        name: "Bordeaux",
+        primary: "#7a1e35",
+        accent:  "#8b6914",
+        bg:      "#f5eeec",
+        text:    "#1a1210",
+        border:  "#e8d9d4"
+    },
+    nachtblau: {
+        name: "Nachtblau",
+        primary: "#1e3a5f",
+        accent:  "#c99a2e",
+        bg:      "#eef2f7",
+        text:    "#0f1a2a",
+        border:  "#d4dde8"
+    },
+    wald: {
+        name: "Wald",
+        primary: "#2d5a3d",
+        accent:  "#b8862a",
+        bg:      "#f0f2ec",
+        text:    "#141a14",
+        border:  "#d7ddd0"
+    },
+    sonnenaufgang: {
+        name: "Sonnenaufgang",
+        primary: "#b84f1a",
+        accent:  "#5a7d3a",
+        bg:      "#fdf4ec",
+        text:    "#2a1810",
+        border:  "#f0ddc8"
+    },
+    graphit: {
+        name: "Graphit",
+        primary: "#3a3a3a",
+        accent:  "#6b8e9a",
+        bg:      "#f2f2f0",
+        text:    "#1a1a1a",
+        border:  "#d8d8d6"
+    }
+};
+
 /* ---- Farbkonvertierung Hex <-> HSL ---- */
 
 function _hexToHsl(hex){
@@ -173,6 +218,7 @@ designAnwenden(designLaden());
 ===================================================== */
 
 function designModalOeffnen(){
+    designPresetLeisteRendern();
     designModalFelderFuellen(designLaden());
     const modal = document.getElementById("designModal");
     if(modal){ modal.style.display = "flex"; }
@@ -227,4 +273,43 @@ function designAbbrechen(){
     // Live-Vorschau rueckgaengig → wieder den gespeicherten Stand setzen
     designAnwenden(designLaden());
     designModalSchliessen();
+}
+
+/* Preset auswaehlen: Felder fuellen + Live-Vorschau.
+   Noch nicht gespeichert — "Uebernehmen" ist weiter noetig. */
+function designPresetAnwenden(key){
+    const p = DESIGN_PRESETS[key];
+    if(!p){ return; }
+    const d = {
+        primary: p.primary,
+        accent:  p.accent,
+        bg:      p.bg,
+        text:    p.text,
+        border:  p.border
+    };
+    designModalFelderFuellen(d);
+    designAnwenden(d);
+}
+
+/* HTML fuer die Preset-Leiste. Wird beim Modal-Oeffnen in den
+   Container #designPresetListe geschrieben. */
+function designPresetLeisteRendern(){
+    const host = document.getElementById("designPresetListe");
+    if(!host){ return; }
+    const stuecke = [];
+    Object.keys(DESIGN_PRESETS).forEach(key => {
+        const p = DESIGN_PRESETS[key];
+        stuecke.push(
+            '<div class="design-preset" onclick="designPresetAnwenden(\''
+            + key + '\')" title="' + p.name + ' anwenden">'
+          +   '<div class="design-preset-vorschau">'
+          +     '<span style="background:' + p.primary + '"></span>'
+          +     '<span style="background:' + p.accent  + '"></span>'
+          +     '<span style="background:' + p.bg      + '"></span>'
+          +   '</div>'
+          +   '<div class="design-preset-name">' + p.name + '</div>'
+          + '</div>'
+        );
+    });
+    host.innerHTML = stuecke.join("");
 }
