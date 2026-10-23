@@ -440,10 +440,6 @@ function erledigteAufgabenBereinigen(){
    AUFGABEN DASHBOARD
 ===================================================== */
 
-function offeneAufgabenAnzahl(){
-    return aufgaben.filter(aufgabe => aufgabe.status !== "Erledigt").length;
-}
-
 /* =====================================================
    AUFGABE BUTTON
 ===================================================== */

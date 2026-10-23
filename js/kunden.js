@@ -868,12 +868,6 @@ function toggleKennzeichen(name){
 
 }
 
-function kennzeichenHinzufuegen(){
-
-    return;
-
-}
-
 /* =====================================================
    KUNDE ARCHIVIEREN
 ===================================================== */

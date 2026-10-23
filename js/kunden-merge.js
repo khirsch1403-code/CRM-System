@@ -2,27 +2,6 @@
    DOPPLUNGSERKENNUNG + ZUSAMMENFÜHREN
    ===================================================== */
 
-function normalisiereName(wert){
-    return String(wert || "").trim().toLowerCase();
-}
-
-function normalisiereGeburtsdatum(wert){
-    // Formate tolerant behandeln: "1990-01-15", "15.01.1990", Date-Objekt
-    const s = String(wert || "").trim();
-    if(!s){ return ""; }
-    const m1 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if(m1){ return m1[3] + "." + m1[2] + "." + m1[1]; }
-    const m2 = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
-    if(m2){
-        const tag  = m2[1].padStart(2,"0");
-        const mon  = m2[2].padStart(2,"0");
-        let jahr   = m2[3];
-        if(jahr.length === 2){ jahr = (parseInt(jahr,10) > 30 ? "19" : "20") + jahr; }
-        return tag + "." + mon + "." + jahr;
-    }
-    return s;
-}
-
 function findeAlleDopplungen(){
     /* Gibt Paare [k1, k2] zurueck, die als potenzielles Duplikat gelten.
        Kriterien (tolerant — es folgt IMMER der Merge-Dialog):

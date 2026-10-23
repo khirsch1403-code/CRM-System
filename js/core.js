@@ -709,14 +709,6 @@ function normalisiereStrasseKey(s){
     return t;
 }
 
-function normalisiereOrtKey(s){
-    return _faltUmlaute(String(s || ""))
-        .toLowerCase()
-        .replace(/[.,;:'`´‘’]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
 function normalisiereGeburtsdatumISO(s){
     if(!s){ return ""; }
     const t = String(s).trim();

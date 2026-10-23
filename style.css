@@ -3265,16 +3265,6 @@ body.serienbrief-modus{
     font-size:11px;
 }
 
-/* =====================================================
-   LEGACY — alte Serienbrief-Regeln ohne Wirkung
-   Werden durch das neue Flow-Layout oben ersetzt.
-===================================================== */
-
-/* Alte Betreff-Position (absolute Layout) — abgeloest */
-.brief-betreff-legacy-margin{
-    margin-top:120mm;
-}
-
 /* Wenn Betreff da ist, ruecht der Inhalt darunter zusammen
    (Betreff traegt bereits den Abstand von oben) */
 .brief-betreff + .brief-inhalt{
@@ -3304,27 +3294,6 @@ body.serienbrief-modus{
     color:var(--c-primary-dunkel, #4d1220);
     font-style:normal;
     font-weight:500;
-}
-
-/* Absender-Block rechts oben im Brief (mehrzeilig, DIN 5008)
-   Position: auf gleicher Hoehe wie das Anschriftfeld (top:50mm)
-   und weit genug rechts, dass er ausserhalb des Kuvert-Sicht-
-   fensters landet. */
-/* =====================================================
-   LEGACY — alter absolut-positionierter Absender-Block
-   Wird durch .brief-kopf-rechts > .brief-absender-block
-   im Flow-Layout ersetzt.
-===================================================== */
-
-.brief-absender-block-legacy{
-    position:absolute;
-    top:50mm;
-    right:15mm;
-    width:68mm;
-    font-size:0.8em;
-    line-height:1.35;
-    white-space:pre-wrap;
-    color:#000;
 }
 
 /* =====================================================
@@ -3541,11 +3510,6 @@ body.serienbrief-modus{
 /* =====================================================
    SERIENBRIEF v2 — RUECKANTWORT auf eigener Seite
 ===================================================== */
-
-/* Legacy — alte Rueckantwort als eigene Seite (jetzt im Textfluss) */
-.brief-rueckantwort-legacy{
-    display:none;
-}
 
 /* =====================================================
    FINANZIERUNGSZERTIFIKAT — Berater-Panel + Betrag-Modal

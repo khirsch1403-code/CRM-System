@@ -172,12 +172,6 @@ function zertLadePdfLib(){
    HILFSFUNKTIONEN
 ===================================================== */
 
-function zertMonatDeutsch(d){
-    const monate = ["Jan.","Feb.","Mär.","Apr.","Mai","Jun.",
-                    "Jul.","Aug.","Sep.","Okt.","Nov.","Dez."];
-    return monate[d.getMonth()] + " " + d.getFullYear();
-}
-
 function zertGueltigBisDatum(d){
     // Zertifikat ist 30 Tage ab Ausstellung gueltig
     const g = new Date(d.getTime());
@@ -186,10 +180,6 @@ function zertGueltigBisDatum(d){
     const mm = String(g.getMonth() + 1).padStart(2, "0");
     const jj = g.getFullYear();
     return tt + "." + mm + "." + jj;
-}
-
-function zertDatumMitGueltigkeit(d){
-    return zertMonatDeutsch(d) + " · gültig bis " + zertGueltigBisDatum(d);
 }
 
 function zertBetragFormatieren(n){
