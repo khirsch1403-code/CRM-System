@@ -70,6 +70,14 @@ function datenExportieren(dateiname){
 
         abschluesse: abschluesse,
 
+        /* Berater-Daten fuer Finanzierungszertifikate.
+           Liegen sonst nur in localStorage und waeren beim
+           Loeschen der Browserdaten weg. */
+        beraterDaten:
+        (typeof zertBeraterLaden === "function")
+            ? zertBeraterLaden()
+            : null,
+
         exportDatum:
         new Date()
         .toISOString()
@@ -250,6 +258,16 @@ function datenLaden(datei){
 
             aktuellerKunde =
             null;
+
+            // Berater-Daten aus Backup wiederherstellen (falls im
+            // JSON enthalten — aeltere Backups haben das Feld nicht).
+            if(daten.beraterDaten
+               && typeof zertBeraterAlleSpeichern === "function"){
+                zertBeraterAlleSpeichern(daten.beraterDaten);
+                if(typeof zertBeraterPanelRendern === "function"){
+                    zertBeraterPanelRendern();
+                }
+            }
 
             // Nach Backup-Wiederherstellung: ID-Merkliste neu bauen
             // und Kollisionen bereinigen. Kompatibilitaet zu aelteren

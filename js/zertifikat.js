@@ -42,6 +42,25 @@ function zertBeraterFeldSpeichern(key, wert){
     try{ localStorage.setItem(key, wert); }catch(_){}
 }
 
+/* Alle Berater-Felder in einem Rutsch setzen (fuer
+   Backup-Restore). Fehlende Keys im Input werden geloescht,
+   leere Strings bleiben erhalten. */
+function zertBeraterAlleSpeichern(obj){
+    if(!obj || typeof obj !== "object"){ return; }
+    const map = [
+        [ZERT_LS_BERATER_NAME,     obj.name],
+        [ZERT_LS_BERATER_FUNKTION, obj.funktion],
+        [ZERT_LS_BERATER_FIRMA,    obj.firma],
+        [ZERT_LS_BERATER_STRASSE,  obj.strasse],
+        [ZERT_LS_BERATER_PLZORT,   obj.plzOrt],
+        [ZERT_LS_BERATER_TEL,      obj.tel],
+        [ZERT_LS_BERATER_EMAIL,    obj.email]
+    ];
+    map.forEach(([key, wert]) => {
+        try{ localStorage.setItem(key, wert == null ? "" : String(wert)); }catch(_){}
+    });
+}
+
 function zertBeraterVollstaendig(b){
     return !!(b.name && b.firma && b.tel && b.email);
 }

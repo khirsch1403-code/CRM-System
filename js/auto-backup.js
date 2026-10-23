@@ -222,6 +222,8 @@ async function autoBackupJetzt(manuell){
             kunden: kunden,
             aufgaben: aufgaben,
             abschluesse: abschluesse,
+            beraterDaten: (typeof zertBeraterLaden === "function")
+                ? zertBeraterLaden() : null,
             exportDatum: new Date().toISOString(),
             typ: "auto-backup"
         };
