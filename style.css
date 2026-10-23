@@ -691,11 +691,11 @@ input.crm-input{
     color:#fff;
 }
 
-.kennzeichen-badge-rot{ background:var(--c-danger); }
-.kennzeichen-badge-grau{ background:#667085; }
-.kennzeichen-badge-blau{ background:var(--c-primary); }
-.kennzeichen-badge-gruen{ background:var(--c-accent); }
-.kennzeichen-badge-dunkelrot{ background:var(--c-primary-dunkel); }
+.kennzeichen-badge-rot{ background:#7a1e35; color:#fff; }
+.kennzeichen-badge-grau{ background:#6c757d; color:#fff; }
+.kennzeichen-badge-blau{ background:#0d6efd; color:#fff; }
+.kennzeichen-badge-gruen{ background:#198754; color:#fff; }
+.kennzeichen-badge-dunkelrot{ background:#561526; color:#fff; }
 .kennzeichen-badge-orange{ background:#d9822b; color:#fff; }
 .kennzeichen-badge-gold{ background:#DAA520; color:#fff; }
 
@@ -1288,32 +1288,32 @@ input.crm-input{
 }
 
 .kennzeichen-aktiv-rot{
-    background:var(--c-primary);
-    border-color:var(--c-danger);
+    background:#7a1e35;
+    border-color:#7a1e35;
     color:#fff;
 }
 
 .kennzeichen-aktiv-grau{
-    background:#667085;
-    border-color:#667085;
+    background:#6c757d;
+    border-color:#6c757d;
     color:#fff;
 }
 
 .kennzeichen-aktiv-blau{
-    background:var(--c-primary);
-    border-color:var(--c-primary);
+    background:#0d6efd;
+    border-color:#0d6efd;
     color:#fff;
 }
 
 .kennzeichen-aktiv-gruen{
-    background:var(--c-accent);
-    border-color:var(--c-accent);
+    background:#198754;
+    border-color:#198754;
     color:#fff;
 }
 
 .kennzeichen-aktiv-dunkelrot{
-    background:var(--c-primary-dunkel);
-    border-color:var(--c-primary-dunkel);
+    background:#561526;
+    border-color:#561526;
     color:#fff;
 }
 

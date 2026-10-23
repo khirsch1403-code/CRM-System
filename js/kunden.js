@@ -207,7 +207,7 @@ function findeHaushalt(kunde){
 ===================================================== */
 
 function sidebarBadges(k){
-    const F = KENNZEICHEN_SIDEBAR_FARBEN;
+    const F = KENNZEICHEN_BADGE_FARBEN;
     return (k.kennzeichen.keineBeratung    ? `<span class="tag" style="background:${F.keineBeratung};color:white;">KB</span>` : '') +
            (k.kennzeichen.nurBuero         ? `<span class="tag" style="background:${F.nurBuero};color:white;">B</span>` : '') +
            (k.kennzeichen.nurTelefon       ? `<span class="tag" style="background:${F.nurTelefon};color:white;">T</span>` : '') +

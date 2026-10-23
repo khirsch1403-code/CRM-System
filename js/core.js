@@ -21,27 +21,15 @@ const MONATE_LANG = [
     "Juli",   "August",  "September", "Oktober", "November", "Dezember"
 ];
 
-/* Kennzeichen-Farben: Haupt-Badges (Kundenliste oben) */
+/* Kennzeichen-Farben — einheitlich fuer Haupt-Badge, Sidebar-Badge
+   und Button im Kundenpanel. Semantische Codierung, bewusst
+   unabhaengig vom Design-Theme. */
 const KENNZEICHEN_BADGE_FARBEN = {
     keineBeratung:    "#7a1e35",
     nurBuero:         "#6c757d",
     nurTelefon:       "#0d6efd",
     nurMail:          "#198754",
     bestandVerlassen: "#561526",
-    wichtigbrief:     "#d9822b",
-    googleReview:     "#DAA520"
-};
-
-/* Kennzeichen-Farben: Sidebar-Badges (Kundenliste rechts).
-   Einige Toene sind absichtlich dunkler/kraeftiger als in der
-   Haupt-Ansicht — belassen wir so, damit sie sich im kleineren
-   Kontext deutlicher absetzen. */
-const KENNZEICHEN_SIDEBAR_FARBEN = {
-    keineBeratung:    "#7a1e35",
-    nurBuero:         "#6c757d",
-    nurTelefon:       "#3d2c7a",
-    nurMail:          "#2d6a4f",
-    bestandVerlassen: "#4e1220",
     wichtigbrief:     "#d9822b",
     googleReview:     "#DAA520"
 };
