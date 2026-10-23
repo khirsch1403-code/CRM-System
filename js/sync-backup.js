@@ -19,6 +19,24 @@ function _anredeNormalisieren(wert){
     return "";
 }
 
+/* Partner-Objekt aus einer Excel-Zeile bauen.
+   Erwartet die Spalten "Anrede Partner", "Vorname Partner",
+   "Nachname Partner", "Geburtsdatum Partner".
+   Gibt null zurueck wenn alle vier Felder leer sind. */
+function _partnerAusZeile(zeile){
+    const an = _anredeNormalisieren(zeile["Anrede Partner"] || "");
+    const vn = String(zeile["Vorname Partner"]      || "").trim();
+    const nn = String(zeile["Nachname Partner"]     || "").trim();
+    const gb = String(zeile["Geburtsdatum Partner"] || "").trim();
+    if(!an && !vn && !nn && !gb){ return null; }
+    return {
+        anrede:       an,
+        vorname:      vn,
+        nachname:     nn,
+        geburtsdatum: gb
+    };
+}
+
 function letzterSyncAnzeigeAktualisieren(){
     const el = document.getElementById("letzterSyncAnzeige");
     if(!el){ return; }
@@ -567,7 +585,9 @@ if(!kunde){
                         bestandVerlassen:false,
                         wichtigbrief:false,
                         googleReview:false
-                    }
+                    },
+
+                    partner: _partnerAusZeile(zeile)
 
                 };
 
@@ -661,6 +681,14 @@ if(
                 zeile["Hausnummer"] ||
                 kunde.hausnummer
             ).trim();
+
+            /* Partner: nur ueberschreiben wenn das Excel welchen
+               liefert. Leere Partner-Spalten lassen den im CRM
+               bereits hinterlegten Partner unangetastet. */
+            const importPartner = _partnerAusZeile(zeile);
+            if(importPartner){
+                kunde.partner = importPartner;
+            }
 
             const telefon = normalisiereTelefon(zeile["Telefon bevorzugt"]);
             if(telefon){
