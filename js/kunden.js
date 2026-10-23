@@ -252,7 +252,24 @@ function kundeOeffnen(id){
 
     const k = aktuellerKunde;
 
+    const partnerTraeger = findePartnerVonKunde(k);
+    const partnerBanner = partnerTraeger ? `
+<div class="partner-hinweis-banner">
+    <div>
+        Dieser Kunde ist bei
+        <strong>${esc(partnerTraeger.vorname)} ${esc(partnerTraeger.nachname)}</strong>
+        als Partner hinterlegt.
+    </div>
+    <button class="crm-button crm-button-klein"
+        onclick="partnerVerweisEntfernen(${partnerTraeger.id})"
+        title="Entfernt den Partner-Verweis beim anderen Kunden. Dieser Kunde bleibt bestehen.">
+        Partner-Verweis entfernen
+    </button>
+</div>` : "";
+
     details.innerHTML = `
+
+${partnerBanner}
 
 <div class="kd-kopf">
 
@@ -1165,4 +1182,39 @@ function bestandVerlassenArchivieren(){
     alert(kandidaten.length +
         (kandidaten.length === 1 ? " Kunde" : " Kunden") +
         " ins Archiv verschoben.");
+}
+
+/* =====================================================
+   PARTNER-VERWEIS ENTFERNEN
+   -----------------------------------------------------
+   Wenn ein Kunde als Partner bei einem anderen hinterlegt
+   ist (z.B. Hans hat Partnerin Maria), und Maria wird
+   spaeter zum eigenstaendigen Kunden mit eigenem Vertrag,
+   soll der Partner-Verweis bei Hans entfernt werden.
+   Maria bleibt als separater Kunde bestehen, Hans verliert
+   nur den (jetzt redundanten) Partner-Eintrag.
+===================================================== */
+
+function partnerVerweisEntfernen(traegerKundeId){
+    const traeger = findeKunde(traegerKundeId);
+    if(!traeger){
+        alert("Kunde nicht gefunden.");
+        return;
+    }
+    const altName = traeger.partner
+        ? (traeger.partner.vorname + " " + traeger.partner.nachname).trim()
+        : "(leer)";
+
+    traeger.partner = null;
+    triggerAutoSave();
+
+    /* Aktuelle Ansicht neu rendern — Banner verschwindet */
+    if(aktuellerKunde){
+        kundeOeffnen(aktuellerKunde.id);
+    }
+    renderKunden();
+
+    alert("Partner-Verweis bei " + traeger.vorname + " " + traeger.nachname
+        + " entfernt (war: " + altName + ").\n\n"
+        + "Beide Kunden existieren nun unabhaengig voneinander.");
 }

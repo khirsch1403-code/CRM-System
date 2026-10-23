@@ -800,3 +800,25 @@ function istPersonenDuplikat(a, b){
     if(!vornamenTolerantMatch(a.vorname, b.vorname)){ return false; }
     return true;
 }
+
+/* Sucht einen anderen Kunden, bei dem der uebergebene Kunde
+   als Partner hinterlegt ist. Match ueber Vor+Nachname (tolerant)
+   und — wenn beide Seiten eins haben — Geburtsdatum.
+   Gibt den anderen Kunden zurueck oder null. */
+function findePartnerVonKunde(kunde){
+    if(!kunde || !kunde.vorname || !kunde.nachname){ return null; }
+    const geburtISO = normalisiereGeburtsdatumISO(kunde.geburtsdatum || "");
+    const treffer = kunden.find(andererKunde => {
+        if(!andererKunde || andererKunde.id === kunde.id){ return false; }
+        if(!andererKunde.partner){ return false; }
+        const p = andererKunde.partner;
+        if(!nachnamenTolerantMatch(p.nachname || "", kunde.nachname)){ return false; }
+        if(!vornamenTolerantMatch(p.vorname || "", kunde.vorname)){ return false; }
+        /* Geburtsdatum nur pruefen wenn BEIDE Seiten eins haben.
+           Fehlt eins, zaehlt der Name allein als Treffer. */
+        const partnerISO = normalisiereGeburtsdatumISO(p.geburtsdatum || "");
+        if(geburtISO && partnerISO && geburtISO !== partnerISO){ return false; }
+        return true;
+    });
+    return treffer || null;
+}

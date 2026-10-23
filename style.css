@@ -3817,3 +3817,25 @@ body.serienbrief-modus{
         grid-template-columns:1fr 1fr;
     }
 }
+
+/* =====================================================
+   PARTNER-HINWEIS-BANNER (im Kundenpanel)
+===================================================== */
+
+.partner-hinweis-banner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+    padding:10px 14px;
+    background:var(--c-accent-soft);
+    border:1px solid var(--c-accent);
+    border-left:4px solid var(--c-accent);
+    border-radius:var(--radius-m);
+    color:var(--c-text);
+    font-size:0.9em;
+}
+.partner-hinweis-banner strong{
+    color:var(--c-accent);
+}
