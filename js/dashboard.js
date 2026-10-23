@@ -313,8 +313,7 @@ function produktionsauswertungAktualisieren(){
     const aktJahr = heute.getFullYear();
     const aktMonat = heute.getMonth();
 
-    const monatsnamen = ["Januar","Februar","März","April","Mai","Juni",
-        "Juli","August","September","Oktober","November","Dezember"];
+    const monatsnamen = MONATE_LANG;
 
     const jahresAbschluesse = abschluesse.filter(a =>
         a.datum && new Date(a.datum).getFullYear() === aktJahr

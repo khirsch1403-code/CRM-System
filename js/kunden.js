@@ -141,13 +141,13 @@ function renderKunden(){
             div.innerHTML = `
     <strong class="kk-name">
     ${esc(kunde.vorname)} ${esc(kunde.nachname)}
-    ${kunde.kennzeichen.keineBeratung ? '<span class="tag" style="background:#7a1e35;color:white;">KB</span>' : ''}
-    ${kunde.kennzeichen.nurBuero ? '<span class="tag" style="background:#6c757d;color:white;">B</span>' : ''}
-    ${kunde.kennzeichen.nurTelefon ? '<span class="tag" style="background:#0d6efd;color:white;">T</span>' : ''}
-    ${kunde.kennzeichen.nurMail ? '<span class="tag" style="background:#198754;color:white;">M</span>' : ''}
-    ${kunde.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#561526;color:white;">BV</span>' : ''}
-    ${kunde.kennzeichen.wichtigbrief ? '<span class="tag" style="background:#d9822b;color:white;">WB</span>' : ''}
-    ${kunde.kennzeichen.googleReview ? '<span class="tag" style="background:#DAA520;color:white;" title="Google-Review vorhanden">★</span>' : ''}
+    ${kunde.kennzeichen.keineBeratung    ? `<span class="tag" style="background:${KENNZEICHEN_BADGE_FARBEN.keineBeratung};color:white;">KB</span>` : ''}
+    ${kunde.kennzeichen.nurBuero         ? `<span class="tag" style="background:${KENNZEICHEN_BADGE_FARBEN.nurBuero};color:white;">B</span>` : ''}
+    ${kunde.kennzeichen.nurTelefon       ? `<span class="tag" style="background:${KENNZEICHEN_BADGE_FARBEN.nurTelefon};color:white;">T</span>` : ''}
+    ${kunde.kennzeichen.nurMail          ? `<span class="tag" style="background:${KENNZEICHEN_BADGE_FARBEN.nurMail};color:white;">M</span>` : ''}
+    ${kunde.kennzeichen.bestandVerlassen ? `<span class="tag" style="background:${KENNZEICHEN_BADGE_FARBEN.bestandVerlassen};color:white;">BV</span>` : ''}
+    ${kunde.kennzeichen.wichtigbrief     ? `<span class="tag" style="background:${KENNZEICHEN_BADGE_FARBEN.wichtigbrief};color:white;">WB</span>` : ''}
+    ${kunde.kennzeichen.googleReview     ? `<span class="tag" style="background:${KENNZEICHEN_BADGE_FARBEN.googleReview};color:white;" title="Google-Review vorhanden">★</span>` : ''}
     </strong>
     <br>
     <span class="kk-ort">${esc(kunde.plz)} ${esc(kunde.ort)}</span>
@@ -207,13 +207,14 @@ function findeHaushalt(kunde){
 ===================================================== */
 
 function sidebarBadges(k){
-    return (k.kennzeichen.keineBeratung ? '<span class="tag" style="background:#7a1e35;color:white;">KB</span>' : '') +
-           (k.kennzeichen.nurBuero ? '<span class="tag" style="background:#6c757d;color:white;">B</span>' : '') +
-           (k.kennzeichen.nurTelefon ? '<span class="tag" style="background:#3d2c7a;color:white;">T</span>' : '') +
-           (k.kennzeichen.nurMail ? '<span class="tag" style="background:#2d6a4f;color:white;">M</span>' : '') +
-           (k.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:#4e1220;color:white;">BV</span>' : '') +
-           (k.kennzeichen.wichtigbrief ? '<span class="tag" style="background:#d9822b;color:white;">WB</span>' : '') +
-           (k.kennzeichen.googleReview ? '<span class="tag" style="background:#DAA520;color:white;" title="Google-Review vorhanden">★</span>' : '');
+    const F = KENNZEICHEN_SIDEBAR_FARBEN;
+    return (k.kennzeichen.keineBeratung    ? `<span class="tag" style="background:${F.keineBeratung};color:white;">KB</span>` : '') +
+           (k.kennzeichen.nurBuero         ? `<span class="tag" style="background:${F.nurBuero};color:white;">B</span>` : '') +
+           (k.kennzeichen.nurTelefon       ? `<span class="tag" style="background:${F.nurTelefon};color:white;">T</span>` : '') +
+           (k.kennzeichen.nurMail          ? `<span class="tag" style="background:${F.nurMail};color:white;">M</span>` : '') +
+           (k.kennzeichen.bestandVerlassen ? `<span class="tag" style="background:${F.bestandVerlassen};color:white;">BV</span>` : '') +
+           (k.kennzeichen.wichtigbrief     ? `<span class="tag" style="background:${F.wichtigbrief};color:white;">WB</span>` : '') +
+           (k.kennzeichen.googleReview     ? `<span class="tag" style="background:${F.googleReview};color:white;" title="Google-Review vorhanden">★</span>` : '');
 }
 
 function sidebarKarteAktualisieren(){

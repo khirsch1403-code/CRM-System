@@ -182,13 +182,8 @@ function prioritaetRang(prioritaet){
 }
 
 function prioritaetFarbe(prioritaet){
-    const farben = {
-        "Sofort": "#dc3545",
-        "Hoch": "#fd7e14",
-        "Mittel": "#ffc107",
-        "Niedrig": "#6c757d"
-    };
-    return farben[prioritaet] || "#6c757d";
+    return AUFGABEN_PRIORITAET_FARBEN[prioritaet]
+        || AUFGABEN_PRIORITAET_FARBEN["Niedrig"];
 }
 
 /* Kurzform für kompaktes Prio-Badge */
@@ -487,8 +482,7 @@ function kalenderMonatWechseln(richtung){
 }
 
 function renderKalender(){
-    const monatsnamen = ["Januar","Februar","März","April","Mai","Juni",
-        "Juli","August","September","Oktober","November","Dezember"];
+    const monatsnamen = MONATE_LANG;
     const wochentage = ["Mo","Di","Mi","Do","Fr","Sa","So"];
 
     document.getElementById("kalenderTitel").textContent =

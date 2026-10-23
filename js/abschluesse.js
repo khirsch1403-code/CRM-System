@@ -424,8 +424,7 @@ function abschluesseKennzahlenAktualisieren(){
     if(fSumme) { fSumme.innerText  = finanzierungSumme.toLocaleString("de-DE") + " €"; }
 
     /* Zeitraum-Label in allen filterbasierten Kachelüberschriften mitziehen */
-    const monatsnamen = ["Januar","Februar","März","April","Mai","Juni",
-        "Juli","August","September","Oktober","November","Dezember"];
+    const monatsnamen = MONATE_LANG;
 
     let zeitraum;
     if(filterJahr === "alle" && filterMonat === "alle"){

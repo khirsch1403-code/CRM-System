@@ -9,6 +9,52 @@ let abschluesse = [];
 let aktuellerKunde = null;
 
 /* =====================================================
+   ZENTRALE KONSTANTEN
+   -----------------------------------------------------
+   Einmal hier definieren, ueberall aus diesem Namen
+   lesen. Aenderungen gelten dann sofort global.
+===================================================== */
+
+/* Deutsche Monatsnamen — vollstaendig */
+const MONATE_LANG = [
+    "Januar", "Februar", "März",     "April",   "Mai",      "Juni",
+    "Juli",   "August",  "September", "Oktober", "November", "Dezember"
+];
+
+/* Kennzeichen-Farben: Haupt-Badges (Kundenliste oben) */
+const KENNZEICHEN_BADGE_FARBEN = {
+    keineBeratung:    "#7a1e35",
+    nurBuero:         "#6c757d",
+    nurTelefon:       "#0d6efd",
+    nurMail:          "#198754",
+    bestandVerlassen: "#561526",
+    wichtigbrief:     "#d9822b",
+    googleReview:     "#DAA520"
+};
+
+/* Kennzeichen-Farben: Sidebar-Badges (Kundenliste rechts).
+   Einige Toene sind absichtlich dunkler/kraeftiger als in der
+   Haupt-Ansicht — belassen wir so, damit sie sich im kleineren
+   Kontext deutlicher absetzen. */
+const KENNZEICHEN_SIDEBAR_FARBEN = {
+    keineBeratung:    "#7a1e35",
+    nurBuero:         "#6c757d",
+    nurTelefon:       "#3d2c7a",
+    nurMail:          "#2d6a4f",
+    bestandVerlassen: "#4e1220",
+    wichtigbrief:     "#d9822b",
+    googleReview:     "#DAA520"
+};
+
+/* Aufgaben-Prioritaet → Farbe */
+const AUFGABEN_PRIORITAET_FARBEN = {
+    "Sofort":  "#dc3545",
+    "Hoch":    "#fd7e14",
+    "Mittel":  "#ffc107",
+    "Niedrig": "#6c757d"
+};
+
+/* =====================================================
    INDEXEDDB (Primärer Speicher)
 ===================================================== */
 
