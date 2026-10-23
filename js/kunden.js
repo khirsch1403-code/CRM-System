@@ -32,6 +32,13 @@ kennzeichen:{
     googleReview:false
 },
 
+        /* Lebenspartner (optional). Entweder null oder ein
+           Objekt mit anrede/vorname/nachname/geburtsdatum.
+           Partner wird mitgesucht; wenn er spaeter einen
+           eigenen Vertrag bekommt, kann er zum echten Kunden
+           hochgezogen werden. */
+        partner:null,
+
         termine:[],
 
         notiz:"",
@@ -109,7 +116,10 @@ function renderKunden(){
                 (kunde.telefone || []).join(" "),
                 (kunde.emails || []).join(" "),
                 vertragsString,
-                (kunde.partyIds || []).join(" ")
+                (kunde.partyIds || []).join(" "),
+                /* Partner-Name mitfinden */
+                (kunde.partner && kunde.partner.vorname)  || "",
+                (kunde.partner && kunde.partner.nachname) || ""
             ]
             .join(" ")
             .toLowerCase();
@@ -369,6 +379,33 @@ function kundeOeffnen(id){
 
 </div>
 
+<!-- Partner / Lebensgefaehrte — leer lassen wenn nicht vorhanden -->
+<div class="kd-partner">
+    <label class="kd-partner-label">Partner (optional)</label>
+    <div class="kd-partner-grid">
+        <select class="crm-input" id="editPartnerAnrede"
+            onchange="kundeSpeichern()" title="Anrede Partner">
+            <option value=""       ${!(k.partner && k.partner.anrede) ? "selected" : ""}>–</option>
+            <option value="Frau"   ${k.partner && k.partner.anrede === "Frau"   ? "selected" : ""}>Frau</option>
+            <option value="Herr"   ${k.partner && k.partner.anrede === "Herr"   ? "selected" : ""}>Herr</option>
+            <option value="Divers" ${k.partner && k.partner.anrede === "Divers" ? "selected" : ""}>Divers</option>
+        </select>
+        <input class="crm-input" id="editPartnerVorname"
+            placeholder="Vorname Partner"
+            onblur="kundeSpeichern()"
+            value="${esc((k.partner && k.partner.vorname) || "")}">
+        <input class="crm-input" id="editPartnerNachname"
+            placeholder="Nachname Partner"
+            onblur="kundeSpeichern()"
+            value="${esc((k.partner && k.partner.nachname) || "")}">
+        <input class="crm-input" id="editPartnerGeburtsdatum"
+            type="text"
+            placeholder="Geburtsdatum Partner (TT.MM.JJJJ)"
+            onblur="kundeSpeichern()"
+            value="${esc((k.partner && k.partner.geburtsdatum) || "")}">
+    </div>
+</div>
+
 <div class="kd-abschnitt">
 
     <div class="kd-abschnitt-kopf">
@@ -533,6 +570,24 @@ function kundeSpeichern(){
 
     aktuellerKunde.notiz =
         document.getElementById("editNotiz").value;
+
+    /* Partner-Daten: alle 4 Felder lesen. Wenn alles leer ist,
+       auf null setzen (kein Partner), sonst als Objekt speichern. */
+    const pAnr = (document.getElementById("editPartnerAnrede")       || {}).value || "";
+    const pVn  = (document.getElementById("editPartnerVorname")      || {}).value || "";
+    const pNn  = (document.getElementById("editPartnerNachname")     || {}).value || "";
+    const pGeb = (document.getElementById("editPartnerGeburtsdatum") || {}).value || "";
+    const pAnrT = pAnr.trim(), pVnT = pVn.trim(), pNnT = pNn.trim(), pGebT = pGeb.trim();
+    if(!pAnrT && !pVnT && !pNnT && !pGebT){
+        aktuellerKunde.partner = null;
+    }else{
+        aktuellerKunde.partner = {
+            anrede:       pAnrT,
+            vorname:      pVnT,
+            nachname:     pNnT,
+            geburtsdatum: pGebT
+        };
+    }
 
     // Nur den Sidebar-Eintrag dieses Kunden aktualisieren
     // (Name könnte sich geändert haben)

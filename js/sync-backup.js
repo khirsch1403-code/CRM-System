@@ -990,6 +990,29 @@ function datenPruefen(){
             kunde.kennzeichen = {};
         }
 
+        /* --- Partner (optional) ---
+           Entweder null oder Plain-Object mit anrede/vorname/
+           nachname/geburtsdatum (alle als String). Alles leer
+           → auf null zuruecksetzen. */
+        if(kunde.partner === undefined){ kunde.partner = null; }
+        if(kunde.partner !== null){
+            if(typeof kunde.partner !== "object"
+               || Array.isArray(kunde.partner)){
+                kunde.partner = null;
+            }else{
+                if(typeof kunde.partner.anrede       !== "string"){ kunde.partner.anrede       = ""; }
+                if(typeof kunde.partner.vorname      !== "string"){ kunde.partner.vorname      = ""; }
+                if(typeof kunde.partner.nachname     !== "string"){ kunde.partner.nachname     = ""; }
+                if(typeof kunde.partner.geburtsdatum !== "string"){ kunde.partner.geburtsdatum = ""; }
+                if(!kunde.partner.anrede
+                   && !kunde.partner.vorname
+                   && !kunde.partner.nachname
+                   && !kunde.partner.geburtsdatum){
+                    kunde.partner = null;
+                }
+            }
+        }
+
         /* Alle Kennzeichen-Felder auf Boolean default false bringen
            (zentrale Liste in core.js: KENNZEICHEN_FELDER). So wird
            ein neues Kennzeichen nur dort eingetragen und automatisch

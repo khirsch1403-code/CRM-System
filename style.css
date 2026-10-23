@@ -3783,3 +3783,37 @@ body.serienbrief-modus{
     background:var(--c-border);
     margin:4px 0 10px 0;
 }
+
+/* =====================================================
+   KUNDENDATENBLATT — Partner (Lebensgefaehrte)
+===================================================== */
+
+.kd-partner{
+    margin-top:12px;
+    padding:10px 12px;
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+}
+
+.kd-partner-label{
+    display:block;
+    font-size:0.85em;
+    font-weight:600;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin-bottom:6px;
+}
+
+.kd-partner-grid{
+    display:grid;
+    grid-template-columns:110px 1fr 1fr 170px;
+    gap:8px;
+}
+
+@media (max-width: 900px){
+    .kd-partner-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
