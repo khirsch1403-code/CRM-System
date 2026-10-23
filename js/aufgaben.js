@@ -182,8 +182,13 @@ function prioritaetRang(prioritaet){
 }
 
 function prioritaetFarbe(prioritaet){
-    return AUFGABEN_PRIORITAET_FARBEN[prioritaet]
-        || AUFGABEN_PRIORITAET_FARBEN["Niedrig"];
+    const slug = {
+        "Sofort":  "sofort",
+        "Hoch":    "hoch",
+        "Mittel":  "mittel",
+        "Niedrig": "niedrig"
+    }[prioritaet] || "niedrig";
+    return "var(--prio-" + slug + ")";
 }
 
 /* Kurzform für kompaktes Prio-Badge */

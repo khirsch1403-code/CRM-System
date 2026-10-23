@@ -11,8 +11,10 @@ let aktuellerKunde = null;
 /* =====================================================
    ZENTRALE KONSTANTEN
    -----------------------------------------------------
-   Einmal hier definieren, ueberall aus diesem Namen
-   lesen. Aenderungen gelten dann sofort global.
+   Werte, die mehrfach gebraucht werden, nur hier
+   definieren. Farben stehen als CSS-Variablen in :root
+   in style.css und werden sowohl aus CSS als auch aus
+   JS per var(--name) referenziert.
 ===================================================== */
 
 /* Deutsche Monatsnamen — vollstaendig */
@@ -20,27 +22,6 @@ const MONATE_LANG = [
     "Januar", "Februar", "März",     "April",   "Mai",      "Juni",
     "Juli",   "August",  "September", "Oktober", "November", "Dezember"
 ];
-
-/* Kennzeichen-Farben — einheitlich fuer Haupt-Badge, Sidebar-Badge
-   und Button im Kundenpanel. Semantische Codierung, bewusst
-   unabhaengig vom Design-Theme. */
-const KENNZEICHEN_BADGE_FARBEN = {
-    keineBeratung:    "#7a1e35",
-    nurBuero:         "#6c757d",
-    nurTelefon:       "#0d6efd",
-    nurMail:          "#198754",
-    bestandVerlassen: "#561526",
-    wichtigbrief:     "#d9822b",
-    googleReview:     "#DAA520"
-};
-
-/* Aufgaben-Prioritaet → Farbe */
-const AUFGABEN_PRIORITAET_FARBEN = {
-    "Sofort":  "#dc3545",
-    "Hoch":    "#fd7e14",
-    "Mittel":  "#ffc107",
-    "Niedrig": "#6c757d"
-};
 
 /* =====================================================
    INDEXEDDB (Primärer Speicher)

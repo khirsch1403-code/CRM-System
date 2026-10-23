@@ -56,6 +56,29 @@
                       0 1px 2px rgba(28,26,23,0.04);
     --schatten-modal:0 24px 64px rgba(28,26,23,0.22);
 
+    /* -------------------------------------------------
+       SEMANTISCHE FARBEN — Einzige Quelle fuer alle
+       Kennzeichen- und Prioritaets-Farben. Werden sowohl
+       aus CSS (Klassen) als auch aus JS (var(--...))
+       referenziert. Bewusst unabhaengig vom Design-Theme.
+       Aenderung hier wirkt sofort ueberall.
+       ------------------------------------------------- */
+
+    /* Kennzeichen (Badge in Liste, Haushalt, Button) */
+    --kennz-keine-beratung:    #7a1e35;
+    --kennz-nur-buero:         #6c757d;
+    --kennz-nur-telefon:       #0d6efd;
+    --kennz-nur-mail:          #198754;
+    --kennz-bestand-verlassen: #561526;
+    --kennz-wichtigbrief:      #d9822b;
+    --kennz-google-review:     #DAA520;
+
+    /* Aufgaben-Prioritaet */
+    --prio-sofort:  #dc3545;
+    --prio-hoch:    #fd7e14;
+    --prio-mittel:  #ffc107;
+    --prio-niedrig: #6c757d;
+
 }
 
 /* =====================================================
@@ -691,13 +714,13 @@ input.crm-input{
     color:#fff;
 }
 
-.kennzeichen-badge-rot{ background:#7a1e35; color:#fff; }
-.kennzeichen-badge-grau{ background:#6c757d; color:#fff; }
-.kennzeichen-badge-blau{ background:#0d6efd; color:#fff; }
-.kennzeichen-badge-gruen{ background:#198754; color:#fff; }
-.kennzeichen-badge-dunkelrot{ background:#561526; color:#fff; }
-.kennzeichen-badge-orange{ background:#d9822b; color:#fff; }
-.kennzeichen-badge-gold{ background:#DAA520; color:#fff; }
+.kennzeichen-badge-rot      { background:var(--kennz-keine-beratung);    color:#fff; }
+.kennzeichen-badge-grau     { background:var(--kennz-nur-buero);         color:#fff; }
+.kennzeichen-badge-blau     { background:var(--kennz-nur-telefon);       color:#fff; }
+.kennzeichen-badge-gruen    { background:var(--kennz-nur-mail);          color:#fff; }
+.kennzeichen-badge-dunkelrot{ background:var(--kennz-bestand-verlassen); color:#fff; }
+.kennzeichen-badge-orange   { background:var(--kennz-wichtigbrief);      color:#fff; }
+.kennzeichen-badge-gold     { background:var(--kennz-google-review);     color:#fff; }
 
 /* =====================================================
    TERMIN MODAL HAUSHALT-CHECKBOX
@@ -1288,44 +1311,44 @@ input.crm-input{
 }
 
 .kennzeichen-aktiv-rot{
-    background:#7a1e35;
-    border-color:#7a1e35;
+    background:var(--kennz-keine-beratung);
+    border-color:var(--kennz-keine-beratung);
     color:#fff;
 }
 
 .kennzeichen-aktiv-grau{
-    background:#6c757d;
-    border-color:#6c757d;
+    background:var(--kennz-nur-buero);
+    border-color:var(--kennz-nur-buero);
     color:#fff;
 }
 
 .kennzeichen-aktiv-blau{
-    background:#0d6efd;
-    border-color:#0d6efd;
+    background:var(--kennz-nur-telefon);
+    border-color:var(--kennz-nur-telefon);
     color:#fff;
 }
 
 .kennzeichen-aktiv-gruen{
-    background:#198754;
-    border-color:#198754;
+    background:var(--kennz-nur-mail);
+    border-color:var(--kennz-nur-mail);
     color:#fff;
 }
 
 .kennzeichen-aktiv-dunkelrot{
-    background:#561526;
-    border-color:#561526;
+    background:var(--kennz-bestand-verlassen);
+    border-color:var(--kennz-bestand-verlassen);
     color:#fff;
 }
 
 .kennzeichen-aktiv-gold{
-    background:#DAA520;
-    border-color:#DAA520;
+    background:var(--kennz-google-review);
+    border-color:var(--kennz-google-review);
     color:#fff;
 }
 
 .kennzeichen-aktiv-orange{
-    background:#d9822b;
-    border-color:#d9822b;
+    background:var(--kennz-wichtigbrief);
+    border-color:var(--kennz-wichtigbrief);
     color:#fff;
 }
 
