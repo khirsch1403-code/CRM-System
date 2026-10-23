@@ -1,0 +1,230 @@
+/* =====================================================
+   DESIGN / FARBPALETTE
+   -----------------------------------------------------
+   Lokale Farbanpassung pro Browser.
+   Werte in localStorage (JSON unter "crmDesign").
+   Setzt CSS-Variablen auf :root → wirkt sofort ueberall.
+   Berechnet abgeleitete Toene (dunkler, soft)
+   automatisch aus der Primaerfarbe.
+===================================================== */
+
+const DESIGN_LS_KEY = "crmDesign";
+
+/* Standard-Werte (muessen zu style.css :root passen) */
+const DESIGN_STANDARD = {
+    primary: "#7a1e35",
+    accent:  "#8b6914",
+    bg:      "#f5eeec",
+    text:    "#1a1210",
+    border:  "#e8d9d4"
+};
+
+/* ---- Farbkonvertierung Hex <-> HSL ---- */
+
+function _hexToHsl(hex){
+    hex = String(hex || "").replace("#","").trim();
+    if(hex.length !== 6){ return [0, 0, 50]; }
+    const r = parseInt(hex.slice(0, 2), 16) / 255;
+    const g = parseInt(hex.slice(2, 4), 16) / 255;
+    const b = parseInt(hex.slice(4, 6), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    let h = 0, s = 0;
+    if(max !== min){
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h * 360, s * 100, l * 100];
+}
+
+function _hslToHex(h, s, l){
+    h = ((h % 360) + 360) % 360 / 360;
+    s = Math.max(0, Math.min(100, s)) / 100;
+    l = Math.max(0, Math.min(100, l)) / 100;
+    let r, g, b;
+    if(s === 0){ r = g = b = l; }
+    else{
+        const hue2rgb = (p, q, t) => {
+            if(t < 0){ t += 1; }
+            if(t > 1){ t -= 1; }
+            if(t < 1 / 6){ return p + (q - p) * 6 * t; }
+            if(t < 1 / 2){ return q; }
+            if(t < 2 / 3){ return p + (q - p) * (2 / 3 - t) * 6; }
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+    }
+    const toHex = x => {
+        const hex = Math.round(x * 255).toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+    };
+    return "#" + toHex(r) + toHex(g) + toHex(b);
+}
+
+function _mitLightness(hex, l){
+    const [h, s] = _hexToHsl(hex);
+    return _hslToHex(h, s, l);
+}
+
+function _dunkler(hex, delta){
+    const [h, s, l] = _hexToHsl(hex);
+    return _hslToHex(h, s, l - delta);
+}
+
+function _heller(hex, delta){
+    const [h, s, l] = _hexToHsl(hex);
+    return _hslToHex(h, s, l + delta);
+}
+
+/* RGBA aus Hex + Alpha (fuer leicht transparente Bg-Toene) */
+function _rgba(hex, alpha){
+    hex = String(hex).replace("#","");
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
+}
+
+/* =====================================================
+   LADEN / SPEICHERN
+===================================================== */
+
+function designLaden(){
+    try{
+        const raw = localStorage.getItem(DESIGN_LS_KEY);
+        if(!raw){ return Object.assign({}, DESIGN_STANDARD); }
+        const d = JSON.parse(raw);
+        return Object.assign({}, DESIGN_STANDARD, d);
+    }catch(_){
+        return Object.assign({}, DESIGN_STANDARD);
+    }
+}
+
+function designSpeichern(d){
+    try{
+        localStorage.setItem(DESIGN_LS_KEY, JSON.stringify(d));
+    }catch(_){}
+}
+
+function designZuruecksetzen(){
+    try{ localStorage.removeItem(DESIGN_LS_KEY); }catch(_){}
+    designAnwenden(DESIGN_STANDARD);
+    designModalFelderFuellen(DESIGN_STANDARD);
+}
+
+/* =====================================================
+   ANWENDEN — setzt CSS-Variablen auf :root
+===================================================== */
+
+function designAnwenden(d){
+    const root = document.documentElement;
+
+    const primary       = d.primary || DESIGN_STANDARD.primary;
+    const primaryDunkel = _dunkler(primary, 10);
+    const primarySoft   = _mitLightness(primary, 94);
+
+    const accent        = d.accent  || DESIGN_STANDARD.accent;
+    const accentSoft    = _mitLightness(accent, 92);
+
+    const bg            = d.bg      || DESIGN_STANDARD.bg;
+    const surface       = _heller(bg, 4);
+    const surfaceMuted  = _heller(bg, 2);
+
+    const border        = d.border  || DESIGN_STANDARD.border;
+    const borderStark   = _dunkler(border, 10);
+
+    const text          = d.text    || DESIGN_STANDARD.text;
+    const textMuted     = _heller(text, 25);
+    const textSchwach   = _heller(text, 45);
+
+    root.style.setProperty("--c-bg", bg);
+    root.style.setProperty("--c-surface", surface);
+    root.style.setProperty("--c-surface-muted", surfaceMuted);
+    root.style.setProperty("--c-border", border);
+    root.style.setProperty("--c-border-stark", borderStark);
+
+    root.style.setProperty("--c-text", text);
+    root.style.setProperty("--c-text-muted", textMuted);
+    root.style.setProperty("--c-text-schwach", textSchwach);
+
+    root.style.setProperty("--c-primary", primary);
+    root.style.setProperty("--c-primary-dunkel", primaryDunkel);
+    root.style.setProperty("--c-primary-soft", primarySoft);
+    root.style.setProperty("--c-accent", accent);
+    root.style.setProperty("--c-accent-soft", accentSoft);
+}
+
+/* Sofort beim Laden anwenden — damit nichts flackert */
+designAnwenden(designLaden());
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+function designModalOeffnen(){
+    designModalFelderFuellen(designLaden());
+    const modal = document.getElementById("designModal");
+    if(modal){ modal.style.display = "flex"; }
+}
+
+function designModalSchliessen(){
+    const modal = document.getElementById("designModal");
+    if(modal){ modal.style.display = "none"; }
+}
+
+function designModalFelderFuellen(d){
+    const map = {
+        designInputPrimary: d.primary,
+        designInputAccent:  d.accent,
+        designInputBg:      d.bg,
+        designInputText:    d.text,
+        designInputBorder:  d.border
+    };
+    Object.keys(map).forEach(id => {
+        const el = document.getElementById(id);
+        if(el){ el.value = map[id]; }
+    });
+}
+
+/* Live-Vorschau: sofort anwenden bei jeder Aenderung,
+   endgueltig gespeichert wird erst mit "Uebernehmen" */
+function designInputGeaendert(){
+    const d = {
+        primary: document.getElementById("designInputPrimary").value,
+        accent:  document.getElementById("designInputAccent").value,
+        bg:      document.getElementById("designInputBg").value,
+        text:    document.getElementById("designInputText").value,
+        border:  document.getElementById("designInputBorder").value
+    };
+    designAnwenden(d);
+}
+
+function designUebernehmen(){
+    const d = {
+        primary: document.getElementById("designInputPrimary").value,
+        accent:  document.getElementById("designInputAccent").value,
+        bg:      document.getElementById("designInputBg").value,
+        text:    document.getElementById("designInputText").value,
+        border:  document.getElementById("designInputBorder").value
+    };
+    designSpeichern(d);
+    designAnwenden(d);
+    designModalSchliessen();
+}
+
+function designAbbrechen(){
+    // Live-Vorschau rueckgaengig → wieder den gespeicherten Stand setzen
+    designAnwenden(designLaden());
+    designModalSchliessen();
+}

@@ -28,6 +28,10 @@
             onclick="fehlerModalOeffnen()"
             title="Alles in Ordnung">✓</span>
         CRM Vertrieb
+        <span
+            class="design-icon"
+            onclick="designModalOeffnen()"
+            title="Design anpassen (nur in diesem Browser)">🎨</span>
     </div>
 
     <div class="navbar-links">
@@ -1215,6 +1219,7 @@
 <script src="js/serienbrief.js"></script>
 <script src="js/selektions-rueckimport.js"></script>
 <script src="js/zertifikat.js"></script>
+<script src="js/design.js"></script>
 
 <!-- =====================================================
      SERIENBRIEF-DRUCKVORSCHAU (Vollbild)
@@ -1237,6 +1242,68 @@
             </button>
             <button class="crm-button crm-button-primary"
                 onclick="serienbriefPostBestaetigen()">
+                Übernehmen
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================
+     DESIGN: Farbpalette (nur lokal)
+===================================================== -->
+
+<div id="designModal" class="modal-overlay" style="z-index:10003;">
+    <div class="modal design-modal">
+        <h2>🎨 Design anpassen</h2>
+        <p class="design-hinweis">
+            Nur in deinem Browser gespeichert — andere Nutzer sehen
+            weiterhin das Standard-Design. Änderungen sind sofort sichtbar.
+        </p>
+
+        <div class="design-reihe">
+            <label for="designInputPrimary">Primärfarbe</label>
+            <input type="color" id="designInputPrimary"
+                oninput="designInputGeaendert()">
+            <span class="design-hint">Buttons, aktive Tabs, Marken­akzent</span>
+        </div>
+
+        <div class="design-reihe">
+            <label for="designInputAccent">Akzentfarbe</label>
+            <input type="color" id="designInputAccent"
+                oninput="designInputGeaendert()">
+            <span class="design-hint">Sekundäre Highlights</span>
+        </div>
+
+        <div class="design-reihe">
+            <label for="designInputBg">Hintergrund</label>
+            <input type="color" id="designInputBg"
+                oninput="designInputGeaendert()">
+            <span class="design-hint">Grundfläche hinter allem</span>
+        </div>
+
+        <div class="design-reihe">
+            <label for="designInputText">Textfarbe</label>
+            <input type="color" id="designInputText"
+                oninput="designInputGeaendert()">
+            <span class="design-hint">Haupttext</span>
+        </div>
+
+        <div class="design-reihe">
+            <label for="designInputBorder">Rahmen</label>
+            <input type="color" id="designInputBorder"
+                oninput="designInputGeaendert()">
+            <span class="design-hint">Linien, Rahmen, Trenner</span>
+        </div>
+
+        <div class="modal-buttons" style="margin-top:14px;">
+            <button class="crm-button" onclick="designZuruecksetzen()">
+                Zurücksetzen
+            </button>
+            <button class="crm-button" onclick="designAbbrechen()">
+                Abbrechen
+            </button>
+            <button class="crm-button crm-button-primary"
+                onclick="designUebernehmen()">
                 Übernehmen
             </button>
         </div>

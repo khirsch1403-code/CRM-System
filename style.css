@@ -3586,3 +3586,58 @@ body.serienbrief-modus{
     font-size:1.1em;
     text-align:right;
 }
+
+/* =====================================================
+   DESIGN — Palette-Icon in der Navbar + Design-Modal
+===================================================== */
+
+.design-icon{
+    cursor:pointer;
+    font-size:1.1em;
+    margin-left:10px;
+    user-select:none;
+    opacity:0.65;
+    transition:opacity 0.15s ease, transform 0.15s ease;
+}
+.design-icon:hover{
+    opacity:1;
+    transform:scale(1.15);
+}
+
+.design-modal{
+    max-width:520px;
+}
+.design-hinweis{
+    color:var(--c-text-muted);
+    font-size:0.9em;
+    margin:4px 0 14px 0;
+    line-height:1.4;
+}
+.design-reihe{
+    display:grid;
+    grid-template-columns:110px 60px 1fr;
+    align-items:center;
+    gap:12px;
+    padding:8px 0;
+    border-bottom:1px solid var(--c-border);
+}
+.design-reihe:last-of-type{
+    border-bottom:none;
+}
+.design-reihe label{
+    font-weight:600;
+    color:var(--c-text);
+}
+.design-reihe input[type="color"]{
+    width:50px;
+    height:34px;
+    border:1px solid var(--c-border-stark);
+    border-radius:6px;
+    cursor:pointer;
+    padding:2px;
+    background:var(--c-surface);
+}
+.design-hint{
+    color:var(--c-text-schwach);
+    font-size:0.85em;
+}
