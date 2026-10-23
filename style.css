@@ -82,6 +82,106 @@
 }
 
 /* =====================================================
+   INHALTSVERZEICHNIS
+   -----------------------------------------------------
+   Suche eines Themas im Editor: Strg/Cmd + F mit dem
+   exakten Section-Namen (z. B. "DASHBOARD").
+   Jede Section hat einen Header im Format:
+
+       / * ====================
+            SECTION-NAME
+         ==================== * /
+
+   HISTORISCH GEWACHSEN: Einige Themen (vor allem der
+   SERIENBRIEF) sind in mehreren Bloecken verteilt, da
+   sie iterativ ausgebaut wurden. Reihenfolge wurde
+   NICHT umsortiert, weil CSS-Cascade davon abhaengt.
+
+   --- A. GRUNDLAGEN ---
+      • DESIGN TOKENS            (ganz oben)
+      • GLOBALE EINSTELLUNGEN
+
+   --- B. STRUKTUR ---
+      • NAVIGATION
+      • CONTENT
+      • TABS
+
+   --- C. DASHBOARD ---
+      • DASHBOARD
+      • DASHBOARD ERWEITERUNG
+      • PRODUKTIONSAUSWERTUNG
+      • BAUSPAR-KACHEL AKZENT
+      • DATENSICHERUNG (im Dashboard)
+      • FEHLER-STATUS-SYMBOL (neben CRM-Titel)
+      • FEHLER-MODAL
+
+   --- D. KUNDEN ---
+      • KUNDENBEREICH
+      • KUNDEN-SUCHE (AUFGABEN-MODAL)
+      • KUNDENDATENBLATT KOMPAKT
+      • VERTRAG TABELLE
+      • TERMINE ZEILEN (KOMPAKT)
+      • KENNZEICHNUNGEN (KUNDE) — Buttons im Panel
+      • EINTRAGS-LISTEN (TELEFON / E-MAIL / VERTRAG)
+      • HAUSHALT
+      • HAUSHALT MITGLIEDER
+      • KUNDENUNTERLAGEN
+      • KUNDENUNTERLAGEN — DRAG & DROP SPOTLIGHT
+      • MERGE / DOPPLUNGEN
+
+   --- E. AUFGABEN ---
+      • AUFGABEN KANBAN
+      • AUFGABEN KARTE (kompakt)
+      • AUFGABEN ANSICHT-TOGGLE
+      • KALENDERANSICHT
+      • SIRENE (ueberfaellige Aufgaben)
+
+   --- F. TERMINE ---
+      • TERMINE
+      • TERMIN MODAL HAUSHALT-CHECKBOX
+      • TERMIN-NOTIZ
+      • ABSCHLUSS <-> TERMIN — Koppel-Checkbox
+
+   --- G. ABSCHLUESSE ---
+      • ABSCHLUSS (kompakt)
+      • ABSCHLUESSE (kompakte Zeilen-Darstellung)
+
+   --- H. SELEKTIONEN ---
+      • SELEKTIONEN
+      • SELEKTIONEN — UND/ODER-Toggle
+      • SELEKTIONS-RUECKIMPORT
+
+   --- I. SERIENBRIEF (mehrere Bloecke) ---
+      • SERIENBRIEF — Klapp-Panel im Selektionen-Tab
+      • SERIENBRIEF — VOLLBILD-DRUCKVORSCHAU
+      • SERIENBRIEF — Brief-Seite (Flow-Layout)
+      • SERIENBRIEF — RUECKANTWORT (im Textfluss)
+      • SERIENBRIEF — PRINT
+      • SERIENBRIEF — Schrift-Optionen + Betreff
+      • SERIENBRIEF — Absender-Block
+      • SERIENBRIEF v2 — Panel-Bloecke
+      • SERIENBRIEF v2 — RUECKANTWORT auf eigener Seite
+
+   --- J. KONTAKT & BENACHRICHTIGUNG ---
+      • KONTAKTUEBERWACHUNG SCROLLLISTEN
+      • BENACHRICHTIGUNGS-BANNER
+
+   --- K. UI-GRUNDBAUSTEINE ---
+      • MODALS
+      • FORMULAR
+      • BUTTONS / BUTTON GEFAHR / ICON BUTTONS
+      • KENNZEICHNUNGEN / TAGS (Mini-Badges)
+      • STATUS FARBEN
+      • KLAPP-PANELS (details/summary)
+      • SCROLLBALKEN
+
+   --- L. FEATURE-MODULE ---
+      • FINANZIERUNGSZERTIFIKAT — Berater-Panel + Betrag-Modal
+      • DESIGN — Palette-Icon in der Navbar + Design-Modal
+      • DESIGN — Preset-Leiste im Design-Modal
+===================================================== */
+
+/* =====================================================
    GLOBALE EINSTELLUNGEN
 ===================================================== */
 
