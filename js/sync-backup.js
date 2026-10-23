@@ -957,68 +957,50 @@ function haushalteAktualisieren(){
 
 /* =====================================================
    DATEN KONSISTENZ
+   -----------------------------------------------------
+   Sichert, dass alle Pflichtfelder an jedem Kunden
+   existieren und den richtigen Datentyp haben.
+   Idempotent: mehrfach aufzurufen ist unschaedlich.
+   Aenderung von Defaults hier wirkt beim naechsten
+   Laden/Speichern auf alle Alt-Datensaetze.
 ===================================================== */
 
 function datenPruefen(){
 
-    kunden.forEach(
+    kunden.forEach(kunde => {
 
-        kunde => {
+        /* --- Array-Felder: nie undefined --- */
+        if(!Array.isArray(kunde.telefone))  { kunde.telefone  = []; }
+        if(!Array.isArray(kunde.emails))    { kunde.emails    = []; }
+        if(!Array.isArray(kunde.vertraege)) { kunde.vertraege = []; }
+        if(!Array.isArray(kunde.termine))   { kunde.termine   = []; }
+        if(!Array.isArray(kunde.partyIds))  { kunde.partyIds  = []; }
 
-            if(!kunde.telefone){
+        /* --- String-Felder --- */
+        if(typeof kunde.anrede !== "string"){ kunde.anrede = ""; }
+        if(typeof kunde.notiz  !== "string"){ kunde.notiz  = ""; }
 
-                kunde.telefone = [];
-
-            }
-
-            if(!kunde.emails){
-
-                kunde.emails = [];
-
-            }
-
-            if(!kunde.vertraege){
-
-                kunde.vertraege = [];
-
-            }
-
-            if(!kunde.termine){
-
-                kunde.termine = [];
-
-            }
-
-            if(!kunde.kennzeichen || typeof kunde.kennzeichen !== "object"
-               || Array.isArray(kunde.kennzeichen)){
-                // Alt-Bug: manche Kunden hatten kennzeichen = [] statt {}.
-                // Objekt sicherstellen, damit .wichtigbrief etc. lesbar bleibt.
-                kunde.kennzeichen = {};
-            }
-
-            // Neues Feld "wichtigbrief" bei Alt-Kunden nach-initialisieren
-            if(typeof kunde.kennzeichen.wichtigbrief !== "boolean"){
-                kunde.kennzeichen.wichtigbrief = false;
-            }
-
-            // Neues Feld "googleReview" bei Alt-Kunden nach-initialisieren
-            if(typeof kunde.kennzeichen.googleReview !== "boolean"){
-                kunde.kennzeichen.googleReview = false;
-            }
-
-            if(typeof kunde.anrede !== "string"){
-                kunde.anrede = "";
-            }
-
-            if(!kunde.notiz){
-
-                kunde.notiz = "";
-
-            }
-
+        /* --- Kennzeichen-Objekt: muss ein Plain-Object sein ---
+           Alt-Bug: manche Kunden hatten kennzeichen = [] statt {}.
+           Null/Array/Primitive-Werte werden auf {} normalisiert,
+           damit .wichtigbrief etc. lesbar bleibt. */
+        if(!kunde.kennzeichen
+           || typeof kunde.kennzeichen !== "object"
+           || Array.isArray(kunde.kennzeichen)){
+            kunde.kennzeichen = {};
         }
 
-    );
+        /* Alle Kennzeichen-Felder auf Boolean default false bringen
+           (zentrale Liste in core.js: KENNZEICHEN_FELDER). So wird
+           ein neues Kennzeichen nur dort eingetragen und automatisch
+           an allen Alt-Kunden ergaenzt. */
+        KENNZEICHEN_FELDER.forEach(feld => {
+            if(typeof kunde.kennzeichen[feld] !== "boolean"){
+                kunde.kennzeichen[feld] = false;
+            }
+        });
+
+    });
 
 }
 

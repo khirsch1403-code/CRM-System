@@ -23,6 +23,20 @@ const MONATE_LANG = [
     "Juli",   "August",  "September", "Oktober", "November", "Dezember"
 ];
 
+/* Alle existierenden Kennzeichen-Keys — Reihenfolge entspricht
+   der Button-Reihe im Kundenpanel. Wer neue Kennzeichen anlegt,
+   fuegt sie hier EIN MAL ein; datenPruefen() nimmt sie dann
+   automatisch mit auf. */
+const KENNZEICHEN_FELDER = [
+    "keineBeratung",
+    "nurBuero",
+    "nurTelefon",
+    "nurMail",
+    "bestandVerlassen",
+    "wichtigbrief",
+    "googleReview"
+];
+
 /* =====================================================
    INDEXEDDB (Primärer Speicher)
 ===================================================== */
