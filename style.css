@@ -1294,6 +1294,7 @@ input.crm-input{
     border-top:1px solid var(--c-border);
     padding-top:14px;
     margin-top:14px;
+    margin-bottom:10px;  /* gleicher Abstand wie .kd-klapp -> einheitlich */
 }
 
 .kd-abschnitt-kopf{
