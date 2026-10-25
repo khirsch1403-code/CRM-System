@@ -383,32 +383,40 @@ ${partnerBanner}
 
 </div>
 
-<!-- Partner / Lebensgefaehrte — leer lassen wenn nicht vorhanden -->
-<div class="kd-partner">
-    <label class="kd-partner-label">Partner (optional)</label>
-    <div class="kd-partner-grid">
-        <select class="crm-input" id="editPartnerAnrede"
-            onchange="kundeSpeichern()" title="Anrede Partner">
-            <option value=""       ${!(k.partner && k.partner.anrede) ? "selected" : ""}>–</option>
-            <option value="Frau"   ${k.partner && k.partner.anrede === "Frau"   ? "selected" : ""}>Frau</option>
-            <option value="Herr"   ${k.partner && k.partner.anrede === "Herr"   ? "selected" : ""}>Herr</option>
-            <option value="Divers" ${k.partner && k.partner.anrede === "Divers" ? "selected" : ""}>Divers</option>
-        </select>
-        <input class="crm-input" id="editPartnerVorname"
-            placeholder="Vorname Partner"
-            onblur="kundeSpeichern()"
-            value="${esc((k.partner && k.partner.vorname) || "")}">
-        <input class="crm-input" id="editPartnerNachname"
-            placeholder="Nachname Partner"
-            onblur="kundeSpeichern()"
-            value="${esc((k.partner && k.partner.nachname) || "")}">
-        <input class="crm-input" id="editPartnerGeburtsdatum"
-            type="text"
-            placeholder="Geburtsdatum Partner (TT.MM.JJJJ)"
-            onblur="kundeSpeichern()"
-            value="${esc((k.partner && k.partner.geburtsdatum) || "")}">
+<!-- Partner / Lebensgefaehrte — Klappfeld, offen wenn Partner vorhanden -->
+<details class="kd-klapp" ${k.partner ? "open" : ""}>
+    <summary class="kd-klapp-summary">
+        <span class="kd-klapp-titel">👥 Partner</span>
+        <span class="kd-klapp-info">${k.partner
+            ? esc((k.partner.vorname || "") + " " + (k.partner.nachname || "")).trim()
+            : '<span class="kd-klapp-info-leer">—</span>'}
+        </span>
+    </summary>
+    <div class="kd-klapp-inhalt">
+        <div class="kd-partner-grid">
+            <select class="crm-input" id="editPartnerAnrede"
+                onchange="kundeSpeichern()" title="Anrede Partner">
+                <option value=""       ${!(k.partner && k.partner.anrede) ? "selected" : ""}>–</option>
+                <option value="Frau"   ${k.partner && k.partner.anrede === "Frau"   ? "selected" : ""}>Frau</option>
+                <option value="Herr"   ${k.partner && k.partner.anrede === "Herr"   ? "selected" : ""}>Herr</option>
+                <option value="Divers" ${k.partner && k.partner.anrede === "Divers" ? "selected" : ""}>Divers</option>
+            </select>
+            <input class="crm-input" id="editPartnerVorname"
+                placeholder="Vorname Partner"
+                onblur="kundeSpeichern()"
+                value="${esc((k.partner && k.partner.vorname) || "")}">
+            <input class="crm-input" id="editPartnerNachname"
+                placeholder="Nachname Partner"
+                onblur="kundeSpeichern()"
+                value="${esc((k.partner && k.partner.nachname) || "")}">
+            <input class="crm-input" id="editPartnerGeburtsdatum"
+                type="text"
+                placeholder="Geburtsdatum Partner (TT.MM.JJJJ)"
+                onblur="kundeSpeichern()"
+                value="${esc((k.partner && k.partner.geburtsdatum) || "")}">
+        </div>
     </div>
-</div>
+</details>
 
 <div class="kd-abschnitt">
 
@@ -449,9 +457,15 @@ ${partnerBanner}
 
 </div>
 
-<div class="kd-abschnitt">
-
-    <h3>Haushalt</h3>
+<details class="kd-klapp" ${haushalt.length > 0 ? "open" : ""}>
+    <summary class="kd-klapp-summary">
+        <span class="kd-klapp-titel">🏠 Haushalt</span>
+        <span class="kd-klapp-info">${haushalt.length === 0
+            ? '<span class="kd-klapp-info-leer">keine weiteren Mitglieder</span>'
+            : (haushalt.length + ' Mitglied' + (haushalt.length !== 1 ? 'er' : ''))}
+        </span>
+    </summary>
+    <div class="kd-klapp-inhalt">
 
     ${haushalt.length === 0
 
@@ -502,10 +516,19 @@ ${partnerBanner}
 
     }
 
-</div>
+    </div>
+</details>
 
-<div class="kd-abschnitt" id="kundenunterlagenPanel">
-</div>
+<details class="kd-klapp">
+    <summary class="kd-klapp-summary">
+        <span class="kd-klapp-titel">📁 Kundenunterlagen</span>
+        <span class="kd-klapp-info" id="kuSummaryInfo">
+            <span class="kd-klapp-info-leer">—</span>
+        </span>
+    </summary>
+    <div class="kd-klapp-inhalt" id="kundenunterlagenPanel">
+    </div>
+</details>
 
 <div class="kd-abschnitt" id="kd-termine-bereich">
 

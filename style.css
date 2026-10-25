@@ -4036,3 +4036,84 @@ body.serienbrief-modus{
     color:var(--c-text-schwach);
     font-style:italic;
 }
+
+/* =====================================================
+   KUNDENDATENBLATT — Klappfelder (Umbau 3 von 4)
+   -----------------------------------------------------
+   Partner, Haushalt, Kundenunterlagen als <details>.
+   Standard geoeffnet wenn Inhalt vorhanden, sonst zu.
+   Summary-Zeile zeigt Status ohne Aufklappen.
+===================================================== */
+
+details.kd-klapp{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    margin-bottom:10px;
+    overflow:hidden;
+    transition:border-color 0.12s ease;
+}
+
+details.kd-klapp[open]{
+    border-color:var(--c-border-stark);
+}
+
+details.kd-klapp > summary.kd-klapp-summary{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 14px;
+    cursor:pointer;
+    list-style:none;
+    user-select:none;
+    background:var(--c-surface-muted);
+    transition:background 0.12s ease;
+}
+details.kd-klapp[open] > summary.kd-klapp-summary{
+    border-bottom:1px solid var(--c-border);
+}
+details.kd-klapp > summary.kd-klapp-summary::-webkit-details-marker{ display:none; }
+details.kd-klapp > summary.kd-klapp-summary::marker{ content:""; }
+details.kd-klapp > summary.kd-klapp-summary:hover{
+    background:var(--c-border);
+}
+
+/* Chevron als visuelles Marker-Element */
+details.kd-klapp > summary.kd-klapp-summary::before{
+    content:"▸";
+    font-size:0.75em;
+    color:var(--c-text-muted);
+    transition:transform 0.15s ease;
+    display:inline-block;
+    width:12px;
+    flex-shrink:0;
+}
+details.kd-klapp[open] > summary.kd-klapp-summary::before{
+    transform:rotate(90deg);
+}
+
+.kd-klapp-titel{
+    font-weight:600;
+    font-size:0.95em;
+    color:var(--c-text);
+    flex-shrink:0;
+}
+
+.kd-klapp-info{
+    flex:1;
+    text-align:right;
+    font-size:0.88em;
+    color:var(--c-text-muted);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.kd-klapp-info-leer{
+    color:var(--c-text-schwach);
+    font-style:italic;
+}
+
+.kd-klapp-inhalt{
+    padding:12px 14px;
+}
