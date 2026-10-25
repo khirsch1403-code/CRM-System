@@ -296,6 +296,23 @@ ${partnerBanner}
         ${renderKennzChips(k)}
     </div>
 
+    <details class="kd-aktionen-menu">
+        <summary class="kd-aktionen-knopf" title="Weitere Aktionen">⋮</summary>
+        <div class="kd-aktionen-liste">
+            <button class="kd-aktionen-eintrag"
+                onclick="zertifikatErstellen(aktuellerKunde); this.closest('details').removeAttribute('open');"
+                title="Finanzierungszertifikat als PDF erzeugen">
+                <span class="kd-aktionen-icon">📄</span>
+                <span>Zertifikat erstellen</span>
+            </button>
+            <button class="kd-aktionen-eintrag kd-aktionen-gefahr"
+                onclick="kundeArchivieren(); this.closest('details').removeAttribute('open');">
+                <span class="kd-aktionen-icon">⚠</span>
+                <span>Kunde archivieren</span>
+            </button>
+        </div>
+    </details>
+
 </div>
 
 <div class="kd-layout">
@@ -536,18 +553,6 @@ ${partnerBanner}
         <h3>Kontakte</h3>
         <button class="crm-button crm-button-klein" onclick="terminAnlegen()">+ Kontakt</button>
     </div>
-
-</div>
-
-<div class="kd-archivieren">
-
-    <button class="crm-button crm-button-klein" onclick="zertifikatErstellen(aktuellerKunde)" title="Finanzierungszertifikat als PDF erzeugen">
-        📄 Zertifikat erstellen
-    </button>
-
-    <button class="crm-button crm-button-klein crm-button-gefahr" onclick="kundeArchivieren()">
-        Kunde archivieren
-    </button>
 
 </div>
 
