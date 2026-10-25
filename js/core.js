@@ -801,6 +801,39 @@ function istPersonenDuplikat(a, b){
     return true;
 }
 
+/* Alter aus Geburtsdatum ("TT.MM.JJJJ" oder "YYYY-MM-DD") in
+   Jahren. Null wenn Datum ungueltig oder leer. */
+function berechneAlter(geburtsdatum){
+    if(!geburtsdatum){ return null; }
+    const s = String(geburtsdatum).trim();
+    let d;
+    const m1 = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if(m1){
+        d = new Date(parseInt(m1[3],10), parseInt(m1[2],10)-1, parseInt(m1[1],10));
+    }else{
+        d = new Date(s);
+    }
+    if(isNaN(d.getTime())){ return null; }
+    const heute = new Date();
+    let alter = heute.getFullYear() - d.getFullYear();
+    const monDiff = heute.getMonth() - d.getMonth();
+    if(monDiff < 0 || (monDiff === 0 && heute.getDate() < d.getDate())){
+        alter--;
+    }
+    return alter;
+}
+
+/* True wenn Geburtstag heute ist (Tag + Monat matchen). */
+function istHeuteGeburtstag(geburtsdatum){
+    if(!geburtsdatum){ return false; }
+    const s = String(geburtsdatum).trim();
+    const m1 = s.match(/^(\d{1,2})\.(\d{1,2})\.\d{4}$/);
+    if(!m1){ return false; }
+    const heute = new Date();
+    return parseInt(m1[1],10) === heute.getDate()
+        && parseInt(m1[2],10) === heute.getMonth() + 1;
+}
+
 /* Sucht einen anderen Kunden, bei dem der uebergebene Kunde
    als Partner hinterlegt ist. Match ueber Vor+Nachname (tolerant)
    und — wenn beide Seiten eins haben — Geburtsdatum.

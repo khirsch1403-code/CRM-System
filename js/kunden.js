@@ -267,45 +267,55 @@ function kundeOeffnen(id){
     </button>
 </div>` : "";
 
+    const alterJahre = berechneAlter(k.geburtsdatum);
+    const alterTxt   = alterJahre != null ? alterJahre + " J." : "";
+    const geburtstagHeute = istHeuteGeburtstag(k.geburtsdatum);
+
     details.innerHTML = `
 
 ${partnerBanner}
 
-<div class="kd-kopf">
+<div class="kd-kopf-neu">
 
-    <div>
-
-        <div style="font-size:11px;color:var(--c-text-schwach);margin-bottom:4px;">
-            PARTY-ID: ${k.partyIds ? k.partyIds.join(" | ") : "-"}
-            &nbsp;·&nbsp; Bestandsabgleich: ${k.letzterImport || "-"}
+    <div class="kd-kopf-titel">
+        <h2 class="kd-kopf-name">
+            ${esc(k.vorname)} ${esc(k.nachname)}
+        </h2>
+        <div class="kd-kopf-sub">
+            ${alterTxt
+                ? `<span class="kd-kopf-alter">${alterTxt}${geburtstagHeute ? ' 🎂' : ''}</span>`
+                : ''}
+            ${(k.plz || k.ort)
+                ? `<span class="kd-kopf-trenner">·</span>
+                   <span class="kd-kopf-ort">${esc(k.plz)} ${esc(k.ort)}</span>`
+                : ''}
         </div>
+    </div>
 
-        <div class="kennzeichen-reihe" style="margin-bottom:0;">
+    <div class="kennzeichen-reihe">
 
-            <button class="kennzeichen-btn ${k.kennzeichen.keineBeratung ? 'kennzeichen-aktiv-rot' : ''}"
-            onclick="toggleKennzeichen('keineBeratung')">Keine Beratung</button>
+        <button class="kennzeichen-btn ${k.kennzeichen.keineBeratung ? 'kennzeichen-aktiv-rot' : ''}"
+        onclick="toggleKennzeichen('keineBeratung')">Keine Beratung</button>
 
-            <button class="kennzeichen-btn ${k.kennzeichen.nurBuero ? 'kennzeichen-aktiv-grau' : ''}"
-            onclick="toggleKennzeichen('nurBuero')">Nur Büro</button>
+        <button class="kennzeichen-btn ${k.kennzeichen.nurBuero ? 'kennzeichen-aktiv-grau' : ''}"
+        onclick="toggleKennzeichen('nurBuero')">Nur Büro</button>
 
-            <button class="kennzeichen-btn ${k.kennzeichen.nurTelefon ? 'kennzeichen-aktiv-blau' : ''}"
-            onclick="toggleKennzeichen('nurTelefon')">Nur Telefon</button>
+        <button class="kennzeichen-btn ${k.kennzeichen.nurTelefon ? 'kennzeichen-aktiv-blau' : ''}"
+        onclick="toggleKennzeichen('nurTelefon')">Nur Telefon</button>
 
-            <button class="kennzeichen-btn ${k.kennzeichen.nurMail ? 'kennzeichen-aktiv-gruen' : ''}"
-            onclick="toggleKennzeichen('nurMail')">Nur Mail</button>
+        <button class="kennzeichen-btn ${k.kennzeichen.nurMail ? 'kennzeichen-aktiv-gruen' : ''}"
+        onclick="toggleKennzeichen('nurMail')">Nur Mail</button>
 
-            <button class="kennzeichen-btn ${k.kennzeichen.bestandVerlassen ? 'kennzeichen-aktiv-dunkelrot' : ''}"
-            onclick="toggleKennzeichen('bestandVerlassen')">Bestand verlassen</button>
+        <button class="kennzeichen-btn ${k.kennzeichen.bestandVerlassen ? 'kennzeichen-aktiv-dunkelrot' : ''}"
+        onclick="toggleKennzeichen('bestandVerlassen')">Bestand verlassen</button>
 
-            <button class="kennzeichen-btn ${k.kennzeichen.wichtigbrief ? 'kennzeichen-aktiv-orange' : ''}"
-            onclick="toggleKennzeichen('wichtigbrief')"
-            title="Kontaktdaten fehlen oder sind falsch — Kunde per Brief anschreiben">Wichtigbrief</button>
+        <button class="kennzeichen-btn ${k.kennzeichen.wichtigbrief ? 'kennzeichen-aktiv-orange' : ''}"
+        onclick="toggleKennzeichen('wichtigbrief')"
+        title="Kontaktdaten fehlen oder sind falsch — Kunde per Brief anschreiben">Wichtigbrief</button>
 
-            <button class="kennzeichen-btn ${k.kennzeichen.googleReview ? 'kennzeichen-aktiv-gold' : ''}"
-            onclick="toggleKennzeichen('googleReview')"
-            title="Kunde hat bereits eine Google-Review hinterlassen">★ Google-Review</button>
-
-        </div>
+        <button class="kennzeichen-btn ${k.kennzeichen.googleReview ? 'kennzeichen-aktiv-gold' : ''}"
+        onclick="toggleKennzeichen('googleReview')"
+        title="Kunde hat bereits eine Google-Review hinterlassen">★ Google-Review</button>
 
     </div>
 
@@ -539,6 +549,13 @@ ${partnerBanner}
         Kunde archivieren
     </button>
 
+</div>
+
+<!-- Admin-Fusszeile: dezent, nur zur Nachverfolgung -->
+<div class="kd-admin-fuss">
+    PARTY-ID: ${k.partyIds && k.partyIds.length ? k.partyIds.join(" | ") : "-"}
+    &nbsp;·&nbsp; Bestandsabgleich: ${k.letzterImport || "-"}
+    &nbsp;·&nbsp; Interne ID: ${k.id}
 </div>
 
 `;

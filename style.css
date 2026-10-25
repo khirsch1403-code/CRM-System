@@ -3839,3 +3839,75 @@ body.serienbrief-modus{
 .partner-hinweis-banner strong{
     color:var(--c-accent);
 }
+
+/* =====================================================
+   KUNDENDATENBLATT — Neue Kopfzeile (Umbau 1 von 4)
+   -----------------------------------------------------
+   Grosser Name links, Marker-Reihe rechts.
+   Admin-Metadaten (PARTY-ID etc.) wandern in die
+   dezente Fusszeile.
+===================================================== */
+
+.kd-kopf-neu{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:14px;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.kd-kopf-titel{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:220px;
+}
+
+.kd-kopf-name{
+    font-size:1.6em;
+    font-weight:600;
+    color:var(--c-text);
+    line-height:1.1;
+    margin:0;
+}
+
+.kd-kopf-sub{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    font-size:0.9em;
+    color:var(--c-text-muted);
+}
+
+.kd-kopf-alter{
+    font-weight:500;
+}
+
+.kd-kopf-trenner{
+    color:var(--c-text-schwach);
+}
+
+.kd-kopf-ort{
+    color:var(--c-text-muted);
+}
+
+/* Marker-Reihe in der Kopfzeile — wrappt bei schmalem Fenster */
+.kd-kopf-neu .kennzeichen-reihe{
+    margin-bottom:0;
+    flex:1;
+    justify-content:flex-end;
+}
+
+/* Admin-Fusszeile ganz unten im Panel */
+.kd-admin-fuss{
+    margin-top:16px;
+    padding-top:10px;
+    border-top:1px solid var(--c-border);
+    font-size:0.78em;
+    color:var(--c-text-schwach);
+    text-align:center;
+    letter-spacing:0.2px;
+}
