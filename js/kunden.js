@@ -292,31 +292,8 @@ ${partnerBanner}
         </div>
     </div>
 
-    <div class="kennzeichen-reihe">
-
-        <button class="kennzeichen-btn ${k.kennzeichen.keineBeratung ? 'kennzeichen-aktiv-rot' : ''}"
-        onclick="toggleKennzeichen('keineBeratung')">Keine Beratung</button>
-
-        <button class="kennzeichen-btn ${k.kennzeichen.nurBuero ? 'kennzeichen-aktiv-grau' : ''}"
-        onclick="toggleKennzeichen('nurBuero')">Nur Büro</button>
-
-        <button class="kennzeichen-btn ${k.kennzeichen.nurTelefon ? 'kennzeichen-aktiv-blau' : ''}"
-        onclick="toggleKennzeichen('nurTelefon')">Nur Telefon</button>
-
-        <button class="kennzeichen-btn ${k.kennzeichen.nurMail ? 'kennzeichen-aktiv-gruen' : ''}"
-        onclick="toggleKennzeichen('nurMail')">Nur Mail</button>
-
-        <button class="kennzeichen-btn ${k.kennzeichen.bestandVerlassen ? 'kennzeichen-aktiv-dunkelrot' : ''}"
-        onclick="toggleKennzeichen('bestandVerlassen')">Bestand verlassen</button>
-
-        <button class="kennzeichen-btn ${k.kennzeichen.wichtigbrief ? 'kennzeichen-aktiv-orange' : ''}"
-        onclick="toggleKennzeichen('wichtigbrief')"
-        title="Kontaktdaten fehlen oder sind falsch — Kunde per Brief anschreiben">Wichtigbrief</button>
-
-        <button class="kennzeichen-btn ${k.kennzeichen.googleReview ? 'kennzeichen-aktiv-gold' : ''}"
-        onclick="toggleKennzeichen('googleReview')"
-        title="Kunde hat bereits eine Google-Review hinterlassen">★ Google-Review</button>
-
+    <div class="kennz-chip-leiste" id="kennzChipLeiste">
+        ${renderKennzChips(k)}
     </div>
 
 </div>
@@ -921,6 +898,50 @@ function vertragLoeschen(index){
    KENNZEICHEN TOGGLE
 ===================================================== */
 
+/* Rendert die Kennzeichen-Chip-Leiste fuer das Kundenpanel.
+   Nur die aktiven Marker werden als farbige Chips angezeigt;
+   inaktive sind ueber ein "+ Marker"-Klappmenue erreichbar. */
+function renderKennzChips(k){
+    if(!k || !k.kennzeichen){ return ""; }
+
+    const aktive   = KENNZEICHEN_FELDER.filter(key =>  k.kennzeichen[key]);
+    const inaktive = KENNZEICHEN_FELDER.filter(key => !k.kennzeichen[key]);
+
+    const chips = aktive.map(key => {
+        const m = KENNZEICHEN_META[key];
+        const titleAttr = m.title ? ` title="${esc(m.title)}"` : "";
+        return `<span class="kennz-chip"
+                      style="background:var(${m.farbVar})"${titleAttr}>
+                    ${esc(m.label)}
+                    <button class="kennz-chip-x"
+                        onclick="toggleKennzeichen('${key}')"
+                        title="Marker entfernen">×</button>
+                </span>`;
+    }).join("");
+
+    const plusMenue = inaktive.length === 0 ? "" : `
+        <details class="kennz-chip-plus">
+            <summary>+ Marker</summary>
+            <div class="kennz-chip-menue">
+                ${inaktive.map(key => {
+                    const m = KENNZEICHEN_META[key];
+                    const titleAttr = m.title ? ` title="${esc(m.title)}"` : "";
+                    return `<button class="kennz-menue-eintrag"
+                        onclick="toggleKennzeichen('${key}')"${titleAttr}>
+                        <span class="kennz-menue-farbe"
+                            style="background:var(${m.farbVar})"></span>
+                        ${esc(m.label)}
+                    </button>`;
+                }).join("")}
+            </div>
+        </details>`;
+
+    const leerHinweis = aktive.length === 0 && inaktive.length === 0
+        ? '<span class="kennz-chip-leer">Keine Marker verfügbar</span>' : '';
+
+    return chips + plusMenue + leerHinweis;
+}
+
 function toggleKennzeichen(name){
 
     if(!aktuellerKunde){ return; }
@@ -928,28 +949,10 @@ function toggleKennzeichen(name){
     aktuellerKunde.kennzeichen[name] =
     !aktuellerKunde.kennzeichen[name];
 
-    // Nur den Kennzeichen-Button aktualisieren (kein Panel-Rebuild)
-    const btn = document.querySelector(
-        `.kennzeichen-btn[onclick*="${name}"]`
-    );
-
-    if(btn){
-        const klassenMap = {
-            keineBeratung: "kennzeichen-aktiv-rot",
-            nurBuero:      "kennzeichen-aktiv-grau",
-            nurTelefon:    "kennzeichen-aktiv-blau",
-            nurMail:       "kennzeichen-aktiv-gruen",
-            bestandVerlassen: "kennzeichen-aktiv-dunkelrot",
-            wichtigbrief:  "kennzeichen-aktiv-orange",
-            googleReview:  "kennzeichen-aktiv-gold"
-        };
-        const klasse = klassenMap[name];
-        if(klasse){
-            btn.classList.toggle(
-                klasse,
-                aktuellerKunde.kennzeichen[name]
-            );
-        }
+    // Chip-Leiste komplett neu rendern (aktive/inaktive verschieben sich)
+    const chipLeiste = document.getElementById("kennzChipLeiste");
+    if(chipLeiste){
+        chipLeiste.innerHTML = renderKennzChips(aktuellerKunde);
     }
 
     sidebarKarteAktualisieren();

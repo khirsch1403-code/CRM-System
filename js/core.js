@@ -37,6 +37,28 @@ const KENNZEICHEN_FELDER = [
     "googleReview"
 ];
 
+/* Metadaten je Kennzeichen (Label, Farb-Variable, optionaler
+   Tooltip). Wird von der Chip-Darstellung im Kundenpanel genutzt.
+   Neues Kennzeichen → hier und in KENNZEICHEN_FELDER eintragen. */
+const KENNZEICHEN_META = {
+    keineBeratung:    { label: "Keine Beratung",
+                        farbVar: "--kennz-keine-beratung" },
+    nurBuero:         { label: "Nur Büro",
+                        farbVar: "--kennz-nur-buero" },
+    nurTelefon:       { label: "Nur Telefon",
+                        farbVar: "--kennz-nur-telefon" },
+    nurMail:          { label: "Nur Mail",
+                        farbVar: "--kennz-nur-mail" },
+    bestandVerlassen: { label: "Bestand verlassen",
+                        farbVar: "--kennz-bestand-verlassen" },
+    wichtigbrief:     { label: "Wichtigbrief",
+                        farbVar: "--kennz-wichtigbrief",
+                        title:   "Kontaktdaten fehlen oder sind falsch" },
+    googleReview:     { label: "★ Google-Review",
+                        farbVar: "--kennz-google-review",
+                        title:   "Kunde hat bereits eine Google-Review hinterlassen" }
+};
+
 /* =====================================================
    INDEXEDDB (Primärer Speicher)
 ===================================================== */
