@@ -1437,11 +1437,22 @@ input.crm-input{
 .termin-kategorie{
     color:var(--c-text-schwach);
     font-size:12px;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .termin-titel{
     font-weight:600;
     color:var(--c-text);
+    /* Langer Titel darf die Spalte nicht sprengen: schrumpfen
+       erlauben (min-width:0) und mit … abkuerzen, damit die
+       Aktions-Buttons im Feld bleiben. */
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .termin-aktionen{
