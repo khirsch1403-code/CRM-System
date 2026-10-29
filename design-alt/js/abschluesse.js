@@ -562,7 +562,7 @@ function renderAbschluesse(){
 
         /* Kundenzeile darüber (dezent, damit das Raster darunter sauber bleibt) */
         const kundenZeile = abschluss.kundenName
-            ? `<div class="abschluss-kunde-zeile"><span class="ico ico-user"></span> ${esc(abschluss.kundenName)}</div>`
+            ? `<div class="abschluss-kunde-zeile">👤 ${esc(abschluss.kundenName)}</div>`
             : `<div class="abschluss-kunde-zeile abschluss-kunde-leer">Kein Kunde verknüpft</div>`;
 
         /* Notiz-Vorschau-Spalte: klickbar wenn Notiz da, sonst leer */
@@ -608,10 +608,10 @@ function renderAbschluesse(){
                 ${notizSpalte}
 
                 <button class="crm-icon-button" title="Bearbeiten"
-                    onclick="abschlussBearbeiten(${abschluss.id})"><span class="ico ico-pencil"></span></button>
+                    onclick="abschlussBearbeiten(${abschluss.id})">✏️</button>
 
                 <button class="crm-icon-button crm-icon-button-gefahr" title="Löschen"
-                    onclick="abschlussLoeschen(${abschluss.id})"><span class="ico ico-trash"></span></button>
+                    onclick="abschlussLoeschen(${abschluss.id})">🗑️</button>
 
             </div>
             ${hatNotiz ? `

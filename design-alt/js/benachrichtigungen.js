@@ -124,7 +124,7 @@ function benachrichtigungBannerZeigen(){
 
     banner.innerHTML = `
         <span>
-            <span class="ico ico-bell"></span> Möchtest du morgens eine Übersicht der fälligen Aufgaben
+            📬 Möchtest du morgens eine Übersicht der fälligen Aufgaben
             als Benachrichtigung erhalten?
         </span>
         <div>

@@ -11,27 +11,6 @@
 <link rel="apple-touch-icon" href="app-icon/icon-512.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM Vertrieb</title>
-
-<!-- Theme frueh setzen (gegen Flackern beim Laden) -->
-<script>
-(function(){
-    try{
-        var t = localStorage.getItem("crmTheme");
-        if(t === "dark" || t === "light"){
-            document.documentElement.setAttribute("data-theme", t);
-        }
-    }catch(e){}
-})();
-</script>
-
-<!-- Schriften: Newsreader (Titel/Kennzahlen) + Instrument Sans (UI). -->
-<!-- Faellt offline sauber auf System-Serif/-Sans zurueck. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
-
-<link rel="stylesheet" href="icons.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -52,7 +31,7 @@
         <span
             class="design-icon"
             onclick="designModalOeffnen()"
-            title="Design anpassen (nur in diesem Browser)"><span class="ico ico-sliders"></span></span>
+            title="Design anpassen (nur in diesem Browser)">🎨</span>
     </div>
 
     <div class="navbar-links">
@@ -127,16 +106,6 @@
 
     </button>
 
-    </div>
-
-    <div class="navbar-rechts">
-        <button
-            type="button"
-            id="themeToggle"
-            class="theme-toggle"
-            onclick="themeUmschalten()"
-            aria-label="Hell-/Dunkelmodus umschalten"
-            title="Hell-/Dunkelmodus umschalten"><span class="ico ico-moon"></span></button>
     </div>
 
 </div>
@@ -236,13 +205,13 @@
                 <button
                     id="backupButton"
                     class="crm-button">
-                    <span class="ico ico-download"></span> Sicherung herunterladen
+                    📥 Sicherung herunterladen
                 </button>
 
                 <button
                     id="syncButton"
                     class="crm-button">
-                    <span class="ico ico-sync"></span> Bestand synchronisieren
+                    🔄 Bestand synchronisieren
                 </button>
 
                 <button
@@ -250,7 +219,7 @@
                     class="crm-button"
                     onclick="dopplungenManuellStarten()"
                     title="Kunden mit gleichem Vor- und Nachnamen sowie Geburtsdatum finden und zusammenführen">
-                    <span class="ico ico-copy"></span> Dopplungen prüfen
+                    🧩 Dopplungen prüfen
                 </button>
 
             </div>
@@ -261,7 +230,7 @@
                     type="button"
                     class="crm-button"
                     onclick="kuWurzelWaehlen()">
-                    <span class="ico ico-folder"></span> Kundenunterlagen-Ordner wählen
+                    📁 Kundenunterlagen-Ordner wählen
                 </button>
 
                 <button
@@ -281,7 +250,7 @@
                     type="button"
                     class="crm-button"
                     onclick="abOrdnerWaehlen()">
-                    <span class="ico ico-lifebuoy"></span> Auto-Backup-Ordner wählen
+                    🛟 Auto-Backup-Ordner wählen
                 </button>
 
                 <button
@@ -321,7 +290,7 @@
 
             <details class="klapp-panel" style="margin-top:18px;">
 
-                <summary><span class="ico ico-user"></span> Berater-Daten (für Finanzierungszertifikate)</summary>
+                <summary>👤 Berater-Daten (für Finanzierungszertifikate)</summary>
 
                 <div class="klapp-inhalt" id="zertBeraterPanel">
                     <!-- wird von zertifikat.js gerendert -->
@@ -715,7 +684,7 @@
 
             <button class="crm-button crm-button-klein"
                 onclick="selektionSpeichern()">
-                <span class="ico ico-save"></span> Speichern
+                💾 Speichern
             </button>
 
             <button class="crm-button crm-button-klein crm-button-gefahr"
@@ -778,7 +747,7 @@
             onclick="selektionExportieren()"
             id="selektionExportButton"
             disabled>
-            <span class="ico ico-sheet"></span> Als Excel exportieren
+            📥 Als Excel exportieren
         </button>
 
     </div>
@@ -788,7 +757,7 @@
 
     <details class="klapp-panel klapp-panel-gross serienbrief-klapp">
 
-        <summary><span class="ico ico-file-text"></span> Serienbrief</summary>
+        <summary>📄 Serienbrief</summary>
 
         <div class="klapp-inhalt">
             <div id="serienbriefPanel">
@@ -804,7 +773,7 @@
     <details class="klapp-panel klapp-panel-gross selektion-rueckimport-klapp"
              ontoggle="if(this.open) sr_panelInitialisieren()">
 
-        <summary><span class="ico ico-download"></span> Selektion rückimportieren — Info-Termin erzeugen</summary>
+        <summary>📥 Selektion rückimportieren — Info-Termin erzeugen</summary>
 
         <div class="klapp-inhalt">
             <div class="sr-hinweis">
@@ -1208,7 +1177,7 @@
         <div id="crmFehlerModalInhalt"></div>
         <div class="modal-buttons">
             <button class="crm-button" onclick="fehlerLogKopieren()">
-                <span class="ico ico-clipboard"></span> In Zwischenablage kopieren
+                📋 In Zwischenablage kopieren
             </button>
             <button class="crm-button crm-button-gefahr" onclick="fehlerLogLeeren();fehlerModalSchliessen();">
                 Log leeren
@@ -1285,7 +1254,7 @@
 
 <div id="designModal" class="modal-overlay" style="z-index:10003;">
     <div class="modal design-modal">
-        <h2><span class="ico ico-sliders"></span> Design anpassen</h2>
+        <h2>🎨 Design anpassen</h2>
         <p class="design-hinweis">
             Nur in deinem Browser gespeichert — andere Nutzer sehen
             weiterhin das Standard-Design. Änderungen sind sofort sichtbar.

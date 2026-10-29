@@ -280,7 +280,7 @@ function abBannerZeigen(){
     banner.className = "benachrichtigung-banner";
     banner.innerHTML = `
         <span>
-            🛟 Noch kein Auto-Backup eingerichtet.
+            <span class="ico ico-lifebuoy"></span> Noch kein Auto-Backup eingerichtet.
             Ohne Sicherung sind Deine Daten nur im Browser gespeichert.
         </span>
         <div>

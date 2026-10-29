@@ -267,7 +267,7 @@ function renderAufgaben(){
             </div>
             <div class="ak-zeile-2">
                 <span class="ak-prio-badge" style="background:${prioFarbe};">${prioritaetKurz(aufgabe.prioritaet)}</span>
-                ${aufgabe.kundenName ? `<span class="ak-kunde">👤 ${esc(aufgabe.kundenName)}</span>` : ""}
+                ${aufgabe.kundenName ? `<span class="ak-kunde"><span class="ico ico-user"></span> ${esc(aufgabe.kundenName)}</span>` : ""}
             </div>
             ${aufgabe.status === "Erledigt" && aufgabe.erledigtAm ? `
                 <div class="aufgaben-loeschcountdown">
@@ -283,12 +283,12 @@ function renderAufgaben(){
             <div class="ak-aktionen">
                 ${aufgabe.kundenId ? `
                     <button class="crm-icon-button" title="Zum Kunden"
-                        onclick="event.stopPropagation();kundeAusAufgabeOeffnen(${aufgabe.kundenId});">👤</button>
+                        onclick="event.stopPropagation();kundeAusAufgabeOeffnen(${aufgabe.kundenId});"><span class="ico ico-user"></span></button>
                 ` : ""}
                 <button class="crm-icon-button" title="Bearbeiten"
-                    onclick="event.stopPropagation();aufgabeBearbeiten(${aufgabe.id});">✏️</button>
+                    onclick="event.stopPropagation();aufgabeBearbeiten(${aufgabe.id});"><span class="ico ico-pencil"></span></button>
                 <button class="crm-icon-button crm-icon-button-gefahr" title="Löschen"
-                    onclick="event.stopPropagation();aufgabeLoeschen(${aufgabe.id});">🗑️</button>
+                    onclick="event.stopPropagation();aufgabeLoeschen(${aufgabe.id});"><span class="ico ico-trash"></span></button>
             </div>
         `;
 

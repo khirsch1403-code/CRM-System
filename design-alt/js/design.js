@@ -13,7 +13,7 @@ const DESIGN_LS_KEY = "crmDesign";
 /* Standard-Werte (muessen zu style.css :root passen) */
 const DESIGN_STANDARD = {
     primary: "#7a1e35",
-    accent:  "#9a7a2e",
+    accent:  "#8b6914",
     bg:      "#f5eeec",
     text:    "#1a1210",
     border:  "#e8d9d4"
@@ -25,7 +25,7 @@ const DESIGN_PRESETS = {
     bordeaux: {
         name: "Bordeaux",
         primary: "#7a1e35",
-        accent:  "#9a7a2e",
+        accent:  "#8b6914",
         bg:      "#f5eeec",
         text:    "#1a1210",
         border:  "#e8d9d4"
@@ -184,75 +184,22 @@ function designAnwenden(d){
     const textMuted     = _heller(text, 25);
     const textSchwach   = _heller(text, 45);
 
-    /* -------------------------------------------------
-       EDITORIAL REDESIGN:
-       design.js setzt NUR noch die Markenfarben (Bordeaux
-       + Akzent) inline. Die neutralen Toene (Hintergrund/
-       Text/Rahmen) und die abgeleiteten -soft/-text-Toene
-       gehoeren dem Theme (hell/dunkel) im Stylesheet und
-       rechnen sich dort per color-mix. So funktioniert der
-       Dark Mode zuverlaessig und die Markenfarbe bleibt in
-       beiden Themes anpassbar.
-       Die lokalen Variablen bg/surface/text/border werden
-       bewusst nicht mehr auf :root geschrieben.
-       ------------------------------------------------- */
-    void surface; void surfaceMuted; void borderStark;
-    void textMuted; void textSchwach; void primarySoft; void accentSoft;
+    root.style.setProperty("--c-bg", bg);
+    root.style.setProperty("--c-surface", surface);
+    root.style.setProperty("--c-surface-muted", surfaceMuted);
+    root.style.setProperty("--c-border", border);
+    root.style.setProperty("--c-border-stark", borderStark);
+
+    root.style.setProperty("--c-text", text);
+    root.style.setProperty("--c-text-muted", textMuted);
+    root.style.setProperty("--c-text-schwach", textSchwach);
 
     root.style.setProperty("--c-primary", primary);
     root.style.setProperty("--c-primary-dunkel", primaryDunkel);
+    root.style.setProperty("--c-primary-soft", primarySoft);
     root.style.setProperty("--c-accent", accent);
+    root.style.setProperty("--c-accent-soft", accentSoft);
 }
-
-/* =====================================================
-   THEME (Hell / Dunkel) — Umschalter in der Navbar
-===================================================== */
-
-const THEME_LS_KEY = "crmTheme";
-
-function themeAktuell(){
-    const gesetzt = document.documentElement.getAttribute("data-theme");
-    if(gesetzt === "dark" || gesetzt === "light"){ return gesetzt; }
-    const dunkelSystem = window.matchMedia
-        && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    return dunkelSystem ? "dark" : "light";
-}
-
-function themeAnwenden(theme){
-    document.documentElement.setAttribute("data-theme", theme);
-    try{ localStorage.setItem(THEME_LS_KEY, theme); }catch(_){}
-    themeIconAktualisieren(theme);
-}
-
-function themeUmschalten(){
-    /* Weicher Farbuebergang: Transitions nur waehrend des Wechsels
-       aktivieren, danach wieder entfernen (kein Nachziehen im Betrieb). */
-    const root = document.documentElement;
-    const reduce = window.matchMedia
-        && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if(!reduce){
-        root.classList.add("theme-wechsel");
-        clearTimeout(themeUmschalten._t);
-        themeUmschalten._t = setTimeout(
-            () => root.classList.remove("theme-wechsel"), 520);
-    }
-    themeAnwenden(themeAktuell() === "dark" ? "light" : "dark");
-}
-
-function themeIconAktualisieren(theme){
-    const btn = document.getElementById("themeToggle");
-    if(!btn){ return; }
-    const dunkel = theme === "dark";
-    /* Hochwertige SVG-Icons (Sonne/Mond) statt Emoji */
-    btn.innerHTML = dunkel
-        ? '<span class="ico ico-sun"></span>'
-        : '<span class="ico ico-moon"></span>';
-    btn.title = dunkel ? "Zum Hellmodus wechseln" : "Zum Dunkelmodus wechseln";
-}
-
-document.addEventListener("DOMContentLoaded", function(){
-    themeIconAktualisieren(themeAktuell());
-});
 
 /* Sofort beim Laden anwenden — damit nichts flackert */
 designAnwenden(designLaden());
@@ -357,51 +304,3 @@ function designPresetLeisteRendern(){
     });
     host.innerHTML = stuecke.join("");
 }
-
-/* =====================================================
-   FLIESSENDER TAB-WECHSEL (design-neu)
-   -----------------------------------------------------
-   Umhuellt die globale showTab(): zuerst sanftes
-   Ausblenden der aktuellen Ansicht, dann der eigentliche
-   Wechsel (inkl. aller Seiteneffekte der Original-
-   Funktion), danach das elegante Einblenden per CSS.
-   design.js wird als letztes Script geladen, daher
-   gewinnt diese Definition. Schnelle Klicks und der
-   Wunsch nach reduzierter Bewegung werden beruecksichtigt.
-===================================================== */
-(function(){
-    if(typeof window.showTab !== "function"){ return; }
-
-    const _origShowTab = window.showTab;
-    let _tabToken = 0;
-
-    window.showTab = function(tabId){
-        const ziel    = document.getElementById(tabId);
-        const aktuell = document.querySelector(".tab-content.tab-active");
-        const reduce  = window.matchMedia
-            && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        /* Haengengebliebene Ausblend-Zustaende immer zuerst loesen */
-        document.querySelectorAll(".tab-raus")
-            .forEach(t => t.classList.remove("tab-raus"));
-
-        /* Navigation sofort umschalten — fuehlt sich reaktiv an */
-        document.querySelectorAll(".nav-button").forEach(function(b){
-            b.classList.toggle("nav-button-aktiv", b.dataset.tab === tabId);
-        });
-
-        /* Kein Uebergang noetig: direkt schalten */
-        if(!ziel || !aktuell || aktuell === ziel || reduce){
-            return _origShowTab(tabId);
-        }
-
-        const token = ++_tabToken;
-        aktuell.classList.add("tab-raus");
-
-        window.setTimeout(function(){
-            if(token !== _tabToken){ return; }   /* neuerer Wechsel gewinnt */
-            aktuell.classList.remove("tab-raus");
-            _origShowTab(tabId);  /* Swap + Seiteneffekte; loest Einblenden aus */
-        }, 140);
-    };
-})();

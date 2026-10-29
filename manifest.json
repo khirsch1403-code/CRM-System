@@ -4,7 +4,7 @@
   "description": "Persönliches Vertrieb-CRM",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f5eeec",
+  "background_color": "#f6f3ee",
   "theme_color": "#7a1e35",
   "icons": [
     {

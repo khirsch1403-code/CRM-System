@@ -283,7 +283,7 @@ ${partnerBanner}
         </h2>
         <div class="kd-kopf-sub">
             ${alterTxt
-                ? `<span class="kd-kopf-alter">${alterTxt}${geburtstagHeute ? ' <span class="ico ico-cake"></span>' : ''}</span>`
+                ? `<span class="kd-kopf-alter">${alterTxt}${geburtstagHeute ? ' 🎂' : ''}</span>`
                 : ''}
             ${(k.plz || k.ort)
                 ? `<span class="kd-kopf-trenner">·</span>
@@ -302,12 +302,12 @@ ${partnerBanner}
             <button class="kd-aktionen-eintrag"
                 onclick="zertifikatErstellen(aktuellerKunde); this.closest('details').removeAttribute('open');"
                 title="Finanzierungszertifikat als PDF erzeugen">
-                <span class="kd-aktionen-icon"><span class="ico ico-file-text"></span></span>
+                <span class="kd-aktionen-icon">📄</span>
                 <span>Zertifikat erstellen</span>
             </button>
             <button class="kd-aktionen-eintrag kd-aktionen-gefahr"
                 onclick="kundeArchivieren(); this.closest('details').removeAttribute('open');">
-                <span class="kd-aktionen-icon"><span class="ico ico-alert"></span></span>
+                <span class="kd-aktionen-icon">⚠</span>
                 <span>Kunde archivieren</span>
             </button>
         </div>
@@ -403,7 +403,7 @@ ${partnerBanner}
 <!-- Partner / Lebensgefaehrte — Klappfeld, offen wenn Partner vorhanden -->
 <details class="kd-klapp" ${k.partner ? "open" : ""}>
     <summary class="kd-klapp-summary">
-        <span class="kd-klapp-titel"><span class="ico ico-users"></span> Partner</span>
+        <span class="kd-klapp-titel">👥 Partner</span>
         <span class="kd-klapp-info">${k.partner
             ? esc((k.partner.vorname || "") + " " + (k.partner.nachname || "")).trim()
             : '<span class="kd-klapp-info-leer">—</span>'}
@@ -476,7 +476,7 @@ ${partnerBanner}
 
 <details class="kd-klapp" ${haushalt.length > 0 ? "open" : ""}>
     <summary class="kd-klapp-summary">
-        <span class="kd-klapp-titel"><span class="ico ico-home"></span> Haushalt</span>
+        <span class="kd-klapp-titel">🏠 Haushalt</span>
         <span class="kd-klapp-info">${haushalt.length === 0
             ? '<span class="kd-klapp-info-leer">keine weiteren Mitglieder</span>'
             : (haushalt.length + ' Mitglied' + (haushalt.length !== 1 ? 'er' : ''))}
@@ -538,7 +538,7 @@ ${partnerBanner}
 
 <details class="kd-klapp">
     <summary class="kd-klapp-summary">
-        <span class="kd-klapp-titel"><span class="ico ico-folder"></span> Kundenunterlagen</span>
+        <span class="kd-klapp-titel">📁 Kundenunterlagen</span>
         <span class="kd-klapp-info" id="kuSummaryInfo">
             <span class="kd-klapp-info-leer">—</span>
         </span>

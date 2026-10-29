@@ -435,7 +435,7 @@ function serienbriefPanelRendern(){
         <!-- BLOCK 1: Firma & Kontakt (einmalig, persistent) -->
         <details class="sb-block" ${basisVollstaendig ? "" : "open"}>
             <summary>
-                🏢 Firma & Kontakt  ${basisVollstaendig
+                <span class="ico ico-building"></span> Firma & Kontakt  ${basisVollstaendig
                     ? '<span class="sb-ok">✓ ausgefüllt</span>'
                     : '<span class="sb-nok">bitte ausfüllen</span>'}
             </summary>
@@ -512,7 +512,7 @@ function serienbriefPanelRendern(){
 
         <!-- BLOCK 2: Pro Kampagne -->
         <details class="sb-block" open>
-            <summary>✉️ Dieser Serienbrief</summary>
+            <summary><span class="ico ico-mail"></span> Dieser Serienbrief</summary>
             <div class="sb-block-inhalt">
 
                 <div class="sb-zwei-spalten">
@@ -566,7 +566,7 @@ function serienbriefPanelRendern(){
                 onclick="serienbriefErstellen()"
                 ${briefeGesamt === 0 ? "disabled" : ""}
                 title="${!basisVollstaendig ? "Bitte zuerst Firma & Kontakt vollständig ausfüllen" : ""}">
-                📄 ${briefeGesamt} Serienbrief${briefeGesamt === 1 ? "" : "e"} erstellen
+                <span class="ico ico-file-text"></span> ${briefeGesamt} Serienbrief${briefeGesamt === 1 ? "" : "e"} erstellen
             </button>
             <button class="crm-button crm-button-klein"
                 onclick="sbVorlageZuruecksetzen()">
@@ -595,7 +595,7 @@ function sbBlockHeaderAktualisieren(){
     if(headers.length === 0){ return; }
     const h = headers[0];
     const ok = sbFirmenDatenVollstaendig(fd);
-    h.innerHTML = "🏢 Firma & Kontakt  " +
+    h.innerHTML = "<span class='ico ico-building'></span> Firma & Kontakt  " +
         (ok ? '<span class="sb-ok">✓ ausgefüllt</span>'
             : '<span class="sb-nok">bitte ausfüllen</span>');
 }
@@ -818,7 +818,7 @@ function _serienbriefErstellenImpl(){
             </div>
             <div class="brief-vorschau-buttons">
                 <button class="crm-button crm-button-primary" onclick="serienbriefDrucken()">
-                    🖨 Drucken / als PDF speichern (Strg+P)
+                    <span class="ico ico-printer"></span> Drucken / als PDF speichern (Strg+P)
                 </button>
                 <button class="crm-button" onclick="serienbriefSchliessen()">
                     Zurück

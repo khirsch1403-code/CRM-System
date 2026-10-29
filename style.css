@@ -2,26 +2,49 @@
    DESIGN TOKENS
 ===================================================== */
 
+/* -----------------------------------------------------
+   EDITORIAL REDESIGN (design-neu)
+   -----------------------------------------------------
+   Neutrale Toene (Hintergrund/Text/Rahmen) gehoeren dem
+   Theme (hell/dunkel). Die Markenfarbe (Bordeaux/Akzent)
+   kommt aus design.js und wird hier NUR referenziert –
+   abgeleitete Toene entstehen per color-mix, damit sie
+   sich automatisch an das jeweilige Theme anpassen.
+   ----------------------------------------------------- */
+
 :root{
 
-    /* Flächen & Hintergrund — warmes Creme mit Rosé-Ton */
-    --c-bg:#f5eeec;
-    --c-surface:#fdfaf9;
-    --c-surface-muted:#f7f2f0;
-    --c-border:#e8d9d4;
-    --c-border-stark:#d4bdb6;
+    /* --- Typografie --- */
+    --font-serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --font-sans:"Instrument Sans",-apple-system,"Segoe UI",
+                Roboto,Helvetica,Arial,sans-serif;
 
-    /* Text */
-    --c-text:#1a1210;
-    --c-text-muted:#6b5047;
-    --c-text-schwach:#a08070;
-
-    /* Marke / Aktion — Bordeaux */
+    /* --- Marke (Default, wird von design.js ueberschrieben) --- */
     --c-primary:#7a1e35;
-    --c-primary-dunkel:#561526;
-    --c-primary-soft:#faeaee;
-    --c-accent:#8b6914;
-    --c-accent-soft:#fdf3dc;
+    --c-primary-dunkel:#5e1526;
+    --c-accent:#9a7a2e;
+
+    /* --- HELLES THEME (Standard) --- */
+    /* Flaechen & Hintergrund — warmes Papier, kuehler als Creme */
+    --c-bg:#f6f3ee;
+    --c-surface:#ffffff;
+    --c-surface-muted:#efeae2;
+    --c-border:#e4ddd3;
+    --c-border-stark:#d4cabb;
+
+    /* Text — warmes Tintenschwarz */
+    --c-text:#211c1a;
+    --c-text-muted:#6b615b;
+    --c-text-schwach:#9a8e86;
+
+    /* Abgeleitete Markentoene (theme-bewusst via color-mix) */
+    --c-primary-text:var(--c-primary);
+    --c-primary-soft:color-mix(in srgb, var(--c-primary) 9%, var(--c-surface));
+    --c-accent-text:var(--c-accent);
+    --c-accent-soft:color-mix(in srgb, var(--c-accent) 12%, var(--c-surface));
+
+    /* On-Primary (Text auf Bordeaux-Flaeche) */
+    --c-on-primary:#ffffff;
 
     /* Status */
     --c-danger:#b83c35;
@@ -48,13 +71,13 @@
     --farbe-gelb-text:var(--c-warn-text);
     --farbe-rot-text:var(--c-danger-text);
 
-    /* Abstände & Radien — weicher */
-    --radius-s:8px;
-    --radius-m:12px;
-    --radius-l:16px;
-    --schatten-karte:0 1px 3px rgba(28,26,23,0.07),
-                      0 1px 2px rgba(28,26,23,0.04);
-    --schatten-modal:0 24px 64px rgba(28,26,23,0.22);
+    /* Abstaende & Radien — ruhiger, weniger rund */
+    --radius-s:7px;
+    --radius-m:10px;
+    --radius-l:14px;
+    /* Editorial: Hierarchie ueber Haarlinien & Weissraum statt Schatten */
+    --schatten-karte:none;
+    --schatten-modal:0 32px 80px -24px rgba(24,18,16,0.45);
 
     /* -------------------------------------------------
        SEMANTISCHE FARBEN — Einzige Quelle fuer alle
@@ -79,6 +102,71 @@
     --prio-mittel:  #ffc107;
     --prio-niedrig: #6c757d;
 
+}
+
+/* =====================================================
+   DUNKLES THEME
+   -----------------------------------------------------
+   Neutrale Toene werden ersetzt; die Markenfarbe bleibt,
+   abgeleitete Toene (…-soft, …-text) rechnen sich neu.
+   Zwei Wege: expliziter Umschalter (data-theme="dark")
+   und System-Praeferenz (nur wenn nicht auf "light"
+   festgelegt).
+===================================================== */
+
+:root[data-theme="dark"]{
+    --c-bg:#1a1613;
+    --c-surface:#231d19;
+    --c-surface-muted:#1f1a16;
+    --c-border:#352c25;
+    --c-border-stark:#493c32;
+
+    --c-text:#f0e9e2;
+    --c-text-muted:#b4a79c;
+    --c-text-schwach:#867a70;
+
+    /* Bordeaux als Text/Akzent auf dunklem Grund aufhellen */
+    --c-primary-text:color-mix(in srgb, var(--c-primary), #ffffff 48%);
+    --c-primary-soft:color-mix(in srgb, var(--c-primary) 26%, var(--c-surface));
+    --c-accent-text:color-mix(in srgb, var(--c-accent), #ffffff 34%);
+    --c-accent-soft:color-mix(in srgb, var(--c-accent) 24%, var(--c-surface));
+
+    --c-danger-bg:rgba(220,96,88,0.16);
+    --c-danger-text:#eb8f88;
+    --c-warn-bg:rgba(201,154,46,0.18);
+    --c-warn-text:#d9b25e;
+    --c-success-bg:rgba(76,160,118,0.18);
+    --c-success-text:#73c89b;
+
+    --schatten-modal:0 32px 80px -20px rgba(0,0,0,0.7);
+}
+
+@media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+        --c-bg:#1a1613;
+        --c-surface:#231d19;
+        --c-surface-muted:#1f1a16;
+        --c-border:#352c25;
+        --c-border-stark:#493c32;
+
+        --c-text:#f0e9e2;
+        --c-text-muted:#b4a79c;
+        --c-text-schwach:#867a70;
+
+        --c-primary-text:color-mix(in srgb, var(--c-primary), #ffffff 48%);
+        --c-primary-soft:color-mix(in srgb, var(--c-primary) 26%, var(--c-surface));
+        --c-accent-text:color-mix(in srgb, var(--c-accent), #ffffff 34%);
+        --c-accent-soft:color-mix(in srgb, var(--c-accent) 24%, var(--c-surface));
+
+        --c-danger-bg:rgba(220,96,88,0.16);
+        --c-danger-text:#eb8f88;
+        --c-warn-bg:rgba(201,154,46,0.18);
+        --c-warn-text:#d9b25e;
+        --c-success-bg:rgba(76,160,118,0.18);
+        --c-success-text:#73c89b;
+
+        --schatten-modal:0 32px 80px -20px rgba(0,0,0,0.7);
+    }
 }
 
 /* =====================================================
@@ -4205,4 +4293,489 @@ details.kd-aktionen-menu .kd-aktionen-liste{
     width:20px;
     text-align:center;
     flex-shrink:0;
+}
+
+
+/* =====================================================
+   ╔═══════════════════════════════════════════════╗
+   ║   EDITORIAL REDESIGN LAYER (design-neu)         ║
+   ║   Ueberschreibt die Basis-Optik. Haarlinien &   ║
+   ║   Weissraum statt Schatten, serifige Schrift     ║
+   ║   fuer Titel & Kennzahlen, Bordeaux als praezise ║
+   ║   Akzentfarbe. Hell/Dunkel ueber Theme-Tokens.   ║
+   ╚═══════════════════════════════════════════════╝
+===================================================== */
+
+/* ---- Grundschrift & Typo-Hierarchie ---- */
+body{
+    font-family:var(--font-sans);
+    font-size:14px;
+    line-height:1.55;
+    letter-spacing:-0.002em;
+    font-feature-settings:" cv11" 1;
+}
+
+h1,h2,
+.dashboard-kopf h2,
+.modal h2{
+    font-family:var(--font-serif);
+    font-weight:460;
+    letter-spacing:-0.012em;
+    color:var(--c-text);
+}
+h2{ font-size:26px; line-height:1.15; }
+.modal h2{ font-size:23px; }
+
+/* Kleine Abschnitts-Labels: KEIN All-Caps mehr (ruhiger, editorial) */
+h3{
+    font-family:var(--font-sans);
+    text-transform:none;
+    letter-spacing:0;
+    font-weight:560;
+    font-size:12.5px;
+    color:var(--c-text-muted);
+}
+
+label{
+    font-family:var(--font-sans);
+    font-weight:540;
+    letter-spacing:0;
+    color:var(--c-text-muted);
+}
+
+::selection{ background:var(--c-primary-soft); color:var(--c-text); }
+
+/* =====================================================
+   MASTHEAD (statt dunkler Navbar)
+===================================================== */
+.navbar{
+    background:var(--c-surface);
+    border-bottom:1px solid var(--c-border);
+    box-shadow:none;
+    padding:0 26px;
+    min-height:60px;
+    gap:18px;
+    position:sticky;
+    top:0;
+    justify-content:flex-start;
+    /* feine Bordeaux-Kante oben als Marken-Signatur */
+    border-top:2px solid var(--c-primary);
+}
+
+.navbar-brand{
+    font-family:var(--font-serif);
+    font-size:19px;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    color:var(--c-text);
+    opacity:1;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:11px 0;
+}
+
+.navbar-links{ gap:2px; }
+
+.nav-button{
+    border:none;
+    background:transparent;
+    color:var(--c-text-muted);
+    border-radius:0;
+    padding:19px 12px 17px;
+    margin:0 2px;
+    font-family:var(--font-sans);
+    font-size:13.5px;
+    font-weight:520;
+    letter-spacing:-0.002em;
+    border-bottom:2px solid transparent;
+    transition:color 0.15s ease, border-color 0.15s ease;
+}
+.nav-button:hover{
+    background:transparent;
+    color:var(--c-text);
+    border-bottom-color:var(--c-border-stark);
+}
+.nav-button-aktiv,
+.nav-button-aktiv:hover{
+    background:transparent;
+    color:var(--c-primary-text);
+    border-bottom-color:var(--c-primary);
+}
+
+/* Nav-Icons: im Hellmodus native Bordeaux-Striche zeigen */
+.nav-icon{
+    width:16px; height:16px;
+    filter:none;
+    opacity:0.55;
+}
+.nav-button:hover .nav-icon{ opacity:0.8; }
+.nav-button-aktiv .nav-icon{ opacity:1; }
+:root[data-theme="dark"] .nav-icon{ filter:brightness(0) invert(0.92); }
+@media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .nav-icon{ filter:brightness(0) invert(0.92); }
+}
+
+/* Status- & Design-Symbole neben dem Wortzeichen */
+.crm-status-symbol{ font-size:13px; }
+.design-icon{ font-size:14px; opacity:0.6; }
+.design-icon:hover{ opacity:1; }
+
+/* Theme-Umschalter (neu) */
+.theme-toggle{
+    border:1px solid var(--c-border-stark);
+    background:var(--c-surface);
+    color:var(--c-text-muted);
+    width:34px; height:34px;
+    border-radius:999px;
+    cursor:pointer;
+    font-size:15px;
+    line-height:1;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    flex-shrink:0;
+}
+.theme-toggle:hover{
+    color:var(--c-text);
+    border-color:var(--c-text-schwach);
+    background:var(--c-surface-muted);
+}
+.navbar-rechts{
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    margin-left:auto;
+}
+
+/* =====================================================
+   CONTENT-RHYTHMUS
+===================================================== */
+.content{ padding:30px 26px 60px; }
+
+.dashboard-kopf{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:16px;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--c-border);
+}
+.dashboard-kopf h2{ font-size:28px; }
+
+.speicher-status{
+    font-family:var(--font-sans);
+    font-size:12px;
+    color:var(--c-text-schwach);
+    letter-spacing:0;
+}
+
+/* =====================================================
+   DASHBOARD — Kennzahlen als editorialer Satz
+===================================================== */
+.dashboard-grid{ gap:0; border:1px solid var(--c-border); border-radius:var(--radius-m);
+    overflow:hidden; background:var(--c-surface); }
+.dashboard-card{
+    background:transparent;
+    border:none;
+    border-right:1px solid var(--c-border);
+    border-radius:0;
+    box-shadow:none;
+    padding:22px 22px 20px;
+    min-height:112px;
+    gap:14px;
+}
+.dashboard-grid > .dashboard-card:last-child{ border-right:none; }
+.dashboard-card h3{
+    font-size:12.5px;
+    font-weight:520;
+    color:var(--c-text-muted);
+    margin-bottom:0;
+    line-height:1.3;
+    max-width:22ch;
+}
+.dashboard-value{
+    font-family:var(--font-serif);
+    font-size:42px;
+    font-weight:420;
+    color:var(--c-primary-text);
+    letter-spacing:-0.015em;
+    line-height:0.95;
+    font-variant-numeric:tabular-nums;
+}
+.dashboard-card-link{ cursor:pointer; transition:background 0.15s ease; }
+.dashboard-card-link:hover{ background:var(--c-surface-muted); }
+
+/* Auf schmalen Viewports wieder einzelne Karten statt Band */
+@media (max-width:860px){
+    .dashboard-grid{ border:none; border-radius:0; display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1px;
+        background:var(--c-border); }
+    .dashboard-card{ border-right:none; background:var(--c-surface); }
+}
+
+/* Abschluss-Kacheln (eigene Grid-Variante) behalten Karten-Look */
+.dashboard-grid-abschluesse{
+    border:none; background:transparent; gap:10px; overflow:visible;
+    border-radius:0;
+}
+.dashboard-grid-abschluesse .dashboard-card{
+    border:1px solid var(--c-border); border-radius:var(--radius-m);
+    background:var(--c-surface);
+}
+.dashboard-grid-abschluesse .dashboard-card h3{ text-transform:none; letter-spacing:0; }
+.dashboard-grid-abschluesse .dashboard-value{ font-size:26px; }
+
+/* =====================================================
+   PANELS / KARTEN (Kunden, Details, generische Flaechen)
+===================================================== */
+.kunden-sidebar,
+.kunden-details,
+.modal,
+.prod-container{
+    box-shadow:none;
+}
+.kunden-sidebar{ border-radius:var(--radius-m); background:var(--c-surface); }
+.kunden-details{ border-radius:var(--radius-m); background:var(--c-surface); }
+.kunden-sidebar h2{ font-size:22px; }
+
+.kundenkarte{
+    border-radius:var(--radius-s);
+    border-color:var(--c-border);
+    transition:border-color 0.12s ease, background 0.12s ease;
+}
+.kundenkarte:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-primary);
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+.crm-button{
+    font-family:var(--font-sans);
+    font-weight:540;
+    letter-spacing:-0.002em;
+    border:1px solid var(--c-border-stark);
+    background:var(--c-surface);
+    color:var(--c-text);
+    border-radius:var(--radius-s);
+    box-shadow:none;
+    transition:background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+.crm-button:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-text-schwach);
+}
+.crm-button-primary{
+    background:var(--c-primary);
+    border-color:var(--c-primary);
+    color:var(--c-on-primary);
+}
+.crm-button-primary:hover{
+    background:var(--c-primary-dunkel);
+    border-color:var(--c-primary-dunkel);
+    color:var(--c-on-primary);
+}
+
+/* =====================================================
+   FORMULARE
+===================================================== */
+.crm-input,
+select.crm-input,
+input.crm-input,
+.crm-textarea{
+    font-family:var(--font-sans);
+    background:var(--c-surface);
+    border:1px solid var(--c-border-stark);
+    color:var(--c-text);
+    border-radius:var(--radius-s);
+}
+.crm-input::placeholder,
+.crm-textarea::placeholder{ color:var(--c-text-schwach); }
+.crm-input:focus,
+.crm-textarea:focus{
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 3px var(--c-primary-soft);
+}
+
+/* =====================================================
+   MODALS
+===================================================== */
+.modal-overlay{
+    background:color-mix(in srgb, var(--c-text) 38%, transparent);
+    backdrop-filter:blur(3px);
+}
+.modal{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-l);
+    box-shadow:var(--schatten-modal);
+    background:var(--c-surface);
+}
+.modal-buttons{ border-top:1px solid var(--c-border); }
+
+/* =====================================================
+   TAGS / CHIPS
+===================================================== */
+.tag{
+    font-family:var(--font-sans);
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    color:var(--c-text-muted);
+    border-radius:999px;
+    font-weight:520;
+}
+
+/* =====================================================
+   KLAPP-PANELS (details/summary)
+===================================================== */
+details.klapp-panel{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    background:var(--c-surface);
+    box-shadow:none;
+}
+details.klapp-panel > summary{
+    font-family:var(--font-sans);
+    font-weight:560;
+    color:var(--c-text);
+}
+
+/* =====================================================
+   FOKUS-SICHTBARKEIT (Tastatur) & ruhige Scrollbalken
+===================================================== */
+:focus-visible{
+    outline:2px solid var(--c-primary);
+    outline-offset:2px;
+    border-radius:3px;
+}
+.nav-button:focus-visible{ outline-offset:-4px; }
+*{ scrollbar-color:var(--c-border-stark) transparent; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{
+    background:var(--c-border-stark);
+    border-radius:999px;
+    border:3px solid var(--c-bg);
+}
+::-webkit-scrollbar-thumb:hover{ background:var(--c-text-schwach); }
+
+/* =====================================================
+   BEWEGUNG — zurueckhaltend, respektiert Nutzerwunsch
+===================================================== */
+.tab-active{ animation:editorial-ein 0.22s ease both; }
+@keyframes editorial-ein{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+        animation-duration:0.001ms !important;
+        transition-duration:0.001ms !important;
+    }
+}
+
+
+/* =====================================================
+   ╔═══════════════════════════════════════════════╗
+   ║   PREMIUM MOTION LAYER (design-neu)             ║
+   ║   Fliessende Tab-Uebergaenge, ruhiger Auftritt  ║
+   ║   beim Laden, taktile Mikro-Interaktionen und   ║
+   ║   weicher Theme-Wechsel. Eine orchestrierte      ║
+   ║   Bewegung je Moment – nichts flackert.          ║
+   ╚═══════════════════════════════════════════════╝
+===================================================== */
+
+:root{
+    --ease-premium:cubic-bezier(0.22,0.61,0.36,1);
+    --ease-soft:cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ---- Tab-Wechsel: Aus- und Einblenden statt Sprung ---- */
+@keyframes tab-ein{
+    from{ opacity:0; transform:translateY(12px) scale(0.994); }
+    to{   opacity:1; transform:none; }
+}
+@keyframes tab-raus{
+    from{ opacity:1; transform:none; }
+    to{   opacity:0; transform:translateY(-6px) scale(0.997); }
+}
+.tab-active{
+    animation:tab-ein 0.44s var(--ease-premium) both;
+    will-change:opacity, transform;
+}
+.tab-content.tab-raus{
+    display:block;
+    animation:tab-raus 0.14s var(--ease-soft) both;
+    pointer-events:none;
+}
+
+/* ---- Ruhiger Auftritt beim Laden (ein Moment) ---- */
+@keyframes masthead-ein{
+    from{ opacity:0; transform:translateY(-10px); }
+    to{   opacity:1; transform:none; }
+}
+.navbar{ animation:masthead-ein 0.5s var(--ease-premium) both; }
+
+/* ---- Taktile Mikro-Interaktionen ---- */
+.kundenkarte{
+    transition:border-color 0.16s var(--ease-soft),
+               background 0.16s var(--ease-soft),
+               transform 0.16s var(--ease-premium);
+}
+.kundenkarte:hover{ transform:translateY(-1px); }
+.kundenkarte:active{ transform:translateY(0); }
+
+.crm-button{
+    transition:background 0.16s var(--ease-soft),
+               border-color 0.16s var(--ease-soft),
+               color 0.16s var(--ease-soft),
+               transform 0.14s var(--ease-premium),
+               box-shadow 0.18s var(--ease-soft);
+}
+.crm-button-primary:hover{
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px -8px color-mix(in srgb, var(--c-primary) 70%, transparent);
+}
+.crm-button-primary:active{ transform:translateY(0); box-shadow:none; }
+
+.nav-button{ transition:color 0.18s var(--ease-soft),
+                        border-color 0.18s var(--ease-soft); }
+
+.dashboard-card-link{
+    transition:background 0.2s var(--ease-soft);
+}
+
+.theme-toggle{
+    transition:border-color 0.18s var(--ease-soft),
+               color 0.18s var(--ease-soft),
+               background 0.18s var(--ease-soft),
+               transform 0.4s var(--ease-premium);
+}
+.theme-toggle:active{ transform:rotate(-30deg) scale(0.92); }
+
+details.klapp-panel > summary{
+    transition:color 0.15s var(--ease-soft), background 0.15s var(--ease-soft);
+}
+
+/* ---- Weicher Theme-Wechsel (nur waehrend des Umschaltens) ---- */
+.theme-wechsel,
+.theme-wechsel *{
+    transition:background-color 0.45s var(--ease-soft),
+               color 0.45s var(--ease-soft),
+               border-color 0.45s var(--ease-soft),
+               fill 0.45s var(--ease-soft) !important;
+}
+
+/* ---- Bewegung respektiert Nutzerwunsch ---- */
+@media (prefers-reduced-motion: reduce){
+    .tab-active,
+    .tab-content.tab-raus,
+    .navbar{ animation:none !important; }
+    .kundenkarte:hover,
+    .crm-button-primary:hover,
+    .theme-toggle:active{ transform:none !important; }
+    .theme-wechsel,
+    .theme-wechsel *{ transition:none !important; }
 }
