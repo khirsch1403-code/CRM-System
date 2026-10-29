@@ -1,0 +1,1268 @@
+function kundeAnlegen(){
+
+    const kunde = {
+
+        id: neueId(),
+
+        partyIds: [],
+        letzterImport: "",
+        anrede:"",
+        vorname:"",
+        nachname:"",
+        geburtsdatum:"",
+
+        strasse:"",
+        hausnummer:"",
+        plz:"",
+        ort:"",
+
+        telefone:[],
+
+        emails:[],
+
+        vertraege:[],
+
+kennzeichen:{
+    keineBeratung:false,
+    nurBuero:false,
+    nurTelefon:false,
+    nurMail:false,
+    bestandVerlassen:false,
+    wichtigbrief:false,
+    googleReview:false
+},
+
+        /* Lebenspartner (optional). Entweder null oder ein
+           Objekt mit anrede/vorname/nachname/geburtsdatum.
+           Partner wird mitgesucht; wenn er spaeter einen
+           eigenen Vertrag bekommt, kann er zum echten Kunden
+           hochgezogen werden. */
+        partner:null,
+
+        termine:[],
+
+        notiz:"",
+
+        archiviert:false
+
+    };
+
+    kunden.push(kunde);
+
+    renderKunden();
+
+    dashboardAktualisieren();
+
+    triggerAutoSave();
+
+    kundeOeffnen(kunde.id);
+
+}
+
+/* =====================================================
+   KUNDENLISTE RENDERN
+===================================================== */
+
+function renderKunden(){
+
+    const liste =
+
+    document.getElementById(
+        "kundenListe"
+    );
+
+    const suche =
+    document.getElementById(
+        "kundenSuche"
+    )
+    .value
+    .toLowerCase()
+    .trim();
+
+    liste.innerHTML = "";
+
+    kunden
+
+    .filter(
+
+        kunde =>
+
+        !kunde.archiviert
+
+    )
+
+    .filter(
+
+        kunde => {
+
+            if(!suche){ return true; }
+
+            const vertragsString =
+            (kunde.vertraege || [])
+            .map(v =>
+                (typeof v === "string" ? v : v.nummer || "")
+                + " " +
+                (typeof v === "object" ? (v.produkt || "") : "")
+            )
+            .join(" ");
+
+            const suchString = [
+                kunde.vorname,
+                kunde.nachname,
+                kunde.strasse,
+                kunde.hausnummer,
+                kunde.plz,
+                kunde.ort,
+                (kunde.telefone || []).join(" "),
+                (kunde.emails || []).join(" "),
+                vertragsString,
+                (kunde.partyIds || []).join(" "),
+                /* Partner-Name mitfinden */
+                (kunde.partner && kunde.partner.vorname)  || "",
+                (kunde.partner && kunde.partner.nachname) || ""
+            ]
+            .join(" ")
+            .toLowerCase();
+
+            // Alle Suchbegriffe (durch Leerzeichen getrennt)
+            // müssen enthalten sein
+            return suche
+            .split(/\s+/)
+            .every(begriff => suchString.includes(begriff));
+
+        }
+
+    )
+
+    .forEach(
+
+        kunde => {
+
+            const div =
+
+            document
+            .createElement(
+                "div"
+            );
+
+            div.className = "kundenkarte";
+            div.dataset.kid = kunde.id;
+
+            div.innerHTML = `
+    <strong class="kk-name">
+    ${esc(kunde.vorname)} ${esc(kunde.nachname)}
+    ${kunde.kennzeichen.keineBeratung    ? '<span class="tag" style="background:var(--kennz-keine-beratung);color:white;">KB</span>' : ''}
+    ${kunde.kennzeichen.nurBuero         ? '<span class="tag" style="background:var(--kennz-nur-buero);color:white;">B</span>' : ''}
+    ${kunde.kennzeichen.nurTelefon       ? '<span class="tag" style="background:var(--kennz-nur-telefon);color:white;">T</span>' : ''}
+    ${kunde.kennzeichen.nurMail          ? '<span class="tag" style="background:var(--kennz-nur-mail);color:white;">M</span>' : ''}
+    ${kunde.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:var(--kennz-bestand-verlassen);color:white;">BV</span>' : ''}
+    ${kunde.kennzeichen.wichtigbrief     ? '<span class="tag" style="background:var(--kennz-wichtigbrief);color:white;">WB</span>' : ''}
+    ${kunde.kennzeichen.googleReview     ? '<span class="tag" style="background:var(--kennz-google-review);color:white;" title="Google-Review vorhanden">★</span>' : ''}
+    </strong>
+    <br>
+    <span class="kk-ort">${esc(kunde.plz)} ${esc(kunde.ort)}</span>
+    <br>
+    Verträge: ${kunde.vertraege.length}
+            `;
+
+            div.onclick =
+            () => {
+
+                kundeOeffnen(
+                    kunde.id
+                );
+
+            };
+
+            liste.appendChild(
+                div
+            );
+
+        }
+
+    );
+
+}
+
+/* =====================================================
+   HAUSHALTE SUCHEN
+===================================================== */
+
+function findeHaushalt(kunde){
+
+    return kunden.filter(
+
+        anderer =>
+
+        anderer.id !== kunde.id &&
+
+        anderer.strasse ===
+        kunde.strasse &&
+
+        anderer.hausnummer ===
+        kunde.hausnummer &&
+
+        anderer.plz ===
+        kunde.plz &&
+
+        anderer.ort ===
+        kunde.ort
+
+    );
+
+}
+
+/* =====================================================
+   SIDEBAR KARTE AKTUALISIEREN (gezielt)
+===================================================== */
+
+function sidebarBadges(k){
+    return (k.kennzeichen.keineBeratung    ? '<span class="tag" style="background:var(--kennz-keine-beratung);color:white;">KB</span>' : '') +
+           (k.kennzeichen.nurBuero         ? '<span class="tag" style="background:var(--kennz-nur-buero);color:white;">B</span>' : '') +
+           (k.kennzeichen.nurTelefon       ? '<span class="tag" style="background:var(--kennz-nur-telefon);color:white;">T</span>' : '') +
+           (k.kennzeichen.nurMail          ? '<span class="tag" style="background:var(--kennz-nur-mail);color:white;">M</span>' : '') +
+           (k.kennzeichen.bestandVerlassen ? '<span class="tag" style="background:var(--kennz-bestand-verlassen);color:white;">BV</span>' : '') +
+           (k.kennzeichen.wichtigbrief     ? '<span class="tag" style="background:var(--kennz-wichtigbrief);color:white;">WB</span>' : '') +
+           (k.kennzeichen.googleReview     ? '<span class="tag" style="background:var(--kennz-google-review);color:white;" title="Google-Review vorhanden">★</span>' : '');
+}
+
+function sidebarKarteAktualisieren(){
+    if(!aktuellerKunde){ return; }
+    const k = aktuellerKunde;
+    const karte = document.querySelector(`.kundenkarte[data-kid="${k.id}"]`);
+    if(!karte){ return; }
+    karte.querySelector(".kk-name").innerHTML =
+        esc(k.vorname) + " " + esc(k.nachname) + " " + sidebarBadges(k);
+    karte.querySelector(".kk-ort").textContent =
+        k.plz + " " + k.ort;
+}
+
+
+/* =====================================================
+   KUNDE OEFFNEN
+===================================================== */
+
+function kundeOeffnen(id){
+
+    aktuellerKunde = findeKunde(id);
+
+    const details = document.getElementById("kundenDetails");
+
+    const haushalt = findeHaushalt(aktuellerKunde);
+
+    const k = aktuellerKunde;
+
+    const partnerTraeger = findePartnerVonKunde(k);
+    const partnerBanner = partnerTraeger ? `
+<div class="partner-hinweis-banner">
+    <div>
+        Dieser Kunde ist bei
+        <strong>${esc(partnerTraeger.vorname)} ${esc(partnerTraeger.nachname)}</strong>
+        als Partner hinterlegt.
+    </div>
+    <button class="crm-button crm-button-klein"
+        onclick="partnerVerweisEntfernen(${partnerTraeger.id})"
+        title="Entfernt den Partner-Verweis beim anderen Kunden. Dieser Kunde bleibt bestehen.">
+        Partner-Verweis entfernen
+    </button>
+</div>` : "";
+
+    const alterJahre = berechneAlter(k.geburtsdatum);
+    const alterTxt   = alterJahre != null ? alterJahre + " J." : "";
+    const geburtstagHeute = istHeuteGeburtstag(k.geburtsdatum);
+
+    details.innerHTML = `
+
+${partnerBanner}
+
+<div class="kd-kopf-neu">
+
+    <div class="kd-kopf-titel">
+        <h2 class="kd-kopf-name">
+            ${esc(k.vorname)} ${esc(k.nachname)}
+        </h2>
+        <div class="kd-kopf-sub">
+            ${alterTxt
+                ? `<span class="kd-kopf-alter">${alterTxt}${geburtstagHeute ? ' 🎂' : ''}</span>`
+                : ''}
+            ${(k.plz || k.ort)
+                ? `<span class="kd-kopf-trenner">·</span>
+                   <span class="kd-kopf-ort">${esc(k.plz)} ${esc(k.ort)}</span>`
+                : ''}
+        </div>
+    </div>
+
+    <div class="kennz-chip-leiste" id="kennzChipLeiste">
+        ${renderKennzChips(k)}
+    </div>
+
+    <details class="kd-aktionen-menu">
+        <summary class="kd-aktionen-knopf" title="Weitere Aktionen">⋮</summary>
+        <div class="kd-aktionen-liste">
+            <button class="kd-aktionen-eintrag"
+                onclick="zertifikatErstellen(aktuellerKunde); this.closest('details').removeAttribute('open');"
+                title="Finanzierungszertifikat als PDF erzeugen">
+                <span class="kd-aktionen-icon">📄</span>
+                <span>Zertifikat erstellen</span>
+            </button>
+            <button class="kd-aktionen-eintrag kd-aktionen-gefahr"
+                onclick="kundeArchivieren(); this.closest('details').removeAttribute('open');">
+                <span class="kd-aktionen-icon">⚠</span>
+                <span>Kunde archivieren</span>
+            </button>
+        </div>
+    </details>
+
+</div>
+
+<div class="kd-layout">
+
+    <div class="kd-stamm">
+
+        <div class="kd-grid-anrede">
+            <select class="crm-input" id="editAnrede" onchange="kundeSpeichern()" title="Anrede">
+                <option value=""       ${!k.anrede ? "selected" : ""}>–</option>
+                <option value="Frau"   ${k.anrede === "Frau" ? "selected" : ""}>Frau</option>
+                <option value="Herr"   ${k.anrede === "Herr" ? "selected" : ""}>Herr</option>
+                <option value="Divers" ${k.anrede === "Divers" ? "selected" : ""}>Divers</option>
+            </select>
+            <input class="crm-input" id="editVorname" placeholder="Vorname" onblur="kundeSpeichern()" value="${esc(k.vorname)}">
+            <input class="crm-input" id="editNachname" placeholder="Nachname" onblur="kundeSpeichern()" value="${esc(k.nachname)}">
+        </div>
+
+        <div class="kd-grid-adresse">
+            <input class="crm-input kd-strasse" id="editStrasse" placeholder="Straße" onblur="kundeSpeichern()" value="${esc(k.strasse)}">
+            <input class="crm-input kd-nr" id="editHausnummer" placeholder="Nr." onblur="kundeSpeichern()" value="${esc(k.hausnummer)}">
+        </div>
+
+        <div class="kd-grid-plzort">
+            <input class="crm-input kd-plz" id="editPlz" placeholder="PLZ" onblur="kundeSpeichern()" value="${esc(k.plz)}">
+            <input class="crm-input kd-ort" id="editOrt" placeholder="Ort" onblur="kundeSpeichern()" value="${esc(k.ort)}">
+        </div>
+
+        <div class="kd-kontakte-grid-2">
+
+            <div class="kd-kontakt-spalte">
+                <div class="kd-kontakt-kopf">
+                    <span>Telefon</span>
+                    <button class="eintrag-plus" onclick="telefonHinzufuegen()">+</button>
+                </div>
+                <div class="eintrag-liste">
+                ${k.telefone.length === 0
+                    ? '<div class="eintrag-leer">–</div>'
+                    : k.telefone.map((t,i) =>
+                        `<div class="eintrag-zeile"><span>${esc(t)}</span>
+                        <button class="eintrag-entfernen" onclick="telefonLoeschen(${i})">×</button></div>`
+                      ).join("")
+                }
+                </div>
+            </div>
+
+            <div class="kd-kontakt-spalte">
+                <div class="kd-kontakt-kopf">
+                    <span>E-Mail</span>
+                    <button class="eintrag-plus" onclick="emailHinzufuegen()">+</button>
+                </div>
+                <div class="eintrag-liste">
+                ${k.emails.length === 0
+                    ? '<div class="eintrag-leer">–</div>'
+                    : k.emails.map((e,i) =>
+                        `<div class="eintrag-zeile">
+                        <a class="eintrag-email" href="mailto:${encodeURIComponent(e)}">${esc(e)}</a>
+                        <button class="eintrag-entfernen" onclick="emailLoeschen(${i})">×</button></div>`
+                      ).join("")
+                }
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="kd-notiz">
+
+        <div class="kd-grid-geburtstag">
+            <label class="kd-geburtstag-label">Geburtsdatum</label>
+            <input class="crm-input" id="editGeburtsdatum"
+                type="text"
+                placeholder="TT.MM.JJJJ"
+                onblur="kundeSpeichern()"
+                value="${esc(k.geburtsdatum || "")}">
+        </div>
+
+        <label style="margin-top:12px;">Notiz</label>
+
+        <textarea class="crm-textarea kd-notiz-textarea" id="editNotiz"
+            onblur="kundeSpeichern()"
+            onkeydown="notizAutoBullet(event, this)">${esc(k.notiz)}</textarea>
+
+    </div>
+
+</div>
+
+<!-- Partner / Lebensgefaehrte — Klappfeld, offen wenn Partner vorhanden -->
+<details class="kd-klapp" ${k.partner ? "open" : ""}>
+    <summary class="kd-klapp-summary">
+        <span class="kd-klapp-titel">👥 Partner</span>
+        <span class="kd-klapp-info">${k.partner
+            ? esc((k.partner.vorname || "") + " " + (k.partner.nachname || "")).trim()
+            : '<span class="kd-klapp-info-leer">—</span>'}
+        </span>
+    </summary>
+    <div class="kd-klapp-inhalt">
+        <div class="kd-partner-grid">
+            <select class="crm-input" id="editPartnerAnrede"
+                onchange="kundeSpeichern()" title="Anrede Partner">
+                <option value=""       ${!(k.partner && k.partner.anrede) ? "selected" : ""}>–</option>
+                <option value="Frau"   ${k.partner && k.partner.anrede === "Frau"   ? "selected" : ""}>Frau</option>
+                <option value="Herr"   ${k.partner && k.partner.anrede === "Herr"   ? "selected" : ""}>Herr</option>
+                <option value="Divers" ${k.partner && k.partner.anrede === "Divers" ? "selected" : ""}>Divers</option>
+            </select>
+            <input class="crm-input" id="editPartnerVorname"
+                placeholder="Vorname Partner"
+                onblur="kundeSpeichern()"
+                value="${esc((k.partner && k.partner.vorname) || "")}">
+            <input class="crm-input" id="editPartnerNachname"
+                placeholder="Nachname Partner"
+                onblur="kundeSpeichern()"
+                value="${esc((k.partner && k.partner.nachname) || "")}">
+            <input class="crm-input" id="editPartnerGeburtsdatum"
+                type="text"
+                placeholder="Geburtsdatum Partner (TT.MM.JJJJ)"
+                onblur="kundeSpeichern()"
+                value="${esc((k.partner && k.partner.geburtsdatum) || "")}">
+        </div>
+    </div>
+</details>
+
+<div class="kd-abschnitt">
+
+    <div class="kd-abschnitt-kopf">
+        <h3>Verträge</h3>
+        <button class="crm-button crm-button-klein" onclick="vertragHinzufuegen()">+ Vertrag</button>
+    </div>
+
+    ${k.vertraege.length === 0
+        ? '<div class="eintrag-leer">Keine Verträge vorhanden</div>'
+        : `<div class="vertrag-tabelle">
+            <div class="vertrag-zeile vertrag-kopf">
+                <span>Vertragsnummer</span>
+                <span>Produkt</span>
+                <span>Bausparsumme</span>
+                <span>Saldo</span>
+                <span>Guthaben %</span>
+                <span></span>
+            </div>
+            ${k.vertraege.map((v,i) => {
+                const vObj = typeof v === "string" ? { nummer: v } : v;
+                return `<div class="vertrag-zeile">
+                    <span class="vertrag-nummer">
+                        <strong>${esc(vObj.nummer || "-")}</strong>
+                        ${vObj.zuteilungsdatum
+                            ? `<span class="vertrag-zuteilung">Zuteilung: ${esc(vObj.zuteilungsdatum)}</span>`
+                            : ""}
+                    </span>
+                    <span>${esc(vObj.produkt || "-")}</span>
+                    <span>${esc(vObj.bausparsumme || "-")}</span>
+                    <span>${esc(vObj.saldo || "-")}</span>
+                    <span>${esc(vObj.guthabenProzent || "-")}</span>
+                    <button class="eintrag-entfernen" onclick="vertragLoeschen(${i})">×</button>
+                </div>`;
+            }).join("")}
+        </div>`
+    }
+
+</div>
+
+<details class="kd-klapp" ${haushalt.length > 0 ? "open" : ""}>
+    <summary class="kd-klapp-summary">
+        <span class="kd-klapp-titel">🏠 Haushalt</span>
+        <span class="kd-klapp-info">${haushalt.length === 0
+            ? '<span class="kd-klapp-info-leer">keine weiteren Mitglieder</span>'
+            : (haushalt.length + ' Mitglied' + (haushalt.length !== 1 ? 'er' : ''))}
+        </span>
+    </summary>
+    <div class="kd-klapp-inhalt">
+
+    ${haushalt.length === 0
+
+    ? "<div style=\"color:var(--c-text-schwach);font-size:13px;\">Kein weiterer Haushalt gefunden</div>"
+
+    : haushalt.map(person => {
+
+        const echteKontakte = (person.termine || [])
+            .filter(t => t.kategorie !== "Info (kein Kontakt)");
+
+        const letzterKontakt =
+        echteKontakte.length > 0
+        ? echteKontakte.slice().sort(
+            (a,b) => new Date(b.datum) - new Date(a.datum)
+          )[0].datum
+        : null;
+
+        const tageAlt = letzterKontakt ? tageSeit(letzterKontakt) : null;
+
+        const kontaktAnzeige =
+        letzterKontakt
+        ? (tageAlt === 0 ? "Heute" : tageAlt === 1 ? "Gestern" : "vor " + tageAlt + " Tagen")
+        : "Noch kein Kontakt";
+
+        const kontaktFarbe =
+        !letzterKontakt ? "var(--c-text-schwach)"
+        : tageAlt > 730 ? "var(--c-danger)"
+        : tageAlt > 365 ? "var(--c-warn-text)"
+        : "var(--c-success-text)";
+
+        return `<div class="haushalt-mitglied">
+            <div class="haushalt-mitglied-info">
+                <strong class="haushalt-mitglied-name" onclick="kundeOeffnen(${person.id})">${esc(person.vorname)} ${esc(person.nachname)}</strong>
+                <span class="haushalt-mitglied-kontakt" style="color:${kontaktFarbe};">${kontaktAnzeige}</span>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+            ${person.kennzeichen.keineBeratung ? '<span class="kennzeichen-badge kennzeichen-badge-rot">KB</span>' : ''}
+            ${person.kennzeichen.nurBuero ? '<span class="kennzeichen-badge kennzeichen-badge-grau">Büro</span>' : ''}
+            ${person.kennzeichen.nurTelefon ? '<span class="kennzeichen-badge kennzeichen-badge-blau">Telefon</span>' : ''}
+            ${person.kennzeichen.nurMail ? '<span class="kennzeichen-badge kennzeichen-badge-gruen">Mail</span>' : ''}
+            ${person.kennzeichen.bestandVerlassen ? '<span class="kennzeichen-badge kennzeichen-badge-dunkelrot">BV</span>' : ''}
+            ${person.kennzeichen.wichtigbrief ? '<span class="kennzeichen-badge kennzeichen-badge-orange">WB</span>' : ''}
+            ${person.kennzeichen.googleReview ? '<span class="kennzeichen-badge kennzeichen-badge-gold" title="Google-Review vorhanden">★</span>' : ''}
+            </div>
+        </div>`;
+
+    }).join("")
+
+    }
+
+    </div>
+</details>
+
+<details class="kd-klapp">
+    <summary class="kd-klapp-summary">
+        <span class="kd-klapp-titel">📁 Kundenunterlagen</span>
+        <span class="kd-klapp-info" id="kuSummaryInfo">
+            <span class="kd-klapp-info-leer">—</span>
+        </span>
+    </summary>
+    <div class="kd-klapp-inhalt" id="kundenunterlagenPanel">
+    </div>
+</details>
+
+<div class="kd-abschnitt" id="kd-termine-bereich">
+
+    <div class="kd-abschnitt-kopf">
+        <h3>Kontakte</h3>
+        <button class="crm-button crm-button-klein" onclick="terminAnlegen()">+ Kontakt</button>
+    </div>
+
+</div>
+
+<!-- Admin-Fusszeile: dezent, nur zur Nachverfolgung -->
+<div class="kd-admin-fuss">
+    PARTY-ID: ${k.partyIds && k.partyIds.length ? k.partyIds.join(" | ") : "-"}
+    &nbsp;·&nbsp; Bestandsabgleich: ${k.letzterImport || "-"}
+    &nbsp;·&nbsp; Interne ID: ${k.id}
+</div>
+
+`;
+
+    // Kundenunterlagen-Panel nachladen (asynchron)
+    if(typeof kundenunterlagenPanelRendern === "function"){
+        kundenunterlagenPanelRendern(k);
+    }
+
+}
+
+/* =====================================================
+   KUNDE SPEICHERN
+===================================================== */
+
+function kundeSpeichern(){
+
+    if(!aktuellerKunde){ return; }
+
+    // Daten leise aktualisieren — kein Panel-Rebuild
+    const anredeEl = document.getElementById("editAnrede");
+    if(anredeEl){
+        aktuellerKunde.anrede = anredeEl.value;
+    }
+
+    aktuellerKunde.vorname =
+        document.getElementById("editVorname").value.trim();
+
+    aktuellerKunde.nachname =
+        document.getElementById("editNachname").value.trim();
+
+    aktuellerKunde.strasse =
+        document.getElementById("editStrasse").value.trim();
+
+    aktuellerKunde.hausnummer =
+        document.getElementById("editHausnummer").value.trim();
+
+    aktuellerKunde.plz =
+        document.getElementById("editPlz").value.trim();
+
+    aktuellerKunde.ort =
+        document.getElementById("editOrt").value.trim();
+
+    aktuellerKunde.geburtsdatum =
+        document.getElementById("editGeburtsdatum").value.trim();
+
+    aktuellerKunde.notiz =
+        document.getElementById("editNotiz").value;
+
+    /* Partner-Daten: alle 4 Felder lesen. Wenn alles leer ist,
+       auf null setzen (kein Partner), sonst als Objekt speichern. */
+    const pAnr = (document.getElementById("editPartnerAnrede")       || {}).value || "";
+    const pVn  = (document.getElementById("editPartnerVorname")      || {}).value || "";
+    const pNn  = (document.getElementById("editPartnerNachname")     || {}).value || "";
+    const pGeb = (document.getElementById("editPartnerGeburtsdatum") || {}).value || "";
+    const pAnrT = pAnr.trim(), pVnT = pVn.trim(), pNnT = pNn.trim(), pGebT = pGeb.trim();
+    if(!pAnrT && !pVnT && !pNnT && !pGebT){
+        aktuellerKunde.partner = null;
+    }else{
+        aktuellerKunde.partner = {
+            anrede:       pAnrT,
+            vorname:      pVnT,
+            nachname:     pNnT,
+            geburtsdatum: pGebT
+        };
+    }
+
+    // Nur den Sidebar-Eintrag dieses Kunden aktualisieren
+    // (Name könnte sich geändert haben)
+    const karte = document.querySelector(
+        `.kundenkarte[data-kid="${aktuellerKunde.id}"]`
+    );
+
+    if(karte){
+        karte.querySelector(".kk-name").innerHTML =
+            esc(aktuellerKunde.vorname) + " " +
+            esc(aktuellerKunde.nachname) + " " +
+            sidebarBadges(aktuellerKunde);
+
+        karte.querySelector(".kk-ort").textContent =
+            aktuellerKunde.plz + " " + aktuellerKunde.ort;
+    }
+
+    // Kurzes "Gespeichert"-Feedback am Speichern-Button
+    const btn = document.querySelector(
+        ".kd-kopf .crm-button-primary"
+    );
+
+    if(btn){
+        const original = btn.textContent;
+        btn.textContent = "✓ Gespeichert";
+        btn.style.background = "var(--c-success-text)";
+        btn.style.borderColor = "var(--c-success-text)";
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.style.background = "";
+            btn.style.borderColor = "";
+        }, 1500);
+    }
+
+    // Verknüpfte Aufgaben und Abschlüsse synchronisieren
+    const neuerName =
+        aktuellerKunde.vorname + " " +
+        aktuellerKunde.nachname;
+
+    aufgaben.forEach(a => {
+        if(a.kundenId === aktuellerKunde.id){
+            a.kundenName = neuerName;
+        }
+    });
+
+    abschluesse.forEach(a => {
+        if(a.kundenId === aktuellerKunde.id){
+            a.kundenName = neuerName;
+        }
+    });
+
+    // Betroffene Ansichten aktualisieren
+    // (nur die jeweiligen Tabs, kein Rebuild des Kundendatenblatts)
+    renderAufgaben();
+    renderAbschluesse();
+    kontaktListenAktualisieren();
+    dashboardAktualisieren();
+    triggerAutoSave();
+
+}
+
+/* =====================================================
+   TELEFON HINZUFUEGEN
+===================================================== */
+
+function telefonHinzufuegen(){
+
+    const wert = prompt("Telefonnummer");
+    if(!wert){ return; }
+
+    const norm = normalisiereTelefon(wert);
+    if(!norm){
+        alert("Ungültige Telefonnummer.");
+        return;
+    }
+
+    const key = telefonSchluessel(wert);
+    const existiert = (aktuellerKunde.telefone || [])
+        .some(t => telefonSchluessel(t) === key);
+
+    if(existiert){
+        alert("Diese Telefonnummer ist bereits hinterlegt.");
+        return;
+    }
+
+    aktuellerKunde.telefone.push(norm);
+    kundeOeffnen(aktuellerKunde.id);
+
+}
+
+/* =====================================================
+   TELEFON LOESCHEN
+===================================================== */
+
+function telefonLoeschen(index){
+
+    if(!aktuellerKunde){
+
+        return;
+
+    }
+
+    if(
+        !confirm(
+            "Telefonnummer löschen?"
+        )
+    ){
+
+        return;
+
+    }
+
+    aktuellerKunde
+    .telefone
+    .splice(
+        index,
+        1
+    );
+
+    kundeOeffnen(
+        aktuellerKunde.id
+    );
+
+}
+
+/* =====================================================
+   EMAIL HINZUFUEGEN
+===================================================== */
+
+function emailHinzufuegen(){
+
+    const wert = prompt("E-Mail");
+    if(!wert){ return; }
+
+    const norm = normalisiereEmail(wert);
+    if(!norm){
+        alert("Ungültige E-Mail-Adresse.");
+        return;
+    }
+
+    const existiert = (aktuellerKunde.emails || [])
+        .some(e => normalisiereEmail(e) === norm);
+
+    if(existiert){
+        alert("Diese E-Mail-Adresse ist bereits hinterlegt.");
+        return;
+    }
+
+    aktuellerKunde.emails.push(norm);
+    kundeOeffnen(aktuellerKunde.id);
+
+}
+
+/* =====================================================
+   EMAIL LOESCHEN
+===================================================== */
+
+function emailLoeschen(index){
+
+    if(!aktuellerKunde){
+
+        return;
+
+    }
+
+    if(
+        !confirm(
+            "E-Mail löschen?"
+        )
+    ){
+
+        return;
+
+    }
+
+    aktuellerKunde
+    .emails
+    .splice(
+        index,
+        1
+    );
+
+    kundeOeffnen(
+        aktuellerKunde.id
+    );
+
+}
+
+/* =====================================================
+   VERTRAG HINZUFUEGEN
+===================================================== */
+
+function vertragHinzufuegen(){
+
+    const wert = prompt("Vertragsnummer");
+
+    if(!wert){ return; }
+
+    aktuellerKunde.vertraege.push({ nummer: wert.trim() });
+
+    kundeOeffnen(aktuellerKunde.id);
+
+    triggerAutoSave();
+
+}
+
+/* =====================================================
+   NOTIZ AUTO-BULLET (• bei Enter am Zeilenanfang)
+===================================================== */
+
+function notizAutoBullet(event, textarea){
+
+    if(event.key !== "Enter"){ return; }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const wert = textarea.value;
+
+    // Aktuelle Zeile ermitteln
+    const zeileStart = wert.lastIndexOf("\n", start - 1) + 1;
+    const aktuelleZeile = wert.substring(zeileStart, start);
+    const bulletMatch = aktuelleZeile.match(/^(•\s+)/);
+
+    // Fall 1: Aktuelle Zeile ist nur "• " → Bullet wieder entfernen,
+    // normale neue Zeile einfügen (Aufzählung beenden).
+    if(bulletMatch && aktuelleZeile.substring(bulletMatch[1].length).trim() === ""){
+        event.preventDefault();
+        const vorher = wert.substring(0, zeileStart);
+        const nachher = wert.substring(end);
+        textarea.value = vorher + "\n" + nachher;
+        textarea.selectionStart = textarea.selectionEnd = zeileStart + 1;
+        return;
+    }
+
+    // Fall 2: Immer neue Bullet-Zeile einfügen
+    event.preventDefault();
+    const vorher = wert.substring(0, start);
+    const nachher = wert.substring(end);
+
+    // Wenn die aktuelle Zeile noch keinen Bullet hat, den nachträglich
+    // vorne einfügen (damit auch die erste Zeile eine Aufzählung ist)
+    let neuerText;
+    let neuePosition;
+
+    if(!bulletMatch && aktuelleZeile.trim() !== ""){
+        // Bullet vorne an aktuelle Zeile setzen
+        const vorZeile = wert.substring(0, zeileStart);
+        const zeileMitBullet = "• " + aktuelleZeile;
+        neuerText = vorZeile + zeileMitBullet + "\n• " + nachher;
+        neuePosition = vorZeile.length + zeileMitBullet.length + 3;
+    }else{
+        neuerText = vorher + "\n• " + nachher;
+        neuePosition = start + 3;
+    }
+
+    textarea.value = neuerText;
+    textarea.selectionStart = textarea.selectionEnd = neuePosition;
+
+}
+
+/* =====================================================
+   VERTRAG LOESCHEN
+===================================================== */
+
+function vertragLoeschen(index){
+
+    if(!aktuellerKunde){
+
+        return;
+
+    }
+
+    if(
+        !confirm(
+            "Vertrag löschen?"
+        )
+    ){
+
+        return;
+
+    }
+
+    aktuellerKunde
+    .vertraege
+    .splice(
+        index,
+        1
+    );
+
+    kundeOeffnen(
+        aktuellerKunde.id
+    );
+
+}
+
+/* =====================================================
+   KENNZEICHEN TOGGLE
+===================================================== */
+
+/* Rendert die Kennzeichen-Chip-Leiste fuer das Kundenpanel.
+   Nur die aktiven Marker werden als farbige Chips angezeigt;
+   inaktive sind ueber ein "+ Marker"-Klappmenue erreichbar. */
+function renderKennzChips(k){
+    if(!k || !k.kennzeichen){ return ""; }
+
+    const aktive   = KENNZEICHEN_FELDER.filter(key =>  k.kennzeichen[key]);
+    const inaktive = KENNZEICHEN_FELDER.filter(key => !k.kennzeichen[key]);
+
+    const chips = aktive.map(key => {
+        const m = KENNZEICHEN_META[key];
+        const titleAttr = m.title ? ` title="${esc(m.title)}"` : "";
+        return `<span class="kennz-chip"
+                      style="background:var(${m.farbVar})"${titleAttr}>
+                    ${esc(m.label)}
+                    <button class="kennz-chip-x"
+                        onclick="toggleKennzeichen('${key}')"
+                        title="Marker entfernen">×</button>
+                </span>`;
+    }).join("");
+
+    const plusMenue = inaktive.length === 0 ? "" : `
+        <details class="kennz-chip-plus">
+            <summary>+ Marker</summary>
+            <div class="kennz-chip-menue">
+                ${inaktive.map(key => {
+                    const m = KENNZEICHEN_META[key];
+                    const titleAttr = m.title ? ` title="${esc(m.title)}"` : "";
+                    return `<button class="kennz-menue-eintrag"
+                        onclick="toggleKennzeichen('${key}')"${titleAttr}>
+                        <span class="kennz-menue-farbe"
+                            style="background:var(${m.farbVar})"></span>
+                        ${esc(m.label)}
+                    </button>`;
+                }).join("")}
+            </div>
+        </details>`;
+
+    const leerHinweis = aktive.length === 0 && inaktive.length === 0
+        ? '<span class="kennz-chip-leer">Keine Marker verfügbar</span>' : '';
+
+    return chips + plusMenue + leerHinweis;
+}
+
+function toggleKennzeichen(name){
+
+    if(!aktuellerKunde){ return; }
+
+    aktuellerKunde.kennzeichen[name] =
+    !aktuellerKunde.kennzeichen[name];
+
+    // Chip-Leiste komplett neu rendern (aktive/inaktive verschieben sich)
+    const chipLeiste = document.getElementById("kennzChipLeiste");
+    if(chipLeiste){
+        chipLeiste.innerHTML = renderKennzChips(aktuellerKunde);
+    }
+
+    sidebarKarteAktualisieren();
+    triggerAutoSave();
+
+}
+
+/* =====================================================
+   KUNDE ARCHIVIEREN
+===================================================== */
+
+function kundeArchivieren(){
+
+    if(!aktuellerKunde){
+
+        return;
+
+    }
+
+    aktuellerKunde
+    .archiviert = true;
+
+    renderKunden();
+
+    dashboardAktualisieren();
+    triggerAutoSave();
+    document
+    .getElementById(
+        "kundenDetails"
+    )
+    .innerHTML =
+
+    "<h2>Kunde archiviert</h2>";
+
+}
+
+/* =====================================================
+   ARCHIV
+===================================================== */
+
+function renderArchiv(){
+
+    const liste =
+    document.getElementById(
+        "archivListe"
+    );
+
+    liste.innerHTML = "";
+
+    const archivierte =
+    kunden.filter(
+        kunde => kunde.archiviert
+    );
+
+    if(archivierte.length === 0){
+
+        liste.innerHTML =
+        "<p style=\"color:var(--c-text-muted);\">" +
+        "Keine archivierten Kunden vorhanden." +
+        "</p>";
+
+        return;
+
+    }
+
+    archivierte.forEach(kunde => {
+
+        const eintrag =
+        document.createElement("div");
+
+        eintrag.className =
+        "kundenkarte";
+
+        eintrag.style.cursor =
+        "default";
+
+        eintrag.innerHTML =
+
+        "<strong>" +
+        esc(kunde.vorname) + " " + esc(kunde.nachname) +
+        "</strong>" +
+
+        "<div style=\"margin-top:8px;display:flex;gap:8px;\">" +
+
+        "<button class=\"crm-button crm-button-klein\" " +
+        "onclick=\"kundeWiederherstellen(" + kunde.id + ")\">" +
+        "Wiederherstellen</button>" +
+
+        "<button class=\"crm-button crm-button-klein crm-button-gefahr\" " +
+        "onclick=\"kundeEndgueltigLoeschen(" + kunde.id + ")\">" +
+        "Endgültig löschen</button>" +
+
+        "</div>";
+
+        liste.appendChild(eintrag);
+
+    });
+
+}
+
+function kundeWiederherstellen(id){
+
+    const kunde =
+    findeKunde(id);
+
+    if(!kunde){
+        return;
+    }
+
+    kunde.archiviert = false;
+
+    renderArchiv();
+
+    renderKunden();
+
+    dashboardAktualisieren();
+    triggerAutoSave();
+}
+
+function kundeEndgueltigLoeschen(id){
+
+    if(
+
+        !confirm(
+            "Diesen Kunden unwiderruflich " +
+            "löschen? Das kann nicht " +
+            "rückgängig gemacht werden."
+        )
+
+    ){
+
+        return;
+
+    }
+
+    const zuLoeschen = findeKunde(id);
+
+    // Zugehörigen Ordner mit entfernen (falls Kundenunterlagen aktiv)
+    if(zuLoeschen && typeof entferneKundenOrdner === "function"){
+        const mitOrdner = confirm(
+            "Zugehörigen Unterlagen-Ordner \""
+            + (typeof ordnerNameFuerKunde === "function" ? ordnerNameFuerKunde(zuLoeschen) : "")
+            + "\" ebenfalls von der Festplatte löschen?"
+        );
+        if(mitOrdner){
+            entferneKundenOrdner(zuLoeschen);
+        }
+    }
+
+    kunden =
+    kunden.filter(
+        kunde => kunde.id !== id
+    );
+
+    renderArchiv();
+
+    renderKunden();
+
+    dashboardAktualisieren();
+    triggerAutoSave();
+}
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+document
+.getElementById(
+    "kundeAnlegenButton"
+)
+.addEventListener(
+
+    "click",
+
+    kundeAnlegen
+
+);
+
+document
+.getElementById(
+    "kundenSuche"
+)
+.addEventListener(
+
+    "keyup",
+
+    renderKunden
+
+);
+
+
+/* =====================================================
+   TERMINVERWALTUNG
+===================================================== */
+
+/* =====================================================
+   TERMIN ANLEGEN
+===================================================== */
+
+/* =====================================================
+   BESTAND-VERLASSEN → ARCHIV
+   Verschiebt alle nicht-archivierten Kunden mit dem
+   Kennzeichen "bestandVerlassen" in einem Rutsch ins Archiv.
+===================================================== */
+
+function bestandVerlassenArchivieren(){
+
+    const kandidaten =
+    kunden.filter(k =>
+        !k.archiviert &&
+        k.kennzeichen &&
+        k.kennzeichen.bestandVerlassen === true
+    );
+
+    if(kandidaten.length === 0){
+        alert("Kein Kunde mit dem Marker \"Bestand verlassen\" gefunden.");
+        return;
+    }
+
+    const bestaetigt = confirm(
+        kandidaten.length +
+        (kandidaten.length === 1
+            ? " Kunde mit dem Marker \"Bestand verlassen\" wird ins Archiv verschoben. Fortfahren?"
+            : " Kunden mit dem Marker \"Bestand verlassen\" werden ins Archiv verschoben. Fortfahren?")
+    );
+
+    if(!bestaetigt){ return; }
+
+    kandidaten.forEach(k => {
+        k.archiviert = true;
+        k.archiviertAm = new Date().toISOString();
+    });
+
+    /* Falls der aktuell geöffnete Kunde betroffen war, Detailansicht zurücksetzen */
+    if(aktuellerKunde && aktuellerKunde.archiviert){
+        aktuellerKunde = null;
+        const details = document.getElementById("kundenDetails");
+        if(details){
+            details.innerHTML = "<h2>Kein Kunde ausgewählt</h2>";
+        }
+    }
+
+    renderKunden();
+    dashboardAktualisieren();
+    triggerAutoSave();
+
+    alert(kandidaten.length +
+        (kandidaten.length === 1 ? " Kunde" : " Kunden") +
+        " ins Archiv verschoben.");
+}
+
+/* =====================================================
+   PARTNER-VERWEIS ENTFERNEN
+   -----------------------------------------------------
+   Wenn ein Kunde als Partner bei einem anderen hinterlegt
+   ist (z.B. Hans hat Partnerin Maria), und Maria wird
+   spaeter zum eigenstaendigen Kunden mit eigenem Vertrag,
+   soll der Partner-Verweis bei Hans entfernt werden.
+   Maria bleibt als separater Kunde bestehen, Hans verliert
+   nur den (jetzt redundanten) Partner-Eintrag.
+===================================================== */
+
+function partnerVerweisEntfernen(traegerKundeId){
+    const traeger = findeKunde(traegerKundeId);
+    if(!traeger){
+        alert("Kunde nicht gefunden.");
+        return;
+    }
+    const altName = traeger.partner
+        ? (traeger.partner.vorname + " " + traeger.partner.nachname).trim()
+        : "(leer)";
+
+    traeger.partner = null;
+    triggerAutoSave();
+
+    /* Aktuelle Ansicht neu rendern — Banner verschwindet */
+    if(aktuellerKunde){
+        kundeOeffnen(aktuellerKunde.id);
+    }
+    renderKunden();
+
+    alert("Partner-Verweis bei " + traeger.vorname + " " + traeger.nachname
+        + " entfernt (war: " + altName + ").\n\n"
+        + "Beide Kunden existieren nun unabhaengig voneinander.");
+}

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bk-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a7a99"/>
+      <stop offset="55%" stop-color="#1e5a7a"/>
+      <stop offset="100%" stop-color="#0f3a52"/>
+    </linearGradient>
+    <linearGradient id="bk-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4593b0"/>
+      <stop offset="100%" stop-color="#2a7a99"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Petrol-Kachel mit Verlauf, gleiche Silhouette wie das App-Icon -->
+  <rect x="16" y="16" width="480" height="480" rx="100" ry="100" fill="url(#bk-bg)"/>
+  <path d="M 116 16 H 396 A 100 100 0 0 1 496 116 V 240 H 16 V 116 A 100 100 0 0 1 116 16 Z" fill="url(#bk-top)" opacity="0.55"/>
+
+  <!-- Schild-Silhouette, mittig zentriert -->
+  <path d="M 256 96
+           C 316 96, 372 116, 400 132
+           L 400 268
+           C 400 348, 344 404, 256 434
+           C 168 404, 112 348, 112 268
+           L 112 132
+           C 140 116, 196 96, 256 96 Z"
+        fill="#ffffff"/>
+
+  <!-- Haken -->
+  <path d="M 172 268 L 236 332 L 344 208"
+        stroke="#1e5a7a" stroke-width="38"
+        stroke-linecap="round" stroke-linejoin="round"
+        fill="none"/>
+</svg>

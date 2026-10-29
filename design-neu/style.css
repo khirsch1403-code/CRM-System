@@ -1,0 +1,4677 @@
+/* =====================================================
+   DESIGN TOKENS
+===================================================== */
+
+/* -----------------------------------------------------
+   EDITORIAL REDESIGN (design-neu)
+   -----------------------------------------------------
+   Neutrale Toene (Hintergrund/Text/Rahmen) gehoeren dem
+   Theme (hell/dunkel). Die Markenfarbe (Bordeaux/Akzent)
+   kommt aus design.js und wird hier NUR referenziert –
+   abgeleitete Toene entstehen per color-mix, damit sie
+   sich automatisch an das jeweilige Theme anpassen.
+   ----------------------------------------------------- */
+
+:root{
+
+    /* --- Typografie --- */
+    --font-serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --font-sans:"Instrument Sans",-apple-system,"Segoe UI",
+                Roboto,Helvetica,Arial,sans-serif;
+
+    /* --- Marke (Default, wird von design.js ueberschrieben) --- */
+    --c-primary:#7a1e35;
+    --c-primary-dunkel:#5e1526;
+    --c-accent:#9a7a2e;
+
+    /* --- HELLES THEME (Standard) --- */
+    /* Flaechen & Hintergrund — warmes Papier, kuehler als Creme */
+    --c-bg:#f6f3ee;
+    --c-surface:#ffffff;
+    --c-surface-muted:#efeae2;
+    --c-border:#e4ddd3;
+    --c-border-stark:#d4cabb;
+
+    /* Text — warmes Tintenschwarz */
+    --c-text:#211c1a;
+    --c-text-muted:#6b615b;
+    --c-text-schwach:#9a8e86;
+
+    /* Abgeleitete Markentoene (theme-bewusst via color-mix) */
+    --c-primary-text:var(--c-primary);
+    --c-primary-soft:color-mix(in srgb, var(--c-primary) 9%, var(--c-surface));
+    --c-accent-text:var(--c-accent);
+    --c-accent-soft:color-mix(in srgb, var(--c-accent) 12%, var(--c-surface));
+
+    /* On-Primary (Text auf Bordeaux-Flaeche) */
+    --c-on-primary:#ffffff;
+
+    /* Status */
+    --c-danger:#b83c35;
+    --c-danger-bg:rgba(184,60,53,0.10);
+    --c-danger-text:#922e28;
+
+    --c-warn-bg:rgba(139,105,20,0.14);
+    --c-warn-text:#6b4e10;
+
+    --c-success-bg:rgba(45,106,79,0.12);
+    --c-success-text:#1e5c3a;
+
+    /* Legacy-Aliase */
+    --farbe-hintergrund:var(--c-bg);
+    --farbe-panel:var(--c-surface-muted);
+    --farbe-panel-dunkel:var(--c-border);
+    --farbe-border:var(--c-border);
+    --farbe-text:var(--c-text);
+    --farbe-text-grau:var(--c-text-muted);
+    --farbe-gruen:var(--c-success-bg);
+    --farbe-gelb:var(--c-warn-bg);
+    --farbe-rot:var(--c-danger-bg);
+    --farbe-gruen-text:var(--c-success-text);
+    --farbe-gelb-text:var(--c-warn-text);
+    --farbe-rot-text:var(--c-danger-text);
+
+    /* Abstaende & Radien — ruhiger, weniger rund */
+    --radius-s:7px;
+    --radius-m:10px;
+    --radius-l:14px;
+    /* Editorial: Hierarchie ueber Haarlinien & Weissraum statt Schatten */
+    --schatten-karte:none;
+    --schatten-modal:0 32px 80px -24px rgba(24,18,16,0.45);
+
+    /* -------------------------------------------------
+       SEMANTISCHE FARBEN — Einzige Quelle fuer alle
+       Kennzeichen- und Prioritaets-Farben. Werden sowohl
+       aus CSS (Klassen) als auch aus JS (var(--...))
+       referenziert. Bewusst unabhaengig vom Design-Theme.
+       Aenderung hier wirkt sofort ueberall.
+       ------------------------------------------------- */
+
+    /* Kennzeichen (Badge in Liste, Haushalt, Button) */
+    --kennz-keine-beratung:    #7a1e35;
+    --kennz-nur-buero:         #6c757d;
+    --kennz-nur-telefon:       #0d6efd;
+    --kennz-nur-mail:          #198754;
+    --kennz-bestand-verlassen: #561526;
+    --kennz-wichtigbrief:      #d9822b;
+    --kennz-google-review:     #DAA520;
+
+    /* Aufgaben-Prioritaet */
+    --prio-sofort:  #dc3545;
+    --prio-hoch:    #fd7e14;
+    --prio-mittel:  #ffc107;
+    --prio-niedrig: #6c757d;
+
+}
+
+/* =====================================================
+   DUNKLES THEME
+   -----------------------------------------------------
+   Neutrale Toene werden ersetzt; die Markenfarbe bleibt,
+   abgeleitete Toene (…-soft, …-text) rechnen sich neu.
+   Zwei Wege: expliziter Umschalter (data-theme="dark")
+   und System-Praeferenz (nur wenn nicht auf "light"
+   festgelegt).
+===================================================== */
+
+:root[data-theme="dark"]{
+    --c-bg:#1a1613;
+    --c-surface:#231d19;
+    --c-surface-muted:#1f1a16;
+    --c-border:#352c25;
+    --c-border-stark:#493c32;
+
+    --c-text:#f0e9e2;
+    --c-text-muted:#b4a79c;
+    --c-text-schwach:#867a70;
+
+    /* Bordeaux als Text/Akzent auf dunklem Grund aufhellen */
+    --c-primary-text:color-mix(in srgb, var(--c-primary), #ffffff 48%);
+    --c-primary-soft:color-mix(in srgb, var(--c-primary) 26%, var(--c-surface));
+    --c-accent-text:color-mix(in srgb, var(--c-accent), #ffffff 34%);
+    --c-accent-soft:color-mix(in srgb, var(--c-accent) 24%, var(--c-surface));
+
+    --c-danger-bg:rgba(220,96,88,0.16);
+    --c-danger-text:#eb8f88;
+    --c-warn-bg:rgba(201,154,46,0.18);
+    --c-warn-text:#d9b25e;
+    --c-success-bg:rgba(76,160,118,0.18);
+    --c-success-text:#73c89b;
+
+    --schatten-modal:0 32px 80px -20px rgba(0,0,0,0.7);
+}
+
+@media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+        --c-bg:#1a1613;
+        --c-surface:#231d19;
+        --c-surface-muted:#1f1a16;
+        --c-border:#352c25;
+        --c-border-stark:#493c32;
+
+        --c-text:#f0e9e2;
+        --c-text-muted:#b4a79c;
+        --c-text-schwach:#867a70;
+
+        --c-primary-text:color-mix(in srgb, var(--c-primary), #ffffff 48%);
+        --c-primary-soft:color-mix(in srgb, var(--c-primary) 26%, var(--c-surface));
+        --c-accent-text:color-mix(in srgb, var(--c-accent), #ffffff 34%);
+        --c-accent-soft:color-mix(in srgb, var(--c-accent) 24%, var(--c-surface));
+
+        --c-danger-bg:rgba(220,96,88,0.16);
+        --c-danger-text:#eb8f88;
+        --c-warn-bg:rgba(201,154,46,0.18);
+        --c-warn-text:#d9b25e;
+        --c-success-bg:rgba(76,160,118,0.18);
+        --c-success-text:#73c89b;
+
+        --schatten-modal:0 32px 80px -20px rgba(0,0,0,0.7);
+    }
+}
+
+/* =====================================================
+   INHALTSVERZEICHNIS
+   -----------------------------------------------------
+   Suche eines Themas im Editor: Strg/Cmd + F mit dem
+   exakten Section-Namen (z. B. "DASHBOARD").
+   Jede Section hat einen Header im Format:
+
+       / * ====================
+            SECTION-NAME
+         ==================== * /
+
+   HISTORISCH GEWACHSEN: Einige Themen (vor allem der
+   SERIENBRIEF) sind in mehreren Bloecken verteilt, da
+   sie iterativ ausgebaut wurden. Reihenfolge wurde
+   NICHT umsortiert, weil CSS-Cascade davon abhaengt.
+
+   --- A. GRUNDLAGEN ---
+      • DESIGN TOKENS            (ganz oben)
+      • GLOBALE EINSTELLUNGEN
+
+   --- B. STRUKTUR ---
+      • NAVIGATION
+      • CONTENT
+      • TABS
+
+   --- C. DASHBOARD ---
+      • DASHBOARD
+      • DASHBOARD ERWEITERUNG
+      • PRODUKTIONSAUSWERTUNG
+      • BAUSPAR-KACHEL AKZENT
+      • DATENSICHERUNG (im Dashboard)
+      • FEHLER-STATUS-SYMBOL (neben CRM-Titel)
+      • FEHLER-MODAL
+
+   --- D. KUNDEN ---
+      • KUNDENBEREICH
+      • KUNDEN-SUCHE (AUFGABEN-MODAL)
+      • KUNDENDATENBLATT KOMPAKT
+      • VERTRAG TABELLE
+      • TERMINE ZEILEN (KOMPAKT)
+      • KENNZEICHNUNGEN (KUNDE) — Buttons im Panel
+      • EINTRAGS-LISTEN (TELEFON / E-MAIL / VERTRAG)
+      • HAUSHALT
+      • HAUSHALT MITGLIEDER
+      • KUNDENUNTERLAGEN
+      • KUNDENUNTERLAGEN — DRAG & DROP SPOTLIGHT
+      • MERGE / DOPPLUNGEN
+
+   --- E. AUFGABEN ---
+      • AUFGABEN KANBAN
+      • AUFGABEN KARTE (kompakt)
+      • AUFGABEN ANSICHT-TOGGLE
+      • KALENDERANSICHT
+      • SIRENE (ueberfaellige Aufgaben)
+
+   --- F. TERMINE ---
+      • TERMINE
+      • TERMIN MODAL HAUSHALT-CHECKBOX
+      • TERMIN-NOTIZ
+      • ABSCHLUSS <-> TERMIN — Koppel-Checkbox
+
+   --- G. ABSCHLUESSE ---
+      • ABSCHLUSS (kompakt)
+      • ABSCHLUESSE (kompakte Zeilen-Darstellung)
+
+   --- H. SELEKTIONEN ---
+      • SELEKTIONEN
+      • SELEKTIONEN — UND/ODER-Toggle
+      • SELEKTIONS-RUECKIMPORT
+
+   --- I. SERIENBRIEF (mehrere Bloecke) ---
+      • SERIENBRIEF — Klapp-Panel im Selektionen-Tab
+      • SERIENBRIEF — VOLLBILD-DRUCKVORSCHAU
+      • SERIENBRIEF — Brief-Seite (Flow-Layout)
+      • SERIENBRIEF — RUECKANTWORT (im Textfluss)
+      • SERIENBRIEF — PRINT
+      • SERIENBRIEF — Schrift-Optionen + Betreff
+      • SERIENBRIEF — Absender-Block
+      • SERIENBRIEF v2 — Panel-Bloecke
+      • SERIENBRIEF v2 — RUECKANTWORT auf eigener Seite
+
+   --- J. KONTAKT & BENACHRICHTIGUNG ---
+      • KONTAKTUEBERWACHUNG SCROLLLISTEN
+      • BENACHRICHTIGUNGS-BANNER
+
+   --- K. UI-GRUNDBAUSTEINE ---
+      • MODALS
+      • FORMULAR
+      • BUTTONS / BUTTON GEFAHR / ICON BUTTONS
+      • KENNZEICHNUNGEN / TAGS (Mini-Badges)
+      • STATUS FARBEN
+      • KLAPP-PANELS (details/summary)
+      • SCROLLBALKEN
+
+   --- L. FEATURE-MODULE ---
+      • FINANZIERUNGSZERTIFIKAT — Berater-Panel + Betrag-Modal
+      • DESIGN — Palette-Icon in der Navbar + Design-Modal
+      • DESIGN — Preset-Leiste im Design-Modal
+===================================================== */
+
+/* =====================================================
+   GLOBALE EINSTELLUNGEN
+===================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    -webkit-font-smoothing:antialiased;
+}
+
+body{
+    background:var(--c-bg);
+    color:var(--c-text);
+    font-family:
+    -apple-system,"Segoe UI",Roboto,
+    Helvetica,Arial,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+}
+
+h2{
+    font-size:19px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--c-text);
+}
+
+h3{
+    font-size:13px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+}
+
+label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    margin-bottom:5px;
+    margin-top:12px;
+}
+
+label:first-child{
+    margin-top:0;
+}
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.navbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    background:linear-gradient(
+        135deg,
+        var(--c-primary-dunkel) 0%,
+        var(--c-primary) 100%
+    );
+    padding:12px 20px;
+    border-bottom:none;
+    box-shadow:0 2px 8px rgba(28,26,23,0.15);
+    position:sticky;
+    top:0;
+    z-index:500;
+}
+
+.navbar-brand{
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:#ffffff;
+    padding-right:14px;
+    white-space:nowrap;
+    opacity:0.95;
+}
+
+.navbar-links{
+    display:flex;
+    gap:4px;
+    flex-wrap:wrap;
+}
+
+.nav-button{
+    border:1px solid rgba(255,255,255,0.15);
+    background:transparent;
+    color:rgba(255,255,255,0.75);
+    border-radius:var(--radius-s);
+    padding:8px 14px;
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.15s ease,color 0.15s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.nav-icon{
+    width:18px;
+    height:18px;
+    display:block;
+    /* SVGs sind weinrot-strichig — hier weißlich einfärben passend zur Navbar */
+    filter:brightness(0) invert(1);
+    opacity:0.75;
+    transition:opacity 0.15s ease;
+    flex-shrink:0;
+}
+
+.nav-button:hover .nav-icon,
+.nav-button-aktiv .nav-icon{
+    opacity:1;
+}
+
+.nav-button:hover{
+    background:rgba(255,255,255,0.12);
+    color:#ffffff;
+}
+
+.nav-button-aktiv,
+.nav-button-aktiv:hover{
+    background:rgba(255,255,255,0.2);
+    color:#ffffff;
+    border-color:rgba(255,255,255,0.35);
+}
+
+/* =====================================================
+   CONTENT
+===================================================== */
+
+.content{
+    padding:24px;
+    max-width:1400px;
+    margin:0 auto;
+}
+
+/* =====================================================
+   TABS
+===================================================== */
+
+.tab-content{
+    display:none;
+}
+
+.tab-active{
+    display:block;
+    animation:einblenden 0.15s ease;
+}
+
+@keyframes einblenden{
+    from{ opacity:0; }
+    to{ opacity:1; }
+}
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(200px,1fr));
+    gap:16px;
+    align-items:stretch;
+}
+
+/* Abschluss-Übersicht: 4 Kacheln in einer Reihe. */
+.dashboard-grid-abschluesse{
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+}
+
+.dashboard-grid-abschluesse .dashboard-card{
+    padding:12px 10px;
+    min-height:auto;
+}
+
+.dashboard-grid-abschluesse .dashboard-card h3{
+    font-size:11px;
+    letter-spacing:0.03em;
+    line-height:1.25;
+    margin-bottom:6px;
+}
+
+.dashboard-grid-abschluesse .dashboard-value{
+    font-size:24px;
+    line-height:1.1;
+}
+
+/* Tablet: 2 pro Zeile (2+2) */
+@media (max-width:1000px){
+    .dashboard-grid-abschluesse{
+        grid-template-columns:repeat(2, 1fr);
+    }
+    .dashboard-grid-abschluesse .dashboard-value{
+        font-size:28px;
+    }
+}
+
+/* Handy: 2 pro Zeile bleibt, aber kompakter */
+@media (max-width:500px){
+    .dashboard-grid-abschluesse{
+        grid-template-columns:repeat(2, 1fr);
+    }
+}
+
+.dashboard-card{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:20px;
+    box-shadow:var(--schatten-karte);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    min-height:90px;
+}
+
+.dashboard-card h3{
+    margin-bottom:10px;
+    font-size:11.5px;
+}
+
+.dashboard-value{
+    font-size:32px;
+    font-weight:700;
+    color:var(--c-primary);
+    letter-spacing:-0.02em;
+    line-height:1;
+}
+
+/* =====================================================
+   KUNDENBEREICH
+===================================================== */
+
+.kunden-layout{
+    display:grid;
+    grid-template-columns:340px 1fr;
+    gap:20px;
+    height:calc(100vh - 140px);
+}
+
+.kunden-sidebar{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-shadow:var(--schatten-karte);
+}
+
+.kunden-details{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:24px;
+    overflow-y:auto;
+    box-shadow:var(--schatten-karte);
+}
+
+.kundenkarte{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:11px 12px;
+    cursor:pointer;
+    margin-bottom:8px;
+    transition:border-color 0.15s ease,
+               background 0.15s ease;
+}
+
+.kundenkarte:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-border-stark);
+}
+
+#kundenListe{
+    flex:1;
+    overflow-y:auto;
+    margin-top:10px;
+    padding-right:5px;
+}
+
+/* =====================================================
+   KUNDEN-SUCHE (AUFGABEN-MODAL)
+===================================================== */
+
+#aufgabeKundeErgebnisse,
+#abschlussKundeErgebnisse{
+    max-height:180px;
+    overflow-y:auto;
+    margin-bottom:8px;
+}
+
+.kunde-suche-treffer{
+    padding:8px 10px;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    margin-bottom:6px;
+    cursor:pointer;
+    font-size:13px;
+    transition:background 0.15s ease;
+}
+
+.kunde-suche-treffer:hover{
+    background:var(--c-primary-soft);
+    border-color:var(--c-primary);
+}
+
+#aufgabeKundeAusgewaehlt,
+#abschlussKundeAusgewaehlt{
+    align-items:center;
+    justify-content:space-between;
+    background:var(--c-accent-soft);
+    border:1px solid var(--c-accent);
+    color:var(--c-accent);
+    border-radius:var(--radius-s);
+    padding:8px 10px;
+    margin-bottom:10px;
+    font-size:13px;
+    font-weight:600;
+}
+
+/* =====================================================
+   MODALS
+===================================================== */
+
+.modal-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(15,22,38,0.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    backdrop-filter:blur(1px);
+}
+
+.modal{
+    width:600px;
+    max-width:95%;
+    max-height:90vh;
+    overflow-y:auto;
+    background:var(--c-surface);
+    border-radius:var(--radius-l);
+    padding:26px;
+    box-shadow:var(--schatten-modal);
+}
+
+.modal h2{
+    margin-bottom:18px;
+}
+
+.modal-buttons{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid var(--c-border);
+}
+
+#aufgabeModal{
+    z-index:10000;
+}
+
+/* =====================================================
+   FORMULAR
+===================================================== */
+
+.crm-input,
+select.crm-input,
+input.crm-input{
+    width:100%;
+    padding:9px 11px;
+    margin-bottom:4px;
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    color:var(--c-text);
+    font-size:13.5px;
+    font-family:inherit;
+    transition:border-color 0.15s ease,
+               box-shadow 0.15s ease;
+}
+
+.crm-input:focus{
+    outline:none;
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 3px var(--c-primary-soft);
+}
+
+.crm-textarea{
+    width:100%;
+    min-height:110px;
+    padding:9px 11px;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    font-family:inherit;
+    font-size:13.5px;
+    color:var(--c-text);
+    resize:vertical;
+}
+
+.crm-textarea:focus{
+    outline:none;
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 3px var(--c-primary-soft);
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.crm-button{
+    border:1px solid var(--c-border);
+    background:var(--c-surface);
+    color:var(--c-text);
+    padding:9px 16px;
+    cursor:pointer;
+    border-radius:var(--radius-s);
+    font-size:13.5px;
+    font-weight:600;
+    font-family:inherit;
+    transition:background 0.15s ease,
+               border-color 0.15s ease,
+               transform 0.05s ease;
+}
+
+.crm-button:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-border-stark);
+}
+
+.crm-button:active{
+    transform:translateY(1px);
+}
+
+.crm-button-primary{
+    background:var(--c-primary);
+    border-color:var(--c-primary);
+    color:#ffffff;
+}
+
+.crm-button-primary:hover{
+    background:var(--c-primary-dunkel);
+    border-color:var(--c-primary-dunkel);
+}
+
+.crm-button-klein{
+    padding:5px 10px;
+    font-size:12px;
+}
+
+/* =====================================================
+   KENNZEICHNUNGEN / TAGS
+===================================================== */
+
+.tag{
+    display:inline-block;
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    color:var(--c-text-muted);
+    padding:4px 10px;
+    border-radius:20px;
+    margin:2px;
+    font-size:11.5px;
+    font-weight:600;
+}
+
+/* =====================================================
+   STATUS FARBEN
+===================================================== */
+
+.status-gelb{
+    background:var(--c-warn-bg);
+    color:var(--c-warn-text);
+}
+
+.status-rot{
+    background:var(--c-danger-bg);
+    color:var(--c-danger-text);
+}
+
+.status-gruen{
+    background:var(--c-success-bg);
+    color:var(--c-success-text);
+}
+
+/* =====================================================
+   AUFGABEN KANBAN
+===================================================== */
+
+.kanban-board{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    height:calc(100vh - 160px);
+}
+
+.kanban-spalte{
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.kanban-spalte h3{
+    padding:2px 4px 10px;
+    flex-shrink:0;
+}
+
+.kanban-spalte-inhalt{
+    flex:1;
+    overflow-y:auto;
+    padding-right:2px;
+}
+
+.kanban-karte{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:9px 10px;
+    margin-bottom:7px;
+    cursor:move;
+    box-shadow:var(--schatten-karte);
+    font-size:13px;
+}
+
+.kanban-karte:hover{
+    border-color:var(--c-border-stark);
+}
+
+.wird-gezogen{
+    opacity:0.4;
+    transform:scale(0.97) rotate(-1deg);
+}
+
+.kanban-karte{
+    transition:opacity 0.15s ease,
+               transform 0.15s ease,
+               box-shadow 0.15s ease;
+}
+
+.kanban-spalte{
+    transition:background 0.15s ease,
+               box-shadow 0.15s ease;
+}
+
+.drop-ziel-aktiv{
+    background:var(--c-primary-soft) !important;
+    box-shadow:inset 0 0 0 2px var(--c-primary);
+}
+
+.aufgaben-loeschcountdown{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-style:italic;
+    margin-top:4px;
+}
+
+/* =====================================================
+   TERMINE
+===================================================== */
+
+.termin-karte{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:12px;
+    margin-bottom:10px;
+    box-shadow:var(--schatten-karte);
+}
+
+/* =====================================================
+   HAUSHALT MITGLIEDER
+===================================================== */
+
+.haushalt-mitglied{
+    padding:10px 12px;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface);
+    margin-bottom:8px;
+}
+
+.haushalt-mitglied-info{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.haushalt-mitglied-name{
+    font-size:14px;
+    color:var(--c-primary);
+}
+
+.haushalt-mitglied-name:hover{
+    text-decoration:underline;
+}
+
+.haushalt-mitglied-kontakt{
+    font-size:12px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.kennzeichen-badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+}
+
+.kennzeichen-badge-rot      { background:var(--kennz-keine-beratung);    color:#fff; }
+.kennzeichen-badge-grau     { background:var(--kennz-nur-buero);         color:#fff; }
+.kennzeichen-badge-blau     { background:var(--kennz-nur-telefon);       color:#fff; }
+.kennzeichen-badge-gruen    { background:var(--kennz-nur-mail);          color:#fff; }
+.kennzeichen-badge-dunkelrot{ background:var(--kennz-bestand-verlassen); color:#fff; }
+.kennzeichen-badge-orange   { background:var(--kennz-wichtigbrief);      color:#fff; }
+.kennzeichen-badge-gold     { background:var(--kennz-google-review);     color:#fff; }
+
+/* =====================================================
+   TERMIN MODAL HAUSHALT-CHECKBOX
+===================================================== */
+
+.haushalt-checkbox-label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--c-primary-soft);
+    border:1px solid var(--c-primary);
+    border-radius:var(--radius-s);
+    padding:11px 13px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--c-primary-dunkel);
+    cursor:pointer;
+    margin-top:12px;
+    user-select:none;
+}
+
+.haushalt-checkbox-label input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    cursor:pointer;
+    accent-color:var(--c-primary);
+    flex-shrink:0;
+}
+
+/* =====================================================
+   HAUSHALT
+===================================================== */
+
+.haushalt-box{
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:12px;
+}
+
+/* =====================================================
+   KLAPP-PANELS (details/summary)
+===================================================== */
+
+.klapp-panel{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface-muted);
+    margin-top:10px;
+    overflow:hidden;
+}
+
+.klapp-panel summary{
+    cursor:pointer;
+    padding:10px 12px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    list-style:none;
+    user-select:none;
+}
+
+.klapp-panel summary::-webkit-details-marker{
+    display:none;
+}
+
+.klapp-panel summary::before{
+    content:"▸";
+    display:inline-block;
+    margin-right:8px;
+    transition:transform 0.15s ease;
+    color:var(--c-primary);
+}
+
+.klapp-panel[open] summary::before{
+    transform:rotate(90deg);
+}
+
+.klapp-panel .klapp-inhalt{
+    padding:4px 12px 14px;
+    border-top:1px solid var(--c-border);
+}
+
+.klapp-panel-gross{
+    background:var(--c-surface);
+    margin-top:20px;
+}
+
+.klapp-panel-gross > summary{
+    font-size:15px;
+    padding:14px 16px;
+}
+
+.klapp-panel-mini{
+    margin-top:8px;
+    background:transparent;
+}
+
+.klapp-panel-mini summary{
+    padding:4px 0;
+    font-size:12px;
+    color:var(--c-text-schwach);
+}
+
+.klapp-panel-mini .klapp-inhalt{
+    padding:4px 0 4px 20px;
+    border-top:none;
+    font-size:13px;
+    color:var(--c-text-muted);
+}
+
+/* =====================================================
+   DATENSICHERUNG (im Dashboard)
+===================================================== */
+
+.datensicherung-zeile{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+}
+
+.verbindungs-status{
+    font-size:12.5px;
+    color:var(--c-text-muted);
+}
+
+/* =====================================================
+   AUFGABEN KARTE (kompakt)
+===================================================== */
+
+.aufgaben-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:8px;
+}
+
+.aufgaben-kopf strong{
+    font-size:13.5px;
+    color:var(--c-text);
+}
+
+.aufgaben-titel-ueberfaellig{
+    color:var(--c-danger) !important;
+}
+
+.aufgaben-faellig{
+    font-size:11.5px;
+    color:var(--c-text-schwach);
+    white-space:nowrap;
+}
+
+.aufgaben-kunde{
+    font-size:12px;
+    color:var(--c-text-muted);
+    margin-top:3px;
+}
+
+.aufgaben-aktionen{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+    flex-wrap:wrap;
+}
+
+/* =====================================================
+   BUTTON GEFAHR
+===================================================== */
+
+.crm-button-gefahr{
+    background:var(--c-danger);
+    border-color:var(--c-danger);
+    color:#ffffff;
+}
+
+.crm-button-gefahr:hover{
+    background:var(--c-danger-text);
+    border-color:var(--c-danger-text);
+}
+
+/* =====================================================
+   ABSCHLUSS (kompakt)
+===================================================== */
+
+.abschluss-zeile{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:10px;
+}
+
+.abschluss-zeile label{
+    margin-top:0;
+}
+
+@media (max-width:900px){
+
+    .abschluss-zeile{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+.abschluss-icon{
+    font-size:22px;
+    line-height:1;
+    flex-shrink:0;
+}
+
+.abschluss-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.abschluss-kunde{
+    font-size:12.5px;
+    color:var(--c-text-muted);
+    font-weight:600;
+}
+
+.abschluss-details{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--c-border);
+}
+
+.abschluss-detail-block{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.abschluss-detail-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--c-text-schwach);
+    font-weight:600;
+}
+
+.abschluss-detail-wert{
+    font-size:16px;
+    font-weight:600;
+    color:var(--c-text);
+}
+
+@media (max-width:900px){
+
+    .abschluss-details{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+.abschluss-aktionen{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+}
+
+/* =====================================================
+   KUNDENDATENBLATT KOMPAKT
+===================================================== */
+
+.kd-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:14px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.kd-layout{
+    display:grid;
+    grid-template-columns:1fr 260px;
+    gap:16px;
+    margin-bottom:16px;
+}
+
+.kd-stamm{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.kd-grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.kd-grid-anrede{
+    display:grid;
+    grid-template-columns:90px 1fr 1fr;
+    gap:8px;
+}
+
+.kd-grid-adresse{
+    display:grid;
+    grid-template-columns:1fr 90px;
+    gap:8px;
+}
+
+.kd-grid-adresse .crm-input{
+    margin-bottom:0;
+}
+
+.kd-grid-plzort{
+    display:grid;
+    grid-template-columns:80px 1fr;
+    gap:8px;
+}
+
+.kd-grid-plzort .crm-input{
+    margin-bottom:0;
+}
+
+.kd-grid-geburtstag{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:4px;
+}
+
+.kd-grid-geburtstag .crm-input{
+    margin-bottom:0;
+    max-width:140px;
+}
+
+.kd-geburtstag-label{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--c-text-muted);
+    margin:0;
+    white-space:nowrap;
+}
+
+.kd-grid-2 .crm-input{
+    margin-bottom:0;
+}
+
+.kd-kontakte-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    min-width:0;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--c-border);
+}
+
+.kd-kontakte-grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    min-width:0;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--c-border);
+}
+
+/* =====================================================
+   VERTRAG TABELLE
+===================================================== */
+
+.vertrag-tabelle{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface);
+    overflow:hidden;
+}
+
+.vertrag-zeile{
+    display:grid;
+    grid-template-columns:
+        1.4fr 1.5fr 1fr 1fr 0.8fr 32px;
+    gap:12px;
+    padding:9px 12px;
+    align-items:center;
+    font-size:13px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.vertrag-zeile:last-child{
+    border-bottom:none;
+}
+
+.vertrag-zeile:hover:not(.vertrag-kopf){
+    background:var(--c-surface-muted);
+}
+
+.vertrag-kopf{
+    font-size:11px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    background:var(--c-surface-muted);
+}
+
+.vertrag-nummer{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.vertrag-zuteilung{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-weight:normal;
+}
+
+.kd-kontakt-spalte{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:0;
+    overflow:hidden;
+}
+
+.kd-kontakt-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:0 2px 4px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.eintrag-plus{
+    border:none;
+    background:transparent;
+    color:var(--c-primary);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    padding:0 4px;
+    font-weight:700;
+    transition:color 0.1s;
+}
+
+.eintrag-plus:hover{
+    color:var(--c-primary-dunkel);
+}
+
+.kd-notiz{
+    display:flex;
+    flex-direction:column;
+}
+
+.kd-notiz-textarea{
+    flex:1;
+    min-height:160px;
+    resize:vertical;
+}
+
+.kd-abschnitt{
+    border-top:1px solid var(--c-border);
+    padding-top:14px;
+    margin-top:14px;
+    margin-bottom:10px;  /* gleicher Abstand wie .kd-klapp -> einheitlich */
+}
+
+.kd-abschnitt-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.kd-archivieren{
+    margin-top:20px;
+    padding-top:14px;
+    border-top:1px solid var(--c-border);
+}
+
+/* =====================================================
+   TERMINE ZEILEN (KOMPAKT)
+===================================================== */
+
+.termin-zeile{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:9px 12px;
+    margin-bottom:8px;
+    box-shadow:var(--schatten-karte);
+    transition:border-color 0.15s ease;
+}
+
+.termin-zeile:hover{
+    border-color:var(--c-border-stark);
+}
+
+.termin-zeile:last-child{
+    margin-bottom:0;
+}
+
+.termin-zeile-haupt{
+    display:grid;
+    grid-template-columns:130px 90px 1fr auto;
+    align-items:center;
+    gap:12px;
+    font-size:13px;
+}
+
+.termin-datum{
+    color:var(--c-text-muted);
+    font-size:12.5px;
+    white-space:nowrap;
+}
+
+.termin-kategorie{
+    color:var(--c-text-schwach);
+    font-size:12px;
+}
+
+.termin-titel{
+    font-weight:600;
+    color:var(--c-text);
+}
+
+.termin-aktionen{
+    display:flex;
+    gap:6px;
+    flex-shrink:0;
+}
+
+.termin-notiz{
+    margin:2px 0 4px 0;
+}
+
+.termin-leer{
+    color:var(--c-text-schwach);
+    font-size:13px;
+    padding:8px 0;
+}
+
+.termin-info .termin-titel{
+    font-weight:normal;
+    color:var(--c-text-muted);
+    font-style:italic;
+}
+
+.termin-info .termin-kategorie{
+    color:var(--c-accent);
+    font-style:italic;
+    font-weight:600;
+}
+
+/* =====================================================
+   KENNZEICHNUNGEN (KUNDE)
+===================================================== */
+
+.kennzeichen-reihe{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+}
+
+.kennzeichen-btn{
+    border:1px solid var(--c-border);
+    background:var(--c-surface);
+    color:var(--c-text-muted);
+    padding:7px 14px;
+    border-radius:20px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.15s ease;
+}
+
+.kennzeichen-btn:hover{
+    border-color:var(--c-border-stark);
+}
+
+.kennzeichen-aktiv-rot{
+    background:var(--kennz-keine-beratung);
+    border-color:var(--kennz-keine-beratung);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-grau{
+    background:var(--kennz-nur-buero);
+    border-color:var(--kennz-nur-buero);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-blau{
+    background:var(--kennz-nur-telefon);
+    border-color:var(--kennz-nur-telefon);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-gruen{
+    background:var(--kennz-nur-mail);
+    border-color:var(--kennz-nur-mail);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-dunkelrot{
+    background:var(--kennz-bestand-verlassen);
+    border-color:var(--kennz-bestand-verlassen);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-gold{
+    background:var(--kennz-google-review);
+    border-color:var(--kennz-google-review);
+    color:#fff;
+}
+
+.kennzeichen-aktiv-orange{
+    background:var(--kennz-wichtigbrief);
+    border-color:var(--kennz-wichtigbrief);
+    color:#fff;
+}
+
+/* =====================================================
+   EINTRAGS-LISTEN (TELEFON / E-MAIL / VERTRAG)
+===================================================== */
+
+.eintrag-liste{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    overflow:hidden;
+    background:var(--c-surface);
+}
+
+.eintrag-zeile{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:9px 12px;
+    font-size:13.5px;
+    border-bottom:1px solid var(--c-border);
+    min-width:0;
+}
+
+.eintrag-zeile span,
+.eintrag-zeile a{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+    flex:1;
+}
+
+.eintrag-email{
+    color:var(--c-primary);
+    text-decoration:none;
+    font-size:13.5px;
+}
+
+.eintrag-email:hover{
+    text-decoration:underline;
+}
+
+.eintrag-zeile:last-child{
+    border-bottom:none;
+}
+
+.eintrag-zeile:hover{
+    background:var(--c-surface-muted);
+}
+
+.eintrag-leer{
+    padding:12px;
+    font-size:13px;
+    color:var(--c-text-schwach);
+}
+
+.eintrag-entfernen{
+    border:none;
+    background:transparent;
+    color:var(--c-text-schwach);
+    font-size:17px;
+    line-height:1;
+    cursor:pointer;
+    padding:2px 8px;
+    border-radius:var(--radius-s);
+    transition:all 0.15s ease;
+}
+
+.eintrag-entfernen:hover{
+    background:var(--c-danger-bg);
+    color:var(--c-danger-text);
+}
+
+.crm-button-hinzufuegen{
+    border:1px dashed var(--c-border-stark);
+    background:transparent;
+    color:var(--c-primary);
+    padding:8px 14px;
+    border-radius:var(--radius-s);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:8px;
+    transition:all 0.15s ease;
+}
+
+.crm-button-hinzufuegen:hover{
+    background:var(--c-primary-soft);
+    border-style:solid;
+    border-color:var(--c-primary);
+}
+
+.datensicherung-hinweis{
+    font-size:12.5px;
+    color:var(--c-text-muted);
+    margin-bottom:14px;
+    line-height:1.5;
+}
+
+.datensicherung-datei-input{
+    display:block;
+    margin-top:8px;
+    font-size:13px;
+    color:var(--c-text-muted);
+}
+
+/* =====================================================
+   KONTAKTUEBERWACHUNG SCROLLLISTEN
+===================================================== */
+
+.kontakt-scroll-liste{
+    max-height:380px;
+    overflow-y:auto;
+    padding-right:4px;
+}
+
+/* =====================================================
+   ABSCHLUESSE (kompakte Zeilen-Darstellung)
+===================================================== */
+
+.abschlusseintrag{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:12px;
+    margin-bottom:10px;
+    box-shadow:var(--schatten-karte);
+}
+
+.abschluss-zeile-kompakt{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    padding:10px 14px;
+    margin-bottom:8px;
+    box-shadow:var(--schatten-karte);
+    transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.abschluss-zeile-kompakt:hover{
+    border-color:var(--c-border-stark);
+}
+
+/* Kundenzeile über dem Raster – klein und dezent */
+.abschluss-kunde-zeile{
+    font-size:11.5px;
+    color:var(--c-text-muted);
+    font-weight:600;
+    margin-bottom:5px;
+    padding-left:2px;
+    letter-spacing:0.01em;
+}
+
+.abschluss-kunde-leer{
+    color:var(--c-text-schwach);
+    font-style:italic;
+    font-weight:500;
+}
+
+/* FESTES RASTER — Spaltenbreiten unabhängig vom Inhalt gleich.
+   Produkt hat feste Breite (damit "Genius" und "Turbodarlehen" gleich viel
+   Platz beanspruchen). Die 1fr-Spalte ist die Notiz-Vorschau — dehnt sich
+   in den Freiraum rechts, statt dort eine Lücke zu lassen. */
+.abschluss-hauptzeile{
+    display:grid;
+    grid-template-columns:
+        36px            /* Icon             */
+        90px            /* Datum            */
+        150px           /* Produkt (fix)    */
+        110px           /* Vertriebsweg     */
+        170px           /* Bausparsumme     */
+        150px           /* Monatsbeitrag    */
+        1fr             /* Notiz-Vorschau   */
+        34px            /* Bearbeiten       */
+        34px;           /* Löschen          */
+    align-items:center;
+    gap:10px;
+}
+
+.ab-sp-icon{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+}
+
+.ab-sp-icon .produkt-icon-svg{
+    width:34px;
+    height:34px;
+    display:block;
+    border-radius:9px;
+}
+
+.ab-sp-datum{
+    font-size:14px;
+    font-weight:700;
+    color:var(--c-text);
+    white-space:nowrap;
+}
+
+.ab-sp-produkt{
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+    border-radius:14px;
+    padding:4px 12px;
+    text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    font-weight:700;
+    font-size:11.5px;
+    justify-self:stretch;
+}
+
+.ab-sp-ort{
+    font-size:13px;
+    color:var(--c-text-muted);
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.ab-sp-bss,
+.ab-sp-mb{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    white-space:nowrap;
+    overflow:hidden;
+}
+
+.ab-wert-label{
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--c-text-schwach);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    flex-shrink:0;
+}
+
+.ab-wert-zahl{
+    font-size:14px;
+    font-weight:700;
+    color:var(--c-text);
+    font-variant-numeric:tabular-nums;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/* Notiz-Vorschau als klickbare Spalte, dehnt sich in den Freiraum */
+.ab-sp-notizvorschau{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 10px;
+    border-radius:var(--radius-s);
+    background:var(--c-surface-muted);
+    color:var(--c-text-muted);
+    font-size:12px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:background 0.15s ease, color 0.15s ease;
+    min-width:0; /* wichtig damit text-overflow greift */
+}
+
+.ab-sp-notizvorschau:hover{
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+}
+
+.ab-sp-notizvorschau-leer{
+    background:transparent;
+    cursor:default;
+    pointer-events:none;
+}
+
+.ab-notiz-chevron{
+    font-size:11px;
+    color:var(--c-primary);
+    flex-shrink:0;
+    line-height:1;
+}
+
+.ab-notiz-vorschautext{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+}
+
+/* Aufklappbare Notiz unterhalb der Rasterzeile */
+.abschluss-notiz-inhalt{
+    display:none;
+    margin-top:8px;
+    padding:8px 12px;
+    background:var(--c-surface-muted);
+    border-radius:var(--radius-s);
+    border-left:3px solid var(--c-primary);
+    font-size:12.5px;
+    color:var(--c-text-muted);
+    line-height:1.45;
+    white-space:pre-wrap;
+}
+
+.abschluss-notiz-offen{
+    display:block;
+}
+
+/* ===== FILTER: aktiver Filter (Rand + fett) ===== */
+
+/* Aktive Auswahl im Dropdown-Popup (nicht "alle") — dunkler markiert */
+select.crm-input option:checked{
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+    font-weight:700;
+}
+
+/* Wenn im Feld ein Filter (nicht "alle") aktiv ist: fetteres Feld
+   mit farbigem Rand — signalisiert "hier ist gerade gefiltert" */
+select.crm-input.filter-select-aktiv{
+    font-weight:700;
+    color:var(--c-primary-dunkel);
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 2px var(--c-primary-soft);
+}
+
+/* Auf schmalen Bildschirmen: Raster umbrechen */
+@media (max-width:900px){
+    .abschluss-hauptzeile{
+        grid-template-columns:36px 90px 1fr auto auto auto;
+        row-gap:8px;
+    }
+    .ab-sp-ort{ grid-column:1 / -1; padding-left:46px; }
+    .ab-sp-bss{ grid-column:1 / span 3; padding-left:46px; }
+    .ab-sp-mb { grid-column:4 / -1; }
+    .ab-sp-notizvorschau{ grid-column:1 / -1; padding-left:46px; }
+}
+
+/* =====================================================
+   BAUSPAR-KACHEL AKZENT (Fokus auf Bausparen)
+===================================================== */
+
+.dashboard-card-bauspar{
+    background:linear-gradient(135deg,
+        var(--c-surface) 0%,
+        var(--c-primary-soft) 100%);
+    border:1px solid var(--c-primary);
+    box-shadow:0 2px 8px rgba(122,30,53,0.10);
+}
+
+.dashboard-card-bauspar h3{
+    color:var(--c-primary-dunkel);
+}
+
+.dashboard-card-bauspar .dashboard-value{
+    color:var(--c-primary-dunkel);
+}
+
+/* Finanzierungs-Akzent (analog zu Bauspar, aber goldbraun-warm)
+   damit Bauspar und Finanzierung auf einen Blick trennbar sind. */
+.dashboard-card-finanzierung{
+    background:linear-gradient(135deg,
+        var(--c-surface) 0%,
+        #f6e6cf 100%);
+    border:1px solid #a06a26;
+    box-shadow:0 2px 8px rgba(160,106,38,0.10);
+}
+
+.dashboard-card-finanzierung h3{
+    color:#6b4315;
+}
+
+.dashboard-card-finanzierung .dashboard-value{
+    color:#6b4315;
+}
+
+/* =====================================================
+   SIRENE — pulsierender roter Rahmen für überfällige,
+   OFFENE Aufgaben (nicht in anderen Kanban-Spalten)
+===================================================== */
+
+@keyframes aufgabe-sirene-puls{
+    0%{
+        box-shadow:
+            0 0 0 0 rgba(180,20,30,0.55),
+            0 0 6px 0 rgba(180,20,30,0.25);
+        border-color:#8a0f1a;
+    }
+    50%{
+        box-shadow:
+            0 0 0 6px rgba(180,20,30,0.0),
+            0 0 18px 3px rgba(180,20,30,0.55);
+        border-color:#c8102e;
+    }
+    100%{
+        box-shadow:
+            0 0 0 0 rgba(180,20,30,0.55),
+            0 0 6px 0 rgba(180,20,30,0.25);
+        border-color:#8a0f1a;
+    }
+}
+
+.aufgabe-sirene{
+    border:2px solid #8a0f1a !important;
+    animation:aufgabe-sirene-puls 1.6s ease-in-out infinite;
+    position:relative;
+}
+
+/* Bewegung ausschalten für Nutzer mit
+   „Reduzierte Bewegung"-Einstellung im OS */
+@media (prefers-reduced-motion:reduce){
+    .aufgabe-sirene{
+        animation:none;
+        box-shadow:0 0 0 2px rgba(180,20,30,0.5);
+    }
+}
+
+.kanban-karte-kompakt{
+    padding:7px 9px !important;
+    margin-bottom:5px !important;
+    font-size:12.5px !important;
+}
+
+.ak-zeile-1{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:6px;
+}
+
+.ak-titel{
+    font-size:13px;
+    color:var(--c-text);
+    line-height:1.25;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.ak-faellig{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-weight:600;
+    white-space:nowrap;
+    flex-shrink:0;
+}
+
+.ak-faellig-ueberfaellig{
+    color:var(--c-danger) !important;
+    font-weight:700;
+}
+
+.ak-zeile-2{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:3px;
+    flex-wrap:wrap;
+}
+
+.ak-prio-badge{
+    display:inline-block;
+    padding:1px 6px;
+    border-radius:8px;
+    font-size:9.5px;
+    font-weight:700;
+    color:#fff;
+    letter-spacing:0.05em;
+    line-height:1.4;
+}
+
+.ak-kunde{
+    font-size:11px;
+    color:var(--c-text-muted);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.ak-aktionen{
+    display:flex;
+    gap:2px;
+    margin-top:6px;
+    justify-content:flex-end;
+}
+
+/* =====================================================
+   ICON BUTTONS (kompakt)
+===================================================== */
+
+.crm-icon-button{
+    background:transparent;
+    border:1px solid transparent;
+    border-radius:6px;
+    padding:3px 6px;
+    font-size:13px;
+    cursor:pointer;
+    line-height:1;
+    transition:background 0.12s ease, border-color 0.12s ease;
+}
+
+.crm-icon-button:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-border);
+}
+
+.crm-icon-button-gefahr:hover{
+    background:#fdecec;
+    border-color:var(--c-danger);
+}
+
+/* =====================================================
+   SCROLLBALKEN (dezent, Chrome/Edge)
+===================================================== */
+
+::-webkit-scrollbar{
+    width:9px;
+    height:9px;
+}
+
+::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+::-webkit-scrollbar-thumb{
+    background:var(--c-border-stark);
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:var(--c-text-schwach);
+}
+
+/* =====================================================
+   DASHBOARD ERWEITERUNG
+===================================================== */
+
+.dashboard-kopf{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:0;
+}
+
+.speicher-status{
+    font-size:12px;
+    color:var(--c-text-schwach);
+    font-weight:600;
+}
+
+.dashboard-card-link{
+    cursor:pointer;
+    position:relative;
+    transition:transform 0.12s ease,
+               box-shadow 0.12s ease,
+               border-color 0.12s ease;
+}
+
+.dashboard-card-link:hover{
+    transform:translateY(-2px);
+    box-shadow:0 4px 16px rgba(28,26,23,0.10);
+    border-color:var(--c-primary);
+}
+
+.dashboard-card-link::after{
+    content:"→";
+    position:absolute;
+    bottom:10px;
+    right:12px;
+    font-size:14px;
+    color:var(--c-primary);
+    opacity:0;
+    transition:opacity 0.12s ease;
+}
+
+.dashboard-card-link:hover::after{
+    opacity:1;
+}
+
+/* =====================================================
+   PRODUKTIONSAUSWERTUNG
+===================================================== */
+
+.prod-container{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:4px;
+}
+
+.prod-block{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:16px;
+    box-shadow:var(--schatten-karte);
+}
+
+.prod-titel{
+    font-size:13px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.prod-gesamt{
+    font-size:22px;
+    font-weight:700;
+    color:var(--c-primary);
+    letter-spacing:-0.01em;
+}
+
+.prod-zeile{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 0;
+    font-size:13px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.prod-zeile-label{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.prod-zeile-label .produkt-icon-svg{
+    width:20px;
+    height:20px;
+    display:block;
+    border-radius:5px;
+    flex-shrink:0;
+}
+
+/* Kleiner Doppel-Marker neben Turbo-/Flexdarlehen in der Produktliste */
+.prod-doppel-hinweis{
+    display:inline-block;
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+    font-size:9.5px;
+    font-weight:700;
+    padding:1px 5px;
+    border-radius:8px;
+    letter-spacing:0.03em;
+    margin-left:2px;
+    cursor:help;
+}
+
+/* Kategorie-Summenzeile am Ende jedes prod-block:
+   Bauspar-Stücke + Finanzierungs-Stücke inkl. Turbo-Doppelwertung */
+.prod-kategorie-zeile{
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px dashed var(--c-border);
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    font-size:11.5px;
+    color:var(--c-text-muted);
+}
+
+.prod-kategorie-zeile strong{
+    color:var(--c-text);
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+}
+
+.prod-kat-trenn{
+    color:var(--c-text-schwach);
+}
+
+.prod-zeile:last-child{
+    border-bottom:none;
+}
+
+.prod-zahl{
+    font-weight:700;
+    color:var(--c-text);
+    background:var(--c-surface-muted);
+    border-radius:20px;
+    padding:1px 9px;
+    font-size:12px;
+}
+
+/* =====================================================
+   AUFGABEN ANSICHT-TOGGLE
+===================================================== */
+
+.aufgaben-kopfzeile{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+}
+
+.ansicht-toggle{
+    display:flex;
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    overflow:hidden;
+}
+
+.toggle-btn{
+    border:none;
+    border-radius:0;
+    background:transparent;
+    color:var(--c-text-muted);
+    padding:6px 14px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.12s ease,color 0.12s ease;
+}
+
+.toggle-btn:hover{
+    background:var(--c-surface-muted);
+    color:var(--c-text);
+}
+
+.toggle-btn-aktiv{
+    background:var(--c-primary);
+    color:#fff;
+}
+
+.toggle-btn-aktiv:hover{
+    background:var(--c-primary-dunkel);
+    color:#fff;
+}
+
+/* =====================================================
+   KALENDERANSICHT
+===================================================== */
+
+.kalender-nav{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:14px;
+}
+
+.kalender-titel{
+    font-size:16px;
+    font-weight:700;
+    color:var(--c-text);
+    min-width:160px;
+    text-align:center;
+}
+
+.kalender-wochentage{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+    margin-bottom:4px;
+}
+
+.kalender-wt{
+    text-align:center;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--c-text-schwach);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:4px 0;
+}
+
+.kalender-tage{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+}
+
+.kalender-tag{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    min-height:90px;
+    padding:6px;
+    vertical-align:top;
+    cursor:pointer;
+    transition:background 0.12s ease,
+               border-color 0.12s ease,
+               transform 0.1s ease;
+}
+
+.kalender-tag:hover{
+    background:var(--c-primary-soft);
+    border-color:var(--c-primary);
+    transform:translateY(-1px);
+}
+
+.kalender-tag-leer{
+    background:transparent;
+    border-color:transparent;
+    min-height:90px;
+    cursor:default;
+}
+
+.kalender-tag-leer:hover{
+    background:transparent;
+    border-color:transparent;
+    transform:none;
+}
+
+.kalender-heute{
+    border-color:var(--c-primary);
+    background:var(--c-primary-soft);
+}
+
+.kalender-heute:hover{
+    background:var(--c-primary-soft);
+    filter:brightness(0.96);
+}
+
+.kalender-tag-nr{
+    font-size:12px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    margin-bottom:4px;
+}
+
+.kalender-heute-nr{
+    color:var(--c-primary);
+}
+
+.kalender-aufgaben{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.kalender-aufgabe-pill{
+    font-size:11px;
+    padding:3px 6px;
+    border-radius:4px;
+    background:var(--c-surface-muted);
+    cursor:pointer;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition:background 0.1s ease,
+               box-shadow 0.1s ease;
+}
+
+.kalender-aufgabe-pill:hover{
+    background:var(--c-primary-soft);
+    box-shadow:0 1px 3px rgba(122,30,53,0.15);
+}
+
+.kalender-mehr{
+    font-size:10.5px;
+    color:var(--c-text-schwach);
+    padding:1px 5px;
+}
+
+
+/* =====================================================
+   SELEKTIONEN
+===================================================== */
+
+.selektionen-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+}
+
+.selektionen-aktionen{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.selektion-filter-liste{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.selektion-filter-zeile{
+    display:grid;
+    grid-template-columns:1fr 180px 1fr 32px;
+    gap:8px;
+    padding:10px;
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    align-items:center;
+}
+
+.selektion-filter-zeile .crm-input{
+    margin-bottom:0;
+}
+
+.selektion-filter-zeile .selektion-wert{
+    /* wenn zwischen → zwei inputs teilen sich die Spalte */
+}
+
+.selektion-filter-zeile:has(.selektion-wert:nth-child(4)){
+    grid-template-columns:1fr 180px 1fr 32px;
+}
+
+.selektion-leer{
+    padding:16px;
+    background:var(--c-surface-muted);
+    border:1px dashed var(--c-border);
+    border-radius:var(--radius-s);
+    color:var(--c-text-schwach);
+    font-size:13px;
+    text-align:center;
+}
+
+.selektion-controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:12px;
+    background:var(--c-surface-muted);
+    border-radius:var(--radius-s);
+    margin-bottom:16px;
+    flex-wrap:wrap;
+}
+
+.selektion-treffer-live{
+    font-size:13px;
+    font-weight:600;
+    color:var(--c-primary);
+    padding:4px 10px;
+    background:var(--c-primary-soft);
+    border-radius:20px;
+}
+
+.selektion-ergebnis{
+    margin-top:8px;
+}
+
+.selektion-treffer-tabelle{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface);
+    overflow:hidden;
+}
+
+.selektion-treffer-kopf,
+.selektion-treffer-zeile{
+    display:grid;
+    grid-template-columns:1.5fr 1.5fr 60px 80px 1fr;
+    gap:12px;
+    padding:9px 12px;
+    align-items:center;
+    font-size:13px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.selektion-treffer-kopf{
+    font-size:11px;
+    font-weight:700;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    background:var(--c-surface-muted);
+}
+
+.selektion-treffer-zeile{
+    cursor:pointer;
+    transition:background 0.1s ease;
+}
+
+.selektion-treffer-zeile:hover{
+    background:var(--c-primary-soft);
+}
+
+.selektion-treffer-zeile:last-child{
+    border-bottom:none;
+}
+
+.selektion-mehr{
+    padding:12px;
+    text-align:center;
+    color:var(--c-text-schwach);
+    font-size:12.5px;
+    font-style:italic;
+}
+
+/* =====================================================
+   BENACHRICHTIGUNGS-BANNER
+===================================================== */
+
+.benachrichtigung-banner{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    max-width:400px;
+    background:var(--c-surface);
+    border:1px solid var(--c-primary);
+    border-radius:var(--radius-m);
+    box-shadow:0 10px 40px rgba(28,26,23,0.18);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    font-size:13.5px;
+    color:var(--c-text);
+    z-index:9998;
+    animation:banner-ein 0.25s ease;
+}
+
+.benachrichtigung-banner > div{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+}
+
+@keyframes banner-ein{
+    from{ transform:translateY(20px); opacity:0; }
+    to{ transform:translateY(0); opacity:1; }
+}
+
+/* =====================================================
+   MERGE / DOPPLUNGEN
+===================================================== */
+
+.modal-breit{
+    width:820px;
+}
+
+.merge-hinweis{
+    background:var(--c-warn-bg, #fff4e5);
+    color:var(--c-text);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.5;
+    margin-bottom:16px;
+}
+
+.merge-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.merge-spalte{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    padding:14px;
+    background:var(--c-surface);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.merge-spalte-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--c-border);
+    padding-bottom:6px;
+    margin-bottom:6px;
+}
+
+.merge-id{
+    font-size:11px;
+    color:var(--c-text-schwach);
+}
+
+.merge-zeile{
+    display:grid;
+    grid-template-columns:110px 1fr;
+    gap:8px;
+    font-size:12.5px;
+    padding:3px 0;
+    border-bottom:1px dashed var(--c-border);
+}
+
+.merge-label{
+    color:var(--c-text-schwach);
+}
+
+.merge-wert{
+    word-break:break-word;
+}
+
+.merge-waehlen-btn{
+    margin-top:12px;
+    align-self:stretch;
+}
+
+/* =====================================================
+   KUNDENUNTERLAGEN
+===================================================== */
+
+.ku-panel-body{
+    margin-top:8px;
+}
+
+.ku-datei-liste{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.ku-datei-zeile{
+    display:grid;
+    grid-template-columns:1fr auto auto;
+    gap:10px;
+    align-items:center;
+    padding:4px 6px;
+    border-radius:4px;
+    font-size:13px;
+}
+
+.ku-datei-zeile:hover{
+    background:var(--c-hover, rgba(0,0,0,0.03));
+}
+
+.ku-datei-zeile a{
+    color:var(--c-link, #7a1e35);
+    text-decoration:none;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.ku-datei-zeile a:hover{
+    text-decoration:underline;
+}
+
+.ku-datei-meta{
+    font-size:11px;
+    color:var(--c-text-schwach);
+}
+
+#kundenordnerModal .ku-datei-liste{
+    max-height:60vh;
+}
+
+/* =====================================================
+   FEHLER-STATUS-SYMBOL (neben CRM-Titel)
+===================================================== */
+
+.crm-status-symbol{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    font-weight:bold;
+    font-size:14px;
+    cursor:pointer;
+    margin-right:8px;
+    user-select:none;
+    transition:transform 0.15s;
+    vertical-align:middle;
+}
+
+.crm-status-symbol:hover{
+    transform:scale(1.15);
+}
+
+.crm-status-ok{
+    background:rgba(45,122,63,0.15);
+    color:rgba(45,122,63,0.55);
+    border:1px solid rgba(45,122,63,0.25);
+}
+
+.crm-status-fehler{
+    background:#c8102e;
+    color:#ffffff;
+    border:2px solid #8a0f1a;
+    animation:crm-status-puls 1.6s ease-in-out infinite;
+}
+
+@keyframes crm-status-puls{
+    0%{
+        box-shadow:
+            0 0 0 0 rgba(200,16,46,0.6),
+            0 0 6px 0 rgba(200,16,46,0.3);
+    }
+    50%{
+        box-shadow:
+            0 0 0 6px rgba(200,16,46,0.0),
+            0 0 18px 3px rgba(200,16,46,0.65);
+    }
+    100%{
+        box-shadow:
+            0 0 0 0 rgba(200,16,46,0.6),
+            0 0 6px 0 rgba(200,16,46,0.3);
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    .crm-status-fehler{
+        animation:none;
+        box-shadow:0 0 0 2px rgba(200,16,46,0.5);
+    }
+}
+
+/* =====================================================
+   FEHLER-MODAL
+===================================================== */
+
+.fehler-modal-hinweis{
+    color:var(--c-text-schwach);
+    font-size:13px;
+    margin-bottom:12px;
+}
+
+.fehler-modal-text{
+    width:100%;
+    min-height:120px;
+    max-height:200px;
+    font-family:monospace;
+    font-size:11px;
+    margin-bottom:12px;
+    background:#f8f8f8;
+}
+
+.fehler-modal-liste{
+    max-height:40vh;
+    overflow-y:auto;
+    border-top:1px solid var(--c-border);
+    padding-top:12px;
+}
+
+.fehler-eintrag{
+    padding:8px 10px;
+    margin-bottom:6px;
+    background:#fff5f5;
+    border-left:3px solid #c8102e;
+    border-radius:4px;
+}
+
+.fehler-eintrag-kopf{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+.fehler-eintrag-zeit{
+    color:var(--c-text-schwach);
+    font-size:11px;
+}
+
+.fehler-eintrag-text{
+    font-size:13px;
+    color:var(--c-text);
+}
+
+.fehler-eintrag-details{
+    font-size:11px;
+    font-family:monospace;
+    color:var(--c-text-schwach);
+    margin-top:4px;
+    word-break:break-all;
+}
+
+/* =====================================================
+   KUNDENUNTERLAGEN — DRAG & DROP SPOTLIGHT
+===================================================== */
+
+.ku-drop-zone{
+    position:relative;
+    transition:outline 100ms;
+}
+
+/* Aktive Drop-Zone: gestrichelter Rand + Rest der Seite
+   abdunkeln ueber einen riesigen box-shadow, der als
+   "Halo" um das Element wirkt. */
+.ku-drop-zone.ku-drop-aktiv{
+    outline:3px dashed #7a1e35;
+    outline-offset:-3px;
+    background:#fff5f7;
+    z-index:9999;
+    box-shadow:0 0 0 100vmax rgba(0,0,0,0.45);
+    clip-path:inset(-3px round 6px);
+}
+
+/* Im Modal soll der Rand kompakter sitzen */
+#kundenordnerModalInhalt.ku-drop-zone.ku-drop-aktiv{
+    background:#fff5f7;
+    border-radius:6px;
+}
+
+/* Kinder der Drop-Zone sollen keine drag-Events schlucken */
+.ku-drop-zone.ku-drop-aktiv *{
+    pointer-events:none;
+}
+
+@media (prefers-reduced-motion:reduce){
+    .ku-drop-zone{ transition:none; }
+}
+
+/* =====================================================
+   SELEKTIONEN — UND/ODER-Toggle
+===================================================== */
+
+.selektion-modus-zeile{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:8px 0 14px 0;
+    flex-wrap:wrap;
+}
+
+.selektion-modus-label{
+    font-size:13px;
+    color:var(--c-text-schwach);
+    font-weight:500;
+}
+
+.selektion-modus-toggle{
+    display:inline-flex;
+    border:1px solid var(--c-border);
+    border-radius:6px;
+    overflow:hidden;
+    background:var(--c-bg-input, #fff);
+}
+
+.selektion-modus-btn{
+    padding:5px 14px;
+    font-size:12px;
+    font-weight:600;
+    background:transparent;
+    color:var(--c-text-schwach);
+    border:none;
+    cursor:pointer;
+    transition:background 100ms, color 100ms;
+    letter-spacing:0.5px;
+}
+
+.selektion-modus-btn + .selektion-modus-btn{
+    border-left:1px solid var(--c-border);
+}
+
+.selektion-modus-btn:hover:not(.aktiv){
+    background:#f0e6e8;
+    color:var(--c-text);
+}
+
+.selektion-modus-btn.aktiv{
+    background:#7a1e35;
+    color:#ffffff;
+}
+
+.selektion-modus-hinweis{
+    font-size:12px;
+    color:var(--c-text-schwach);
+    font-style:italic;
+}
+
+/* =====================================================
+   ABSCHLUSS ↔ TERMIN — Koppel-Checkbox
+===================================================== */
+
+.abschluss-terminkoppel-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:10px 0 4px 0;
+    padding:8px 10px;
+    background:#faf3f4;
+    border:1px solid #e3d5d9;
+    border-radius:5px;
+    font-size:13px;
+    cursor:pointer;
+    user-select:none;
+    flex-wrap:wrap;
+}
+
+.abschluss-terminkoppel-label input[type=checkbox]{
+    cursor:pointer;
+}
+
+.abschluss-terminkoppel-hinweis{
+    color:var(--c-text-schwach);
+    font-size:11px;
+    font-style:italic;
+    margin-left:auto;
+}
+
+/* =====================================================
+   TERMIN-NOTIZ — einheitlich mit Abschluss-Notiz
+   Klickbare Vorschauzeile mit Chevron, darunter
+   aufklappbarer Volltext (dieselbe Optik wie
+   .ab-sp-notizvorschau + .abschluss-notiz-inhalt).
+===================================================== */
+
+.tm-notiz-vorschau{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 10px;
+    margin-top:6px;
+    border-radius:var(--radius-s);
+    background:var(--c-surface-muted);
+    color:var(--c-text-muted);
+    font-size:12px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:background 0.15s ease, color 0.15s ease;
+    min-width:0;
+}
+
+.tm-notiz-vorschau:hover{
+    background:var(--c-primary-soft);
+    color:var(--c-primary-dunkel);
+}
+
+.tm-notiz-chevron{
+    font-size:11px;
+    color:var(--c-primary);
+    flex-shrink:0;
+    line-height:1;
+}
+
+.tm-notiz-vorschautext{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+}
+
+.termin-notiz-inhalt{
+    display:none;
+    margin-top:8px;
+    padding:8px 12px;
+    background:var(--c-surface-muted);
+    border-radius:var(--radius-s);
+    border-left:3px solid var(--c-primary);
+    font-size:12.5px;
+    color:var(--c-text-muted);
+    line-height:1.45;
+    white-space:pre-wrap;
+}
+
+.termin-notiz-offen{
+    display:block;
+}
+
+/* =====================================================
+   SERIENBRIEF — Klapp-Panel im Selektionen-Tab
+===================================================== */
+
+.serienbrief-klapp{
+    margin-top:20px;
+}
+
+#serienbriefPanel .sb-info-zeile{
+    padding:8px 10px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:13px;
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.sb-haushalt-hinweis{
+    color:var(--c-primary-dunkel, #4d1220);
+    font-style:italic;
+}
+
+.sb-warn-hinweis{
+    color:#8a5a00;
+    font-weight:500;
+    background:#fff4dc;
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:12px;
+}
+
+.sb-haushalts-details{
+    margin-bottom:12px;
+    background:#faf7f8;
+    border:1px solid #eadde0;
+    border-radius:5px;
+    padding:6px 10px;
+    font-size:13px;
+}
+
+.sb-haushalts-details summary{
+    cursor:pointer;
+    font-weight:500;
+    color:var(--c-primary-dunkel, #4d1220);
+}
+
+.sb-haushalts-liste{
+    margin-top:8px;
+}
+
+.sb-haushalt-eintrag{
+    padding:8px 10px;
+    background:#fff;
+    border-left:3px solid #d9822b;
+    margin:6px 0;
+    border-radius:3px;
+    font-size:12px;
+}
+
+.sb-haushalt-eintrag.sb-eintrag-warn{
+    border-left-color:#c8102e;
+    color:#8a0f1a;
+}
+
+.sb-haushalt-adr{
+    color:var(--c-text, #333);
+    margin-bottom:3px;
+}
+
+.sb-haushalt-name-kombiniert{
+    color:var(--c-text-schwach);
+    font-style:italic;
+    display:block;
+    margin-top:2px;
+}
+
+.sb-haushalt-personen{
+    color:var(--c-text-schwach);
+    font-size:11px;
+    margin-bottom:4px;
+}
+
+.sb-haushalt-person{
+    display:inline-block;
+}
+
+.sb-haushalt-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:var(--c-text-schwach);
+    cursor:pointer;
+    margin-top:4px;
+}
+
+.sb-feld-label{
+    display:block;
+    font-size:12px;
+    font-weight:500;
+    color:var(--c-text-schwach);
+    margin:10px 0 4px 0;
+}
+
+.sb-feld-label code{
+    background:#f0e6e8;
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:11px;
+    color:var(--c-primary-dunkel, #4d1220);
+}
+
+.sb-brieftext{
+    width:100%;
+    min-height:180px;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.sb-signatur{
+    width:100%;
+    min-height:80px;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.4;
+}
+
+.sb-aktionen{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.sb-post-checkbox{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding:8px 10px;
+    margin:6px 0;
+    background:#faf3f4;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+/* =====================================================
+   SERIENBRIEF — VOLLBILD-DRUCKVORSCHAU
+===================================================== */
+
+.serienbrief-druckansicht{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#e8e8e8;
+    z-index:10000;
+    overflow-y:auto;
+    padding:20px 0;
+}
+
+/* Post-Aktion-Modal MUSS ueber der Druckvorschau liegen,
+   sonst gehen Klicks auf den Uebernehmen-Button in die
+   darunterliegende Vorschau — und die Aktion scheitert still. */
+#serienbriefPostModal{
+    z-index:10001;
+}
+
+body.serienbrief-modus{
+    overflow:hidden;
+}
+
+.brief-vorschau-header{
+    position:sticky;
+    top:0;
+    z-index:1;
+    background:#fff;
+    padding:10px 20px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:0 auto 12px auto;
+    max-width:210mm;
+    border-radius:4px;
+    font-size:14px;
+}
+
+.brief-vorschau-buttons{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.brief-vorschau-hinweis{
+    max-width:210mm;
+    margin:0 auto 20px auto;
+    padding:8px 14px;
+    background:#fff4dc;
+    color:#5a3d00;
+    font-size:12px;
+    border-radius:4px;
+    border-left:3px solid #d9822b;
+}
+
+/* =====================================================
+   SERIENBRIEF — Brief-Seite (Flow-Layout, 1:1 Vorlage)
+   Dichter gepackt, damit Hauptbrief + Rueckantwort auf
+   EINER A4-Seite Platz haben.
+   Dezente Falzmarken links (105mm / 210mm) via Pseudo-
+   Elementen.
+===================================================== */
+
+.brief-seite{
+    background:#fff;
+    width:210mm;
+    min-height:297mm;
+    max-height:297mm;
+    box-sizing:border-box;
+    margin:0 auto 20px auto;
+    /* Kompaktere Raender als DIN-Standard, damit alles passt */
+    padding:35mm 18mm 10mm 25mm;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    font-family:"Helvetica","Arial",sans-serif;
+    font-size:11pt;
+    line-height:1.3;
+    color:#000;
+    position:relative;
+    page-break-after:always;
+}
+
+.brief-seite:last-child{
+    page-break-after:auto;
+}
+
+/* Dezente Falzmarken bei 105mm und 210mm vom Papier-Oberrand */
+.brief-seite::before,
+.brief-seite::after{
+    content:"";
+    position:absolute;
+    left:4mm;
+    width:4mm;
+    height:0;
+    border-top:0.3mm solid #bbb;
+}
+.brief-seite::before{ top:105mm; }
+.brief-seite::after{  top:210mm; }
+
+/* Kopf: 2-Spalten-Grid. Anschriftfeld muss im Bereich
+   50mm–85mm vom Papier-Oberrand liegen (DIN-676 Form B,
+   Kuvert-Sichtfenster). padding-top:35mm + Ruecksender-
+   Zeile ≈15mm → Anschrift startet bei ~50mm. */
+.brief-kopf{
+    display:grid;
+    grid-template-columns:85mm 1fr;
+    gap:6mm;
+    margin-bottom:7mm;
+    min-height:50mm;
+}
+
+.brief-kopf-links{
+    display:flex;
+    flex-direction:column;
+}
+
+.brief-ruecksender{
+    font-size:0.65em;
+    color:#555;
+    text-decoration:underline;
+    padding-bottom:1.5mm;
+    margin-bottom:3mm;
+    line-height:1.2;
+}
+
+.brief-anschrift{
+    font-size:1em;
+    line-height:1.3;
+}
+
+.brief-kopf-rechts{
+    font-size:0.78em;
+    line-height:1.3;
+    color:#000;
+    /* 1cm Luft zur Anschrift-Spalte, damit der Absender-Block
+       deutlich rechts steht und ausserhalb des Kuvert-Sichtfensters
+       landet */
+    padding-left:10mm;
+}
+
+.brief-absender-block{
+    white-space:pre-wrap;
+}
+
+.brief-datum{
+    text-align:right;
+    font-size:0.9em;
+    color:#333;
+    margin-bottom:4mm;
+}
+
+.brief-betreff{
+    font-weight:700;
+    line-height:1.25;
+    margin-bottom:4mm;
+}
+
+.brief-inhalt{
+    white-space:pre-wrap;
+    text-align:left;
+    margin-bottom:4mm;
+}
+
+.brief-inhalt strong{ font-weight:700; }
+
+.brief-signatur{
+    margin-top:4mm;
+    line-height:1.3;
+    margin-bottom:4mm;
+}
+
+.brief-signatur strong{ font-weight:700; }
+
+.brief-sig-leer{ height:0.8em; }
+
+/* =====================================================
+   SERIENBRIEF — RUECKANTWORT (direkt im Textfluss)
+   Nach der Schere-Linie steht die Rueckadresse DIN-naeher
+   positioniert, sodass sie nach dem Abschneiden/Falten im
+   Sichtfenster eines DIN-Lang-Kuverts liegen koennte.
+===================================================== */
+
+.brief-schere{
+    font-size:0.72em;
+    letter-spacing:0.5mm;
+    color:#777;
+    margin:3mm 0 2mm 0;
+    overflow:hidden;
+    white-space:nowrap;
+}
+
+.brief-rueck-titel{
+    font-size:0.95em;
+    margin-bottom:3mm;
+}
+
+.brief-rueck-tabelle{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6mm;
+    margin-bottom:3mm;
+    /* Abstand vom Titel zur Adresse — DIN-naeher:
+       Adresse liegt dann ca. 30mm unterhalb der Schere, damit
+       sie nach dem Falten im Kuvert-Fenster erscheinen koennte */
+    padding-top:18mm;
+}
+
+.brief-rueck-adresse{
+    font-size:0.9em;
+    line-height:1.4;
+}
+
+.brief-rueck-adresse-label{
+    color:#555;
+    margin-bottom:1.5mm;
+    font-size:0.85em;
+}
+
+.brief-rueck-felder{
+    display:flex;
+    flex-direction:column;
+    gap:3mm;
+}
+
+.brief-rueck-feld-label{
+    font-size:0.82em;
+    margin-bottom:0.5mm;
+}
+
+.brief-rueck-linie{
+    border-bottom:1px solid #000;
+    height:5mm;
+}
+
+.brief-datenschutz{
+    margin-top:3mm;
+    padding-top:2mm;
+    border-top:1px solid #ccc;
+    font-size:0.68em;
+    color:#555;
+    line-height:1.3;
+    font-style:italic;
+}
+
+/* =====================================================
+   SERIENBRIEF — PRINT
+===================================================== */
+
+@media print{
+    body > *:not(.serienbrief-druckansicht){
+        display:none !important;
+    }
+    body.serienbrief-modus{
+        overflow:visible !important;
+        background:#fff !important;
+    }
+    .serienbrief-druckansicht{
+        display:block !important;
+        position:static !important;
+        background:#fff !important;
+        padding:0 !important;
+        overflow:visible !important;
+    }
+    .brief-vorschau-header,
+    .brief-vorschau-hinweis{
+        display:none !important;
+    }
+    .brief-seite{
+        margin:0 !important;
+        box-shadow:none !important;
+        width:auto !important;
+        min-height:0 !important;
+        page-break-after:always;
+    }
+    .brief-seite:last-child{
+        page-break-after:auto;
+    }
+    /* Rueckantwort ist jetzt im Textfluss der .brief-seite —
+       keine separaten Print-Regeln noetig */
+    @page{
+        size:A4;
+        margin:0;
+    }
+}
+
+/* =====================================================
+   SERIENBRIEF — Schrift-Optionen + Betreff (Panel)
+===================================================== */
+
+.sb-optionen-zeile{
+    display:flex;
+    gap:14px;
+    align-items:center;
+    margin:8px 0 4px 0;
+    flex-wrap:wrap;
+}
+
+.sb-optionen-label{
+    font-size:12px;
+    color:var(--c-text-schwach);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.sb-schrift-select{
+    width:auto;
+    padding:4px 8px;
+    font-size:12px;
+    margin-bottom:0;
+}
+
+.sb-betreff-input{
+    width:100%;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+}
+
+.sb-feld-hinweis{
+    color:var(--c-text-schwach);
+    font-weight:400;
+    font-style:italic;
+    font-size:11px;
+}
+
+/* Wenn Betreff da ist, ruecht der Inhalt darunter zusammen
+   (Betreff traegt bereits den Abstand von oben) */
+.brief-betreff + .brief-inhalt{
+    margin-top:0;
+}
+
+/* =====================================================
+   SERIENBRIEF — Absender-Block (Kopf oben rechts)
+===================================================== */
+
+.sb-absender{
+    width:100%;
+    min-height:110px;
+    font-family:inherit;
+    font-size:12px;
+    line-height:1.4;
+}
+
+.sb-ruecksender-vorschau{
+    margin:4px 0 6px 4px;
+    font-size:11px;
+    color:var(--c-text-schwach);
+    font-style:italic;
+}
+
+.sb-ruecksender-vorschau span{
+    color:var(--c-primary-dunkel, #4d1220);
+    font-style:normal;
+    font-weight:500;
+}
+
+/* =====================================================
+   SELEKTIONS-RUECKIMPORT — Panel im Selektionen-Tab
+===================================================== */
+
+.selektion-rueckimport-klapp{
+    margin-top:14px;
+}
+
+.sr-hinweis{
+    padding:8px 10px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:12px;
+    color:var(--c-text-schwach);
+    margin-bottom:12px;
+    line-height:1.4;
+}
+
+.sr-feld-label{
+    display:block;
+    font-size:12px;
+    font-weight:500;
+    color:var(--c-text-schwach);
+    margin:10px 0 4px 0;
+}
+
+.sr-datei-input{
+    padding:5px;
+}
+
+.sr-zwei-spalten{
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:12px;
+    margin-top:6px;
+}
+
+.sr-haushalt-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 10px;
+    margin-top:12px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:13px;
+    cursor:pointer;
+}
+
+#srVorschau{
+    margin-top:14px;
+}
+
+.sr-vorschau-zeile{
+    padding:8px 10px;
+    background:var(--c-surface-muted, #faf3f4);
+    border-radius:5px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.sr-vorschau-titelzeile{
+    padding:6px 10px;
+    margin-top:6px;
+    font-size:13px;
+    color:var(--c-text-schwach);
+}
+
+.sr-warn{
+    color:#8a5a00;
+    font-weight:500;
+    background:#fff4dc;
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:12px;
+}
+
+.sr-haushalt-hinweis{
+    color:var(--c-primary-dunkel, #4d1220);
+    font-style:italic;
+    font-size:12px;
+}
+
+.sr-details{
+    margin-top:8px;
+    background:#faf7f8;
+    border:1px solid #eadde0;
+    border-radius:5px;
+    padding:6px 10px;
+    font-size:12px;
+}
+
+.sr-details summary{
+    cursor:pointer;
+    font-weight:500;
+    color:var(--c-text, #333);
+}
+
+.sr-nicht-liste{
+    margin-top:8px;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.sr-nicht-eintrag{
+    padding:4px 8px;
+    margin:3px 0;
+    background:#fff5f5;
+    border-left:3px solid #c8102e;
+    border-radius:3px;
+    font-size:11px;
+    color:#5a0f1a;
+}
+
+.sr-aktionen{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+/* =====================================================
+   SERIENBRIEF v2 — Panel-Bloecke (Firma / Kampagne)
+===================================================== */
+
+.sb-block{
+    margin:12px 0;
+    background:#faf7f8;
+    border:1px solid #eadde0;
+    border-radius:5px;
+    padding:0;
+}
+
+.sb-block > summary{
+    cursor:pointer;
+    padding:10px 14px;
+    font-weight:600;
+    color:var(--c-primary-dunkel, #4d1220);
+    user-select:none;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.sb-block > summary::marker{
+    color:var(--c-primary, #7a1e35);
+}
+
+.sb-block-inhalt{
+    padding:10px 14px 14px 14px;
+    border-top:1px solid #eadde0;
+}
+
+.sb-ok{
+    display:inline-block;
+    padding:2px 8px;
+    background:#d4edda;
+    color:#155724;
+    font-size:11px;
+    border-radius:3px;
+    font-weight:500;
+}
+
+.sb-nok{
+    display:inline-block;
+    padding:2px 8px;
+    background:#fff4dc;
+    color:#8a5a00;
+    font-size:11px;
+    border-radius:3px;
+    font-weight:500;
+}
+
+.sb-zwei-spalten{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:6px;
+}
+
+.sb-oeffnungszeiten{
+    width:100%;
+    min-height:70px;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.4;
+}
+
+.sb-ruckantwort-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:10px 0;
+    padding:8px 10px;
+    background:#fff;
+    border:1px solid #eadde0;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.sb-feld-hinweis-klein{
+    font-size:11px;
+    color:var(--c-text-schwach);
+    margin-top:3px;
+}
+
+/* =====================================================
+   SERIENBRIEF v2 — RUECKANTWORT auf eigener Seite
+===================================================== */
+
+/* =====================================================
+   FINANZIERUNGSZERTIFIKAT — Berater-Panel + Betrag-Modal
+===================================================== */
+
+#zertBeraterPanel .zert-berater-hinweis{
+    font-size:0.9em;
+    color:#555;
+    margin:4px 0 12px 0;
+}
+#zertBeraterPanel .zert-berater-hinweis .sb-ok{
+    color:#1a8a1a;
+    font-weight:600;
+    margin-left:6px;
+}
+#zertBeraterPanel .zert-berater-hinweis .sb-nok{
+    color:#c0392b;
+    font-weight:600;
+    margin-left:6px;
+}
+#zertBeraterPanel .zert-ber-grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:6px;
+}
+#zertBeraterPanel .sb-feld-label{
+    display:block;
+    font-size:0.85em;
+    color:#444;
+    margin-top:8px;
+    margin-bottom:3px;
+}
+#zertBetragModal .modal{
+    max-width:420px;
+}
+#zertBetragModal input{
+    font-size:1.1em;
+    text-align:right;
+}
+
+/* =====================================================
+   DESIGN — Palette-Icon in der Navbar + Design-Modal
+===================================================== */
+
+.design-icon{
+    cursor:pointer;
+    font-size:1.1em;
+    margin-left:10px;
+    user-select:none;
+    opacity:0.65;
+    transition:opacity 0.15s ease, transform 0.15s ease;
+}
+.design-icon:hover{
+    opacity:1;
+    transform:scale(1.15);
+}
+
+.design-modal{
+    max-width:520px;
+}
+.design-hinweis{
+    color:var(--c-text-muted);
+    font-size:0.9em;
+    margin:4px 0 14px 0;
+    line-height:1.4;
+}
+.design-reihe{
+    display:grid;
+    grid-template-columns:110px 60px 1fr;
+    align-items:center;
+    gap:12px;
+    padding:8px 0;
+    border-bottom:1px solid var(--c-border);
+}
+.design-reihe:last-of-type{
+    border-bottom:none;
+}
+.design-reihe label{
+    font-weight:600;
+    color:var(--c-text);
+}
+.design-reihe input[type="color"]{
+    width:50px;
+    height:34px;
+    border:1px solid var(--c-border-stark);
+    border-radius:6px;
+    cursor:pointer;
+    padding:2px;
+    background:var(--c-surface);
+}
+.design-hint{
+    color:var(--c-text-schwach);
+    font-size:0.85em;
+}
+
+/* =====================================================
+   DESIGN — Preset-Leiste im Design-Modal
+===================================================== */
+
+.design-presets-label{
+    font-size:0.85em;
+    font-weight:600;
+    color:var(--c-text-muted);
+    margin:4px 0 8px 0;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+.design-presets{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:8px;
+    margin-bottom:14px;
+}
+.design-preset{
+    cursor:pointer;
+    border:1.5px solid var(--c-border);
+    border-radius:8px;
+    padding:6px 4px 4px 4px;
+    text-align:center;
+    background:var(--c-surface);
+    transition:border-color 0.15s ease, transform 0.1s ease;
+    user-select:none;
+}
+.design-preset:hover{
+    border-color:var(--c-primary);
+    transform:translateY(-1px);
+}
+.design-preset-vorschau{
+    display:flex;
+    height:28px;
+    border-radius:5px;
+    overflow:hidden;
+    margin-bottom:4px;
+    border:1px solid var(--c-border);
+}
+.design-preset-vorschau span{
+    flex:1;
+    display:block;
+}
+.design-preset-name{
+    font-size:0.75em;
+    color:var(--c-text);
+    font-weight:500;
+}
+.design-trenner{
+    height:1px;
+    background:var(--c-border);
+    margin:4px 0 10px 0;
+}
+
+/* =====================================================
+   KUNDENDATENBLATT — Partner (Lebensgefaehrte)
+===================================================== */
+
+.kd-partner{
+    margin-top:12px;
+    padding:10px 12px;
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+}
+
+.kd-partner-label{
+    display:block;
+    font-size:0.85em;
+    font-weight:600;
+    color:var(--c-text-muted);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin-bottom:6px;
+}
+
+.kd-partner-grid{
+    display:grid;
+    grid-template-columns:110px 1fr 1fr 170px;
+    gap:8px;
+}
+
+@media (max-width: 900px){
+    .kd-partner-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+/* =====================================================
+   PARTNER-HINWEIS-BANNER (im Kundenpanel)
+===================================================== */
+
+.partner-hinweis-banner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+    padding:10px 14px;
+    background:var(--c-accent-soft);
+    border:1px solid var(--c-accent);
+    border-left:4px solid var(--c-accent);
+    border-radius:var(--radius-m);
+    color:var(--c-text);
+    font-size:0.9em;
+}
+.partner-hinweis-banner strong{
+    color:var(--c-accent);
+}
+
+/* =====================================================
+   KUNDENDATENBLATT — Neue Kopfzeile (Umbau 1 von 4)
+   -----------------------------------------------------
+   Grosser Name links, Marker-Reihe rechts.
+   Admin-Metadaten (PARTY-ID etc.) wandern in die
+   dezente Fusszeile.
+===================================================== */
+
+.kd-kopf-neu{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:14px;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--c-border);
+}
+
+.kd-kopf-titel{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:220px;
+}
+
+.kd-kopf-name{
+    font-size:1.6em;
+    font-weight:600;
+    color:var(--c-text);
+    line-height:1.1;
+    margin:0;
+}
+
+.kd-kopf-sub{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    font-size:0.9em;
+    color:var(--c-text-muted);
+}
+
+.kd-kopf-alter{
+    font-weight:500;
+}
+
+.kd-kopf-trenner{
+    color:var(--c-text-schwach);
+}
+
+.kd-kopf-ort{
+    color:var(--c-text-muted);
+}
+
+/* Marker-Reihe in der Kopfzeile — wrappt bei schmalem Fenster */
+.kd-kopf-neu .kennzeichen-reihe{
+    margin-bottom:0;
+    flex:1;
+    justify-content:flex-end;
+}
+
+/* Admin-Fusszeile ganz unten im Panel */
+.kd-admin-fuss{
+    margin-top:16px;
+    padding-top:10px;
+    border-top:1px solid var(--c-border);
+    font-size:0.78em;
+    color:var(--c-text-schwach);
+    text-align:center;
+    letter-spacing:0.2px;
+}
+
+/* =====================================================
+   KUNDENDATENBLATT — Kennzeichen-Chips (Umbau 2 von 4)
+   -----------------------------------------------------
+   Nur aktive Marker als farbige Chips sichtbar. Weitere
+   per Klapp-Menue "+ Marker" hinzufuegbar. Platzsparend
+   und Fokus auf Besonderheiten.
+===================================================== */
+
+.kennz-chip-leiste{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    justify-content:flex-end;
+    flex:1;
+    min-height:32px;
+}
+
+.kennz-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:4px 4px 4px 10px;
+    border-radius:999px;
+    color:#fff;
+    font-size:0.82em;
+    font-weight:500;
+    line-height:1.2;
+    white-space:nowrap;
+    box-shadow:0 1px 2px rgba(0,0,0,0.08);
+}
+
+.kennz-chip-x{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    border:none;
+    border-radius:50%;
+    background:rgba(255,255,255,0.22);
+    color:#fff;
+    font-size:0.95em;
+    font-weight:600;
+    line-height:1;
+    cursor:pointer;
+    transition:background 0.12s ease;
+}
+.kennz-chip-x:hover{
+    background:rgba(255,255,255,0.4);
+}
+
+/* "+ Marker" Klapp-Menue */
+.kennz-chip-plus{
+    position:relative;
+    display:inline-block;
+}
+.kennz-chip-plus > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:4px 10px;
+    border:1px dashed var(--c-border-stark);
+    border-radius:999px;
+    font-size:0.82em;
+    color:var(--c-text-muted);
+    background:transparent;
+    transition:background 0.12s ease, border-color 0.12s ease;
+    user-select:none;
+}
+.kennz-chip-plus > summary::-webkit-details-marker{ display:none; }
+.kennz-chip-plus > summary::marker{ display:none; content:""; }
+.kennz-chip-plus > summary:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-primary);
+    color:var(--c-primary);
+}
+
+/* Das aufklappbare Menue schwebt ueber dem Rest */
+.kennz-chip-menue{
+    position:absolute;
+    top:calc(100% + 6px);
+    right:0;
+    z-index:50;
+    background:var(--c-surface);
+    border:1px solid var(--c-border-stark);
+    border-radius:var(--radius-m);
+    box-shadow:var(--schatten-modal);
+    padding:6px;
+    min-width:200px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.kennz-menue-eintrag{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border:none;
+    background:transparent;
+    text-align:left;
+    cursor:pointer;
+    border-radius:6px;
+    font-size:0.9em;
+    color:var(--c-text);
+    transition:background 0.1s ease;
+}
+.kennz-menue-eintrag:hover{
+    background:var(--c-surface-muted);
+}
+.kennz-menue-farbe{
+    display:inline-block;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    flex-shrink:0;
+}
+
+.kennz-chip-leer{
+    font-size:0.85em;
+    color:var(--c-text-schwach);
+    font-style:italic;
+}
+
+/* =====================================================
+   KUNDENDATENBLATT — Klappfelder (Umbau 3 von 4)
+   -----------------------------------------------------
+   Partner, Haushalt, Kundenunterlagen als <details>.
+   Standard geoeffnet wenn Inhalt vorhanden, sonst zu.
+   Summary-Zeile zeigt Status ohne Aufklappen.
+===================================================== */
+
+details.kd-klapp{
+    background:var(--c-surface);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    margin-bottom:10px;
+    overflow:hidden;
+    transition:border-color 0.12s ease;
+}
+
+details.kd-klapp[open]{
+    border-color:var(--c-border-stark);
+}
+
+details.kd-klapp > summary.kd-klapp-summary{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 14px;
+    cursor:pointer;
+    list-style:none;
+    user-select:none;
+    background:var(--c-surface-muted);
+    transition:background 0.12s ease;
+}
+details.kd-klapp[open] > summary.kd-klapp-summary{
+    border-bottom:1px solid var(--c-border);
+}
+details.kd-klapp > summary.kd-klapp-summary::-webkit-details-marker{ display:none; }
+details.kd-klapp > summary.kd-klapp-summary::marker{ content:""; }
+details.kd-klapp > summary.kd-klapp-summary:hover{
+    background:var(--c-border);
+}
+
+/* Chevron als visuelles Marker-Element */
+details.kd-klapp > summary.kd-klapp-summary::before{
+    content:"▸";
+    font-size:0.75em;
+    color:var(--c-text-muted);
+    transition:transform 0.15s ease;
+    display:inline-block;
+    width:12px;
+    flex-shrink:0;
+}
+details.kd-klapp[open] > summary.kd-klapp-summary::before{
+    transform:rotate(90deg);
+}
+
+.kd-klapp-titel{
+    font-weight:600;
+    font-size:0.95em;
+    color:var(--c-text);
+    flex-shrink:0;
+}
+
+.kd-klapp-info{
+    flex:1;
+    text-align:right;
+    font-size:0.88em;
+    color:var(--c-text-muted);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.kd-klapp-info-leer{
+    color:var(--c-text-schwach);
+    font-style:italic;
+}
+
+.kd-klapp-inhalt{
+    padding:12px 14px;
+}
+
+/* =====================================================
+   KUNDENDATENBLATT — Aktionen-Menue (Umbau 4 von 4)
+   -----------------------------------------------------
+   3-Punkte-Dropdown rechts in der Kopfzeile:
+   Zertifikat erstellen, Kunde archivieren.
+   Ersetzt die alte .kd-archivieren-Zeile am unteren Rand.
+===================================================== */
+
+details.kd-aktionen-menu{
+    position:relative;
+    flex-shrink:0;
+}
+
+details.kd-aktionen-menu > summary.kd-aktionen-knopf{
+    list-style:none;
+    cursor:pointer;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.3em;
+    font-weight:700;
+    line-height:1;
+    color:var(--c-text-muted);
+    background:transparent;
+    border:1px solid transparent;
+    transition:background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    user-select:none;
+}
+details.kd-aktionen-menu > summary.kd-aktionen-knopf::-webkit-details-marker{ display:none; }
+details.kd-aktionen-menu > summary.kd-aktionen-knopf::marker{ content:""; }
+details.kd-aktionen-menu > summary.kd-aktionen-knopf:hover,
+details.kd-aktionen-menu[open] > summary.kd-aktionen-knopf{
+    background:var(--c-surface-muted);
+    border-color:var(--c-border-stark);
+    color:var(--c-text);
+}
+
+details.kd-aktionen-menu .kd-aktionen-liste{
+    position:absolute;
+    top:calc(100% + 6px);
+    right:0;
+    z-index:50;
+    min-width:220px;
+    background:var(--c-surface);
+    border:1px solid var(--c-border-stark);
+    border-radius:var(--radius-m);
+    box-shadow:var(--schatten-modal);
+    padding:6px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.kd-aktionen-eintrag{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 12px;
+    border:none;
+    background:transparent;
+    text-align:left;
+    cursor:pointer;
+    border-radius:6px;
+    font-size:0.95em;
+    color:var(--c-text);
+    transition:background 0.1s ease;
+}
+.kd-aktionen-eintrag:hover{
+    background:var(--c-surface-muted);
+}
+
+.kd-aktionen-gefahr{
+    color:var(--c-danger);
+}
+.kd-aktionen-gefahr:hover{
+    background:var(--c-danger-bg);
+}
+
+.kd-aktionen-icon{
+    display:inline-block;
+    width:20px;
+    text-align:center;
+    flex-shrink:0;
+}
+
+
+/* =====================================================
+   ╔═══════════════════════════════════════════════╗
+   ║   EDITORIAL REDESIGN LAYER (design-neu)         ║
+   ║   Ueberschreibt die Basis-Optik. Haarlinien &   ║
+   ║   Weissraum statt Schatten, serifige Schrift     ║
+   ║   fuer Titel & Kennzahlen, Bordeaux als praezise ║
+   ║   Akzentfarbe. Hell/Dunkel ueber Theme-Tokens.   ║
+   ╚═══════════════════════════════════════════════╝
+===================================================== */
+
+/* ---- Grundschrift & Typo-Hierarchie ---- */
+body{
+    font-family:var(--font-sans);
+    font-size:14px;
+    line-height:1.55;
+    letter-spacing:-0.002em;
+    font-feature-settings:" cv11" 1;
+}
+
+h1,h2,
+.dashboard-kopf h2,
+.modal h2{
+    font-family:var(--font-serif);
+    font-weight:460;
+    letter-spacing:-0.012em;
+    color:var(--c-text);
+}
+h2{ font-size:26px; line-height:1.15; }
+.modal h2{ font-size:23px; }
+
+/* Kleine Abschnitts-Labels: KEIN All-Caps mehr (ruhiger, editorial) */
+h3{
+    font-family:var(--font-sans);
+    text-transform:none;
+    letter-spacing:0;
+    font-weight:560;
+    font-size:12.5px;
+    color:var(--c-text-muted);
+}
+
+label{
+    font-family:var(--font-sans);
+    font-weight:540;
+    letter-spacing:0;
+    color:var(--c-text-muted);
+}
+
+::selection{ background:var(--c-primary-soft); color:var(--c-text); }
+
+/* =====================================================
+   MASTHEAD (statt dunkler Navbar)
+===================================================== */
+.navbar{
+    background:var(--c-surface);
+    border-bottom:1px solid var(--c-border);
+    box-shadow:none;
+    padding:0 26px;
+    min-height:60px;
+    gap:18px;
+    position:sticky;
+    top:0;
+    justify-content:flex-start;
+    /* feine Bordeaux-Kante oben als Marken-Signatur */
+    border-top:2px solid var(--c-primary);
+}
+
+.navbar-brand{
+    font-family:var(--font-serif);
+    font-size:19px;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    color:var(--c-text);
+    opacity:1;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:11px 0;
+}
+
+.navbar-links{ gap:2px; }
+
+.nav-button{
+    border:none;
+    background:transparent;
+    color:var(--c-text-muted);
+    border-radius:0;
+    padding:19px 12px 17px;
+    margin:0 2px;
+    font-family:var(--font-sans);
+    font-size:13.5px;
+    font-weight:520;
+    letter-spacing:-0.002em;
+    border-bottom:2px solid transparent;
+    transition:color 0.15s ease, border-color 0.15s ease;
+}
+.nav-button:hover{
+    background:transparent;
+    color:var(--c-text);
+    border-bottom-color:var(--c-border-stark);
+}
+.nav-button-aktiv,
+.nav-button-aktiv:hover{
+    background:transparent;
+    color:var(--c-primary-text);
+    border-bottom-color:var(--c-primary);
+}
+
+/* Nav-Icons: im Hellmodus native Bordeaux-Striche zeigen */
+.nav-icon{
+    width:16px; height:16px;
+    filter:none;
+    opacity:0.55;
+}
+.nav-button:hover .nav-icon{ opacity:0.8; }
+.nav-button-aktiv .nav-icon{ opacity:1; }
+:root[data-theme="dark"] .nav-icon{ filter:brightness(0) invert(0.92); }
+@media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .nav-icon{ filter:brightness(0) invert(0.92); }
+}
+
+/* Status- & Design-Symbole neben dem Wortzeichen */
+.crm-status-symbol{ font-size:13px; }
+.design-icon{ font-size:14px; opacity:0.6; }
+.design-icon:hover{ opacity:1; }
+
+/* Theme-Umschalter (neu) */
+.theme-toggle{
+    border:1px solid var(--c-border-stark);
+    background:var(--c-surface);
+    color:var(--c-text-muted);
+    width:34px; height:34px;
+    border-radius:999px;
+    cursor:pointer;
+    font-size:15px;
+    line-height:1;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    flex-shrink:0;
+}
+.theme-toggle:hover{
+    color:var(--c-text);
+    border-color:var(--c-text-schwach);
+    background:var(--c-surface-muted);
+}
+.navbar-rechts{
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    margin-left:auto;
+}
+
+/* =====================================================
+   CONTENT-RHYTHMUS
+===================================================== */
+.content{ padding:30px 26px 60px; }
+
+.dashboard-kopf{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:16px;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--c-border);
+}
+.dashboard-kopf h2{ font-size:28px; }
+
+.speicher-status{
+    font-family:var(--font-sans);
+    font-size:12px;
+    color:var(--c-text-schwach);
+    letter-spacing:0;
+}
+
+/* =====================================================
+   DASHBOARD — Kennzahlen als editorialer Satz
+===================================================== */
+.dashboard-grid{ gap:0; border:1px solid var(--c-border); border-radius:var(--radius-m);
+    overflow:hidden; background:var(--c-surface); }
+.dashboard-card{
+    background:transparent;
+    border:none;
+    border-right:1px solid var(--c-border);
+    border-radius:0;
+    box-shadow:none;
+    padding:22px 22px 20px;
+    min-height:112px;
+    gap:14px;
+}
+.dashboard-grid > .dashboard-card:last-child{ border-right:none; }
+.dashboard-card h3{
+    font-size:12.5px;
+    font-weight:520;
+    color:var(--c-text-muted);
+    margin-bottom:0;
+    line-height:1.3;
+    max-width:22ch;
+}
+.dashboard-value{
+    font-family:var(--font-serif);
+    font-size:42px;
+    font-weight:420;
+    color:var(--c-primary-text);
+    letter-spacing:-0.015em;
+    line-height:0.95;
+    font-variant-numeric:tabular-nums;
+}
+.dashboard-card-link{ cursor:pointer; transition:background 0.15s ease; }
+.dashboard-card-link:hover{ background:var(--c-surface-muted); }
+
+/* Auf schmalen Viewports wieder einzelne Karten statt Band */
+@media (max-width:860px){
+    .dashboard-grid{ border:none; border-radius:0; display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1px;
+        background:var(--c-border); }
+    .dashboard-card{ border-right:none; background:var(--c-surface); }
+}
+
+/* Abschluss-Kacheln (eigene Grid-Variante) behalten Karten-Look */
+.dashboard-grid-abschluesse{
+    border:none; background:transparent; gap:10px; overflow:visible;
+    border-radius:0;
+}
+.dashboard-grid-abschluesse .dashboard-card{
+    border:1px solid var(--c-border); border-radius:var(--radius-m);
+    background:var(--c-surface);
+}
+.dashboard-grid-abschluesse .dashboard-card h3{ text-transform:none; letter-spacing:0; }
+.dashboard-grid-abschluesse .dashboard-value{ font-size:26px; }
+
+/* =====================================================
+   PANELS / KARTEN (Kunden, Details, generische Flaechen)
+===================================================== */
+.kunden-sidebar,
+.kunden-details,
+.modal,
+.prod-container{
+    box-shadow:none;
+}
+.kunden-sidebar{ border-radius:var(--radius-m); background:var(--c-surface); }
+.kunden-details{ border-radius:var(--radius-m); background:var(--c-surface); }
+.kunden-sidebar h2{ font-size:22px; }
+
+.kundenkarte{
+    border-radius:var(--radius-s);
+    border-color:var(--c-border);
+    transition:border-color 0.12s ease, background 0.12s ease;
+}
+.kundenkarte:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-primary);
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+.crm-button{
+    font-family:var(--font-sans);
+    font-weight:540;
+    letter-spacing:-0.002em;
+    border:1px solid var(--c-border-stark);
+    background:var(--c-surface);
+    color:var(--c-text);
+    border-radius:var(--radius-s);
+    box-shadow:none;
+    transition:background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+.crm-button:hover{
+    background:var(--c-surface-muted);
+    border-color:var(--c-text-schwach);
+}
+.crm-button-primary{
+    background:var(--c-primary);
+    border-color:var(--c-primary);
+    color:var(--c-on-primary);
+}
+.crm-button-primary:hover{
+    background:var(--c-primary-dunkel);
+    border-color:var(--c-primary-dunkel);
+    color:var(--c-on-primary);
+}
+
+/* =====================================================
+   FORMULARE
+===================================================== */
+.crm-input,
+select.crm-input,
+input.crm-input,
+.crm-textarea{
+    font-family:var(--font-sans);
+    background:var(--c-surface);
+    border:1px solid var(--c-border-stark);
+    color:var(--c-text);
+    border-radius:var(--radius-s);
+}
+.crm-input::placeholder,
+.crm-textarea::placeholder{ color:var(--c-text-schwach); }
+.crm-input:focus,
+.crm-textarea:focus{
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 3px var(--c-primary-soft);
+}
+
+/* =====================================================
+   MODALS
+===================================================== */
+.modal-overlay{
+    background:color-mix(in srgb, var(--c-text) 38%, transparent);
+    backdrop-filter:blur(3px);
+}
+.modal{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-l);
+    box-shadow:var(--schatten-modal);
+    background:var(--c-surface);
+}
+.modal-buttons{ border-top:1px solid var(--c-border); }
+
+/* =====================================================
+   TAGS / CHIPS
+===================================================== */
+.tag{
+    font-family:var(--font-sans);
+    background:var(--c-surface-muted);
+    border:1px solid var(--c-border);
+    color:var(--c-text-muted);
+    border-radius:999px;
+    font-weight:520;
+}
+
+/* =====================================================
+   KLAPP-PANELS (details/summary)
+===================================================== */
+details.klapp-panel{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-m);
+    background:var(--c-surface);
+    box-shadow:none;
+}
+details.klapp-panel > summary{
+    font-family:var(--font-sans);
+    font-weight:560;
+    color:var(--c-text);
+}
+
+/* =====================================================
+   FOKUS-SICHTBARKEIT (Tastatur) & ruhige Scrollbalken
+===================================================== */
+:focus-visible{
+    outline:2px solid var(--c-primary);
+    outline-offset:2px;
+    border-radius:3px;
+}
+.nav-button:focus-visible{ outline-offset:-4px; }
+*{ scrollbar-color:var(--c-border-stark) transparent; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{
+    background:var(--c-border-stark);
+    border-radius:999px;
+    border:3px solid var(--c-bg);
+}
+::-webkit-scrollbar-thumb:hover{ background:var(--c-text-schwach); }
+
+/* =====================================================
+   BEWEGUNG — zurueckhaltend, respektiert Nutzerwunsch
+===================================================== */
+.tab-active{ animation:editorial-ein 0.22s ease both; }
+@keyframes editorial-ein{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+        animation-duration:0.001ms !important;
+        transition-duration:0.001ms !important;
+    }
+}
