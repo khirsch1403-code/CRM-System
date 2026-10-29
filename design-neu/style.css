@@ -4675,3 +4675,107 @@ details.klapp-panel > summary{
         transition-duration:0.001ms !important;
     }
 }
+
+
+/* =====================================================
+   ╔═══════════════════════════════════════════════╗
+   ║   PREMIUM MOTION LAYER (design-neu)             ║
+   ║   Fliessende Tab-Uebergaenge, ruhiger Auftritt  ║
+   ║   beim Laden, taktile Mikro-Interaktionen und   ║
+   ║   weicher Theme-Wechsel. Eine orchestrierte      ║
+   ║   Bewegung je Moment – nichts flackert.          ║
+   ╚═══════════════════════════════════════════════╝
+===================================================== */
+
+:root{
+    --ease-premium:cubic-bezier(0.22,0.61,0.36,1);
+    --ease-soft:cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ---- Tab-Wechsel: Aus- und Einblenden statt Sprung ---- */
+@keyframes tab-ein{
+    from{ opacity:0; transform:translateY(12px) scale(0.994); }
+    to{   opacity:1; transform:none; }
+}
+@keyframes tab-raus{
+    from{ opacity:1; transform:none; }
+    to{   opacity:0; transform:translateY(-6px) scale(0.997); }
+}
+.tab-active{
+    animation:tab-ein 0.44s var(--ease-premium) both;
+    will-change:opacity, transform;
+}
+.tab-content.tab-raus{
+    display:block;
+    animation:tab-raus 0.14s var(--ease-soft) both;
+    pointer-events:none;
+}
+
+/* ---- Ruhiger Auftritt beim Laden (ein Moment) ---- */
+@keyframes masthead-ein{
+    from{ opacity:0; transform:translateY(-10px); }
+    to{   opacity:1; transform:none; }
+}
+.navbar{ animation:masthead-ein 0.5s var(--ease-premium) both; }
+
+/* ---- Taktile Mikro-Interaktionen ---- */
+.kundenkarte{
+    transition:border-color 0.16s var(--ease-soft),
+               background 0.16s var(--ease-soft),
+               transform 0.16s var(--ease-premium);
+}
+.kundenkarte:hover{ transform:translateY(-1px); }
+.kundenkarte:active{ transform:translateY(0); }
+
+.crm-button{
+    transition:background 0.16s var(--ease-soft),
+               border-color 0.16s var(--ease-soft),
+               color 0.16s var(--ease-soft),
+               transform 0.14s var(--ease-premium),
+               box-shadow 0.18s var(--ease-soft);
+}
+.crm-button-primary:hover{
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px -8px color-mix(in srgb, var(--c-primary) 70%, transparent);
+}
+.crm-button-primary:active{ transform:translateY(0); box-shadow:none; }
+
+.nav-button{ transition:color 0.18s var(--ease-soft),
+                        border-color 0.18s var(--ease-soft); }
+
+.dashboard-card-link{
+    transition:background 0.2s var(--ease-soft);
+}
+
+.theme-toggle{
+    transition:border-color 0.18s var(--ease-soft),
+               color 0.18s var(--ease-soft),
+               background 0.18s var(--ease-soft),
+               transform 0.4s var(--ease-premium);
+}
+.theme-toggle:active{ transform:rotate(-30deg) scale(0.92); }
+
+details.klapp-panel > summary{
+    transition:color 0.15s var(--ease-soft), background 0.15s var(--ease-soft);
+}
+
+/* ---- Weicher Theme-Wechsel (nur waehrend des Umschaltens) ---- */
+.theme-wechsel,
+.theme-wechsel *{
+    transition:background-color 0.45s var(--ease-soft),
+               color 0.45s var(--ease-soft),
+               border-color 0.45s var(--ease-soft),
+               fill 0.45s var(--ease-soft) !important;
+}
+
+/* ---- Bewegung respektiert Nutzerwunsch ---- */
+@media (prefers-reduced-motion: reduce){
+    .tab-active,
+    .tab-content.tab-raus,
+    .navbar{ animation:none !important; }
+    .kundenkarte:hover,
+    .crm-button-primary:hover,
+    .theme-toggle:active{ transform:none !important; }
+    .theme-wechsel,
+    .theme-wechsel *{ transition:none !important; }
+}

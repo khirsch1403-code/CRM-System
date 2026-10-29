@@ -225,6 +225,17 @@ function themeAnwenden(theme){
 }
 
 function themeUmschalten(){
+    /* Weicher Farbuebergang: Transitions nur waehrend des Wechsels
+       aktivieren, danach wieder entfernen (kein Nachziehen im Betrieb). */
+    const root = document.documentElement;
+    const reduce = window.matchMedia
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(!reduce){
+        root.classList.add("theme-wechsel");
+        clearTimeout(themeUmschalten._t);
+        themeUmschalten._t = setTimeout(
+            () => root.classList.remove("theme-wechsel"), 520);
+    }
     themeAnwenden(themeAktuell() === "dark" ? "light" : "dark");
 }
 
@@ -343,3 +354,51 @@ function designPresetLeisteRendern(){
     });
     host.innerHTML = stuecke.join("");
 }
+
+/* =====================================================
+   FLIESSENDER TAB-WECHSEL (design-neu)
+   -----------------------------------------------------
+   Umhuellt die globale showTab(): zuerst sanftes
+   Ausblenden der aktuellen Ansicht, dann der eigentliche
+   Wechsel (inkl. aller Seiteneffekte der Original-
+   Funktion), danach das elegante Einblenden per CSS.
+   design.js wird als letztes Script geladen, daher
+   gewinnt diese Definition. Schnelle Klicks und der
+   Wunsch nach reduzierter Bewegung werden beruecksichtigt.
+===================================================== */
+(function(){
+    if(typeof window.showTab !== "function"){ return; }
+
+    const _origShowTab = window.showTab;
+    let _tabToken = 0;
+
+    window.showTab = function(tabId){
+        const ziel    = document.getElementById(tabId);
+        const aktuell = document.querySelector(".tab-content.tab-active");
+        const reduce  = window.matchMedia
+            && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* Haengengebliebene Ausblend-Zustaende immer zuerst loesen */
+        document.querySelectorAll(".tab-raus")
+            .forEach(t => t.classList.remove("tab-raus"));
+
+        /* Navigation sofort umschalten — fuehlt sich reaktiv an */
+        document.querySelectorAll(".nav-button").forEach(function(b){
+            b.classList.toggle("nav-button-aktiv", b.dataset.tab === tabId);
+        });
+
+        /* Kein Uebergang noetig: direkt schalten */
+        if(!ziel || !aktuell || aktuell === ziel || reduce){
+            return _origShowTab(tabId);
+        }
+
+        const token = ++_tabToken;
+        aktuell.classList.add("tab-raus");
+
+        window.setTimeout(function(){
+            if(token !== _tabToken){ return; }   /* neuerer Wechsel gewinnt */
+            aktuell.classList.remove("tab-raus");
+            _origShowTab(tabId);  /* Swap + Seiteneffekte; loest Einblenden aus */
+        }, 140);
+    };
+})();
