@@ -243,7 +243,10 @@ function themeIconAktualisieren(theme){
     const btn = document.getElementById("themeToggle");
     if(!btn){ return; }
     const dunkel = theme === "dark";
-    btn.textContent = dunkel ? "☀" : "🌙";
+    /* Hochwertige SVG-Icons (Sonne/Mond) statt Emoji */
+    btn.innerHTML = dunkel
+        ? '<span class="ico ico-sun"></span>'
+        : '<span class="ico ico-moon"></span>';
     btn.title = dunkel ? "Zum Hellmodus wechseln" : "Zum Dunkelmodus wechseln";
 }
 
