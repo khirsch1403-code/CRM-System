@@ -20,7 +20,17 @@ const ZERT_LS_BERATER_STRASSE  = "crmZertBeraterStrasse";
 const ZERT_LS_BERATER_PLZORT   = "crmZertBeraterPlzOrt";
 const ZERT_LS_BERATER_TEL      = "crmZertBeraterTel";
 const ZERT_LS_BERATER_EMAIL    = "crmZertBeraterEmail";
+/* Zusaetzliche Kontaktangaben — nur fuer Serienbriefe genutzt,
+   aber hier zentral gepflegt (einzige Quelle). */
+const ZERT_LS_BERATER_WEB            = "crmZertBeraterWeb";
+const ZERT_LS_BERATER_OEFFNUNGSZEITEN= "crmZertBeraterOeffnungszeiten";
 const ZERT_LS_LETZTER_BETRAG   = "crmZertLetzterBetrag";
+
+/* Standard-Oeffnungszeiten (Vorbelegung fuer den Serienbrief-Absender) */
+const ZERT_DEFAULT_OEFFNUNGSZEITEN =
+    "Mo–Do  9:00–17:00 Uhr\n"
+  + "Fr  9:00–13:00 Uhr\n"
+  + "weitere Termine nach Vereinbarung";
 
 /* =====================================================
    BERATER-DATEN LADEN/SPEICHERN
@@ -34,7 +44,12 @@ function zertBeraterLaden(){
         strasse:  localStorage.getItem(ZERT_LS_BERATER_STRASSE)  || "",
         plzOrt:   localStorage.getItem(ZERT_LS_BERATER_PLZORT)   || "",
         tel:      localStorage.getItem(ZERT_LS_BERATER_TEL)      || "",
-        email:    localStorage.getItem(ZERT_LS_BERATER_EMAIL)    || ""
+        email:    localStorage.getItem(ZERT_LS_BERATER_EMAIL)    || "",
+        web:      localStorage.getItem(ZERT_LS_BERATER_WEB)      || "",
+        oeffnungszeiten:
+            localStorage.getItem(ZERT_LS_BERATER_OEFFNUNGSZEITEN) !== null
+                ? localStorage.getItem(ZERT_LS_BERATER_OEFFNUNGSZEITEN)
+                : ZERT_DEFAULT_OEFFNUNGSZEITEN
     };
 }
 
@@ -54,7 +69,9 @@ function zertBeraterAlleSpeichern(obj){
         [ZERT_LS_BERATER_STRASSE,  obj.strasse],
         [ZERT_LS_BERATER_PLZORT,   obj.plzOrt],
         [ZERT_LS_BERATER_TEL,      obj.tel],
-        [ZERT_LS_BERATER_EMAIL,    obj.email]
+        [ZERT_LS_BERATER_EMAIL,    obj.email],
+        [ZERT_LS_BERATER_WEB,      obj.web],
+        [ZERT_LS_BERATER_OEFFNUNGSZEITEN, obj.oeffnungszeiten]
     ];
     map.forEach(([key, wert]) => {
         try{ localStorage.setItem(key, wert == null ? "" : String(wert)); }catch(_){}
@@ -90,7 +107,8 @@ function zertBeraterPanelRendern(){
     container.innerHTML = `
         <div class="zert-berater-hinweis">
             Diese Daten erscheinen auf jedem Finanzierungszertifikat
-            als „Überreicht von Ihrem Berater".
+            als „Überreicht von Ihrem Berater" und dienen zugleich als
+            Absender für Serienbriefe.
             ${ok ? '<span class="sb-ok">✓ ausgefüllt</span>'
                  : '<span class="sb-nok">bitte ausfüllen</span>'}
         </div>
@@ -151,6 +169,19 @@ function zertBeraterPanelRendern(){
                     placeholder="name@firma.de">
             </div>
         </div>
+
+        <label class="sb-feld-label">Website
+            <span class="sb-feld-hinweis">(optional — nur für Serienbriefe)</span></label>
+        <input type="text" class="crm-input"
+            value="${esc(b.web)}"
+            oninput="zertBeraterFeldSpeichern('${ZERT_LS_BERATER_WEB}', this.value)"
+            placeholder="www.firma.de">
+
+        <label class="sb-feld-label">Öffnungszeiten
+            <span class="sb-feld-hinweis">(nur für Serienbriefe)</span></label>
+        <textarea class="crm-textarea sb-oeffnungszeiten"
+            oninput="zertBeraterFeldSpeichern('${ZERT_LS_BERATER_OEFFNUNGSZEITEN}', this.value)"
+            placeholder="Mo–Do  9:00–17:00 Uhr&#10;Fr  9:00–13:00 Uhr">${esc(b.oeffnungszeiten)}</textarea>
     `;
 }
 
@@ -411,6 +442,73 @@ async function _zertifikatErstellenImpl(kunde){
         // mit dem Mail-Programm kollidiert.
         setTimeout(() => { window.location.href = mailto; }, 500);
     }
+}
+
+/* =====================================================
+   MIGRATION — fruehere Serienbrief-Absenderdaten uebernehmen
+   -----------------------------------------------------
+   Frueher pflegte der Serienbrief seine Firma/Kontakt-Daten
+   doppelt in eigenen localStorage-Keys. Jetzt sind die
+   Berater-Daten die einzige Quelle. Diese Migration kopiert
+   vorhandene Serienbrief-Werte einmalig in leere Berater-
+   Felder und entfernt danach die alten, ungenutzten Keys.
+===================================================== */
+
+function zertBeraterMigriereAusSerienbrief(){
+    try{
+        if(localStorage.getItem("crmBeraterSbMigriert") === "1"){ return; }
+
+        const paare = [
+            [ZERT_LS_BERATER_FIRMA,            "crmSerienbriefFirmaName"],
+            [ZERT_LS_BERATER_STRASSE,          "crmSerienbriefFirmaStrasse"],
+            [ZERT_LS_BERATER_PLZORT,           "crmSerienbriefFirmaPlzOrt"],
+            [ZERT_LS_BERATER_NAME,             "crmSerienbriefKontaktName"],
+            [ZERT_LS_BERATER_FUNKTION,         "crmSerienbriefKontaktFunktion"],
+            [ZERT_LS_BERATER_TEL,              "crmSerienbriefKontaktTel"],
+            [ZERT_LS_BERATER_EMAIL,            "crmSerienbriefKontaktEmail"],
+            [ZERT_LS_BERATER_WEB,              "crmSerienbriefKontaktWeb"],
+            [ZERT_LS_BERATER_OEFFNUNGSZEITEN,  "crmSerienbriefOeffnungszeiten"]
+        ];
+
+        // Nur fuellen, wo das Berater-Feld noch leer ist — vorhandene
+        // Berater-Daten haben Vorrang.
+        paare.forEach(([zielKey, altKey]) => {
+            const alt  = localStorage.getItem(altKey);
+            const ziel = localStorage.getItem(zielKey);
+            if(alt != null && alt !== "" && (ziel == null || ziel === "")){
+                try{ localStorage.setItem(zielKey, alt); }catch(_){}
+            }
+        });
+
+        // Alte, nun ungenutzte Serienbrief-Absender-Keys entfernen
+        [ "crmSerienbriefFirmaName", "crmSerienbriefFirmaStrasse",
+          "crmSerienbriefFirmaPlzOrt", "crmSerienbriefKontaktName",
+          "crmSerienbriefKontaktFunktion", "crmSerienbriefKontaktTel",
+          "crmSerienbriefKontaktEmail", "crmSerienbriefKontaktWeb",
+          "crmSerienbriefOeffnungszeiten"
+        ].forEach(k => { try{ localStorage.removeItem(k); }catch(_){} });
+
+        localStorage.setItem("crmBeraterSbMigriert", "1");
+    }catch(_){}
+}
+
+/* Sofort beim Laden des Scripts — vor jedem Panel-Render */
+zertBeraterMigriereAusSerienbrief();
+
+/* Dashboard anspringen und das Berater-Klappfeld aufklappen
+   (vom Serienbrief-Panel aus verlinkt). */
+function beraterDatenOeffnen(){
+    if(typeof showTab === "function"){ showTab("dashboard"); }
+    const panel = document.getElementById("zertBeraterPanel");
+    if(!panel){ return; }
+    let el = panel.closest("details");
+    while(el){
+        el.open = true;
+        el = el.parentElement ? el.parentElement.closest("details") : null;
+    }
+    setTimeout(() => {
+        try{ panel.scrollIntoView({ behavior:"smooth", block:"center" }); }catch(_){}
+    }, 80);
 }
 
 /* =====================================================

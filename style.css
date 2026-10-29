@@ -4790,3 +4790,30 @@ details.klapp-panel > summary{
     .theme-wechsel,
     .theme-wechsel *{ transition:none !important; }
 }
+
+
+/* =====================================================
+   SERIENBRIEF — Absender-Vorschau (aus Berater-Daten)
+===================================================== */
+.sb-absender-vorschau{
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-s);
+    background:var(--c-surface-muted);
+    padding:12px 14px;
+    margin:4px 0 12px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+.sb-absender-zeile{
+    font-size:13.5px;
+    color:var(--c-text);
+}
+.sb-absender-zeile.sb-absender-dezent{
+    color:var(--c-text-muted);
+    font-size:12.5px;
+}
+.sb-absender-fehlt{
+    margin-top:4px;
+    font-size:12.5px;
+}

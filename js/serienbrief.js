@@ -7,26 +7,17 @@
    im Brief auftauchen (Ruecksenderzeile, Absender-Block,
    Signatur, Rueckantwort-Adresse).
 
-   Persistierung (localStorage):
-     - Firma: Name, Straße, PLZ+Ort
-     - Kontakt: Ansprechpartner, Funktion, Tel/WhatsApp,
-       E-Mail, Website
-     - Öffnungszeiten (mehrzeilig)
+   Absenderdaten (Firma, Ansprechpartner, Website,
+   Öffnungszeiten) stammen zentral aus den Berater-Daten
+   (zertifikat.js) — hier NICHT mehr doppelt gepflegt.
+
+   Persistierung (localStorage), nur serienbrief-spezifisch:
      - Rückmelde-Frist (Tage)
      - Rückantwort-Teil ein/aus
      - Betreff, Brieftext, Schriftgröße
      - Haushalts-Overrides (getrennt anschreiben)
 ===================================================== */
 
-const SB_LS_FIRMA_NAME      = "crmSerienbriefFirmaName";
-const SB_LS_FIRMA_STRASSE   = "crmSerienbriefFirmaStrasse";
-const SB_LS_FIRMA_PLZORT    = "crmSerienbriefFirmaPlzOrt";
-const SB_LS_KONTAKT_NAME    = "crmSerienbriefKontaktName";
-const SB_LS_KONTAKT_FUNKTION= "crmSerienbriefKontaktFunktion";
-const SB_LS_KONTAKT_TEL     = "crmSerienbriefKontaktTel";
-const SB_LS_KONTAKT_EMAIL   = "crmSerienbriefKontaktEmail";
-const SB_LS_KONTAKT_WEB     = "crmSerienbriefKontaktWeb";
-const SB_LS_OEFFNUNGSZEITEN = "crmSerienbriefOeffnungszeiten";
 const SB_LS_FRIST_TAGE      = "crmSerienbriefFristTage";
 const SB_LS_RUECKANTWORT    = "crmSerienbriefRueckantwort";
 const SB_LS_TEXT            = "crmSerienbriefText";
@@ -37,11 +28,6 @@ const SB_LS_GETRENNT        = "crmSerienbriefGetrennt";
 const SB_SCHRIFTGROESSEN = [9, 10, 11, 12, 13, 14];
 const SB_DEFAULT_SCHRIFT = 11;
 const SB_DEFAULT_FRIST_TAGE = 21;
-
-const SB_DEFAULT_OEFFNUNGSZEITEN =
-    "Mo–Do  9:00–17:00 Uhr\n"
-  + "Fr  9:00–13:00 Uhr\n"
-  + "weitere Termine nach Vereinbarung";
 
 const SB_DEFAULT_BETREFF =
     "Wichtige Unterlagen zu Ihrem Vertrag – bitte kurz bei uns melden";
@@ -73,23 +59,23 @@ const SB_DEFAULT_TEXT =
 ===================================================== */
 
 function sbFirmenDatenLaden(){
+    /* Absenderdaten kommen aus den Berater-Daten (einzige Quelle). */
+    const b = (typeof zertBeraterLaden === "function")
+        ? zertBeraterLaden() : {};
     return {
         firma: {
-            name:    localStorage.getItem(SB_LS_FIRMA_NAME) || "",
-            strasse: localStorage.getItem(SB_LS_FIRMA_STRASSE) || "",
-            plzOrt:  localStorage.getItem(SB_LS_FIRMA_PLZORT) || ""
+            name:    b.firma   || "",
+            strasse: b.strasse || "",
+            plzOrt:  b.plzOrt  || ""
         },
         kontakt: {
-            name:     localStorage.getItem(SB_LS_KONTAKT_NAME) || "",
-            funktion: localStorage.getItem(SB_LS_KONTAKT_FUNKTION) || "",
-            tel:      localStorage.getItem(SB_LS_KONTAKT_TEL) || "",
-            email:    localStorage.getItem(SB_LS_KONTAKT_EMAIL) || "",
-            web:      localStorage.getItem(SB_LS_KONTAKT_WEB) || ""
+            name:     b.name     || "",
+            funktion: b.funktion || "",
+            tel:      b.tel      || "",
+            email:    b.email    || "",
+            web:      b.web      || ""
         },
-        oeffnungszeiten:
-            localStorage.getItem(SB_LS_OEFFNUNGSZEITEN) !== null
-                ? localStorage.getItem(SB_LS_OEFFNUNGSZEITEN)
-                : SB_DEFAULT_OEFFNUNGSZEITEN,
+        oeffnungszeiten: b.oeffnungszeiten || "",
         fristTage: (function(){
             const n = parseInt(localStorage.getItem(SB_LS_FRIST_TAGE), 10);
             return (isNaN(n) || n < 1) ? SB_DEFAULT_FRIST_TAGE : n;
@@ -432,81 +418,46 @@ function serienbriefPanelRendern(){
             </details>
         ` : ""}
 
-        <!-- BLOCK 1: Firma & Kontakt (einmalig, persistent) -->
+        <!-- BLOCK 1: Absender — nur Anzeige, Quelle sind die Berater-Daten -->
         <details class="sb-block" ${basisVollstaendig ? "" : "open"}>
             <summary>
-                <span class="ico ico-building"></span> Firma & Kontakt  ${basisVollstaendig
-                    ? '<span class="sb-ok">✓ ausgefüllt</span>'
-                    : '<span class="sb-nok">bitte ausfüllen</span>'}
+                <span class="ico ico-building"></span> Absender (aus Berater-Daten)  ${basisVollstaendig
+                    ? '<span class="sb-ok">✓ vollständig</span>'
+                    : '<span class="sb-nok">unvollständig</span>'}
             </summary>
             <div class="sb-block-inhalt">
-                <label class="sb-feld-label">Firmenname</label>
-                <input type="text" class="crm-input"
-                    value="${esc(fd.firma.name)}"
-                    oninput="sbFeldGespeichert('${SB_LS_FIRMA_NAME}', this.value); sbBlockHeaderAktualisieren()"
-                    placeholder="z. B. Wüstenrot Service-Center">
-
-                <div class="sb-zwei-spalten">
-                    <div>
-                        <label class="sb-feld-label">Firmen-Straße + Nr.</label>
-                        <input type="text" class="crm-input"
-                            value="${esc(fd.firma.strasse)}"
-                            oninput="sbFeldGespeichert('${SB_LS_FIRMA_STRASSE}', this.value)"
-                            placeholder="Musterstraße 1">
-                    </div>
-                    <div>
-                        <label class="sb-feld-label">Firmen-PLZ + Ort</label>
-                        <input type="text" class="crm-input"
-                            value="${esc(fd.firma.plzOrt)}"
-                            oninput="sbFeldGespeichert('${SB_LS_FIRMA_PLZORT}', this.value); sbBlockHeaderAktualisieren()"
-                            placeholder="57072 Siegen">
-                    </div>
+                <p class="sb-feld-hinweis">
+                    Diese Angaben stammen aus den Berater-Daten und werden dort
+                    zentral gepflegt (auch fürs Finanzierungszertifikat).
+                </p>
+                <div class="sb-absender-vorschau">
+                    ${[fd.firma.name, fd.firma.strasse, fd.firma.plzOrt].some(Boolean) ? `
+                        <div class="sb-absender-zeile">
+                            ${esc([fd.firma.name, fd.firma.strasse, fd.firma.plzOrt].filter(Boolean).join(" · "))}
+                        </div>` : ""}
+                    ${[fd.kontakt.name, fd.kontakt.funktion].some(Boolean) ? `
+                        <div class="sb-absender-zeile">
+                            ${esc([fd.kontakt.name, fd.kontakt.funktion].filter(Boolean).join(", "))}
+                        </div>` : ""}
+                    ${[fd.kontakt.tel, fd.kontakt.email, fd.kontakt.web].some(Boolean) ? `
+                        <div class="sb-absender-zeile sb-absender-dezent">
+                            ${esc([fd.kontakt.tel, fd.kontakt.email, fd.kontakt.web].filter(Boolean).join(" · "))}
+                        </div>` : ""}
+                    ${!basisVollstaendig ? `
+                        <div class="sb-nok sb-absender-fehlt">
+                            Noch nötig: ${[
+                                !fd.firma.name    ? "Firmenname" : "",
+                                !fd.firma.plzOrt  ? "Firmen-PLZ+Ort" : "",
+                                !fd.kontakt.name  ? "Ansprechpartner" : "",
+                                !fd.kontakt.tel   ? "Telefon" : "",
+                                !fd.kontakt.email ? "E-Mail" : ""
+                            ].filter(Boolean).join(", ")}
+                        </div>` : ""}
                 </div>
-
-                <div class="sb-zwei-spalten">
-                    <div>
-                        <label class="sb-feld-label">Ansprechpartner (Name)</label>
-                        <input type="text" class="crm-input"
-                            value="${esc(fd.kontakt.name)}"
-                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_NAME}', this.value); sbBlockHeaderAktualisieren()"
-                            placeholder="Vorname Nachname">
-                    </div>
-                    <div>
-                        <label class="sb-feld-label">Funktion</label>
-                        <input type="text" class="crm-input"
-                            value="${esc(fd.kontakt.funktion)}"
-                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_FUNKTION}', this.value)"
-                            placeholder="z. B. Bezirksleiter">
-                    </div>
-                </div>
-
-                <div class="sb-zwei-spalten">
-                    <div>
-                        <label class="sb-feld-label">Telefon / WhatsApp</label>
-                        <input type="text" class="crm-input"
-                            value="${esc(fd.kontakt.tel)}"
-                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_TEL}', this.value); sbBlockHeaderAktualisieren()"
-                            placeholder="0271 / 770280">
-                    </div>
-                    <div>
-                        <label class="sb-feld-label">E-Mail</label>
-                        <input type="text" class="crm-input"
-                            value="${esc(fd.kontakt.email)}"
-                            oninput="sbFeldGespeichert('${SB_LS_KONTAKT_EMAIL}', this.value); sbBlockHeaderAktualisieren()"
-                            placeholder="name@firma.de">
-                    </div>
-                </div>
-
-                <label class="sb-feld-label">Website <span class="sb-feld-hinweis">(optional — wird nur gedruckt wenn ausgefüllt)</span></label>
-                <input type="text" class="crm-input"
-                    value="${esc(fd.kontakt.web)}"
-                    oninput="sbFeldGespeichert('${SB_LS_KONTAKT_WEB}', this.value)"
-                    placeholder="www.firma.de">
-
-                <label class="sb-feld-label">Öffnungszeiten</label>
-                <textarea class="crm-textarea sb-oeffnungszeiten"
-                    oninput="sbFeldGespeichert('${SB_LS_OEFFNUNGSZEITEN}', this.value)"
-                    placeholder="Mo–Do  9:00–17:00 Uhr&#10;Fr  9:00–13:00 Uhr">${esc(fd.oeffnungszeiten)}</textarea>
+                <button class="crm-button crm-button-klein"
+                    onclick="beraterDatenOeffnen()">
+                    Berater-Daten öffnen
+                </button>
             </div>
         </details>
 
@@ -565,7 +516,7 @@ function serienbriefPanelRendern(){
             <button class="crm-button crm-button-primary"
                 onclick="serienbriefErstellen()"
                 ${briefeGesamt === 0 ? "disabled" : ""}
-                title="${!basisVollstaendig ? "Bitte zuerst Firma & Kontakt vollständig ausfüllen" : ""}">
+                title="${!basisVollstaendig ? "Bitte zuerst die Berater-Daten vollständig ausfüllen" : ""}">
                 <span class="ico ico-file-text"></span> ${briefeGesamt} Serienbrief${briefeGesamt === 1 ? "" : "e"} erstellen
             </button>
             <button class="crm-button crm-button-klein"
@@ -584,20 +535,6 @@ function sbFristAnzeigeAktualisieren(tage){
     const el = document.getElementById("sbFristAnzeige");
     if(!el){ return; }
     el.textContent = sbFristDatum(tage);
-}
-
-function sbBlockHeaderAktualisieren(){
-    // Nur den OK/NOK-Status im Block-1-Header refreshen,
-    // ohne das ganze Panel neu zu bauen (sonst verliert
-    // die aktuell editierte Eingabe den Fokus).
-    const fd = sbFirmenDatenLaden();
-    const headers = document.querySelectorAll("#serienbriefPanel .sb-block > summary");
-    if(headers.length === 0){ return; }
-    const h = headers[0];
-    const ok = sbFirmenDatenVollstaendig(fd);
-    h.innerHTML = "<span class='ico ico-building'></span> Firma & Kontakt  " +
-        (ok ? '<span class="sb-ok">✓ ausgefüllt</span>'
-            : '<span class="sb-nok">bitte ausfüllen</span>');
 }
 
 function sbVorlageZuruecksetzen(){
@@ -643,9 +580,9 @@ function _serienbriefErstellenImpl(){
         if(!fd.kontakt.name)  fehlt.push("Ansprechpartner");
         if(!fd.kontakt.tel)   fehlt.push("Telefon/WhatsApp");
         if(!fd.kontakt.email) fehlt.push("E-Mail");
-        alert('Noch nicht ausgefüllt im Block „Firma & Kontakt":\n\n• '
+        alert('Absenderdaten unvollständig (werden aus den Berater-Daten gezogen):\n\n• '
             + fehlt.join("\n• ")
-            + "\n\nBitte den oberen Block ausklappen und ergänzen.");
+            + '\n\nBitte im Dashboard unter „Datensicherung → Berater-Daten" ergänzen.');
         return;
     }
 
