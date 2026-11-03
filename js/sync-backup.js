@@ -1230,6 +1230,11 @@ window.addEventListener("load", async function(){
     }
 
     datenPruefen();
+    // Bestehende Telefon-/E-Mail-Angaben einheitlich normieren
+    // (z. B. +49/0049 → 0, Dopplungen entfernen), auch bei Alt-Daten.
+    if(typeof bereinigeAlleKontaktdaten === "function"){
+        bereinigeAlleKontaktdaten();
+    }
     erledigteAufgabenBereinigen();
     haushalteAktualisieren();
     renderKunden();

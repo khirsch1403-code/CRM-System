@@ -237,17 +237,16 @@ function normalisiereTelefon(input){
     // Nur Ziffern und + behalten (Leerzeichen, /, -, (), … fallen raus)
     let z = s.replace(/[^\d+]/g, "");
     if(!z){ return ""; }
-    // Deutsches Vorwahl-Prefix vereinheitlichen: +49… und 0049… → 0…
+    // Deutsche Vorwahl vereinheitlichen: +49… / 0049… → 0…
+    // Auch die Schreibweisen +49(0)… bzw. 0049 0… (zusaetzliche 0)
+    // werden korrekt auf eine einzelne fuehrende 0 gebracht.
     if(z.indexOf("+49") === 0){
-        z = "0" + z.substring(3);
+        z = "0" + z.substring(3).replace(/^0+/, "");
     }else if(z.indexOf("0049") === 0){
-        z = "0" + z.substring(4);
+        z = "0" + z.substring(4).replace(/^0+/, "");
     }
-    // Zwei fuehrende Nullen bei nationalen Nummern zusammenziehen
-    while(z.length > 2 && z.substring(0,2) === "00" && z[2] !== "0"){
-        // Nicht anfassen — 00 signalisiert internationale Waehlvorwahl
-        break;
-    }
+    // Nummern, die bereits mit 0 beginnen, bleiben unveraendert;
+    // andere internationale Nummern (+33, 0033, …) ebenfalls.
     return z;
 }
 

@@ -921,27 +921,71 @@ function vertragLoeschen(index){
    Kachel — sofort als zusammengehörig erkennbar.
 ===================================================== */
 
-/* Kompakte Faktenzeile eines Vertrags: nur befüllte Felder,
-   in fester Reihenfolge, mit " · " getrennt. */
+/* Deutsche Zahl mit Tausenderpunkten. "." = Tausender-, "," =
+   Dezimaltrenner (deutsche Notation). null, wenn keine Zahl. */
+function _zahlDe(roh){
+    let s = String(roh == null ? "" : roh).trim();
+    if(!s){ return null; }
+    let z = s.replace(/[^\d.,-]/g, "");
+    if(!/\d/.test(z)){ return null; }
+    z = z.replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(z);
+    if(isNaN(n)){ return null; }
+    return new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 }).format(n);
+}
+function fmtBetrag(roh){
+    const f = _zahlDe(roh);
+    return f == null ? String(roh || "").trim() : f + " €";
+}
+function fmtProzent(roh){
+    const f = _zahlDe(roh);
+    return f == null ? String(roh || "").trim() : f + " %";
+}
+
+/* Kopf-Kennzahlen eines Nummer-Clusters: Summe, Saldo,
+   Guthaben % — erster befüllter Wert über alle Produkte. */
+function vertragKopfKennzahlen(items){
+    const ersterWert = (key) => {
+        for(const { v } of items){
+            const w = String(v[key] || "").trim();
+            if(w){ return w; }
+        }
+        return "";
+    };
+    const summe    = ersterWert("bausparsumme");
+    const saldo    = ersterWert("saldo");
+    const guthaben = ersterWert("guthabenProzent");
+    const teile = [];
+    if(summe){    teile.push(`Summe ${esc(fmtBetrag(summe))}`); }
+    if(saldo){    teile.push(`Saldo ${esc(fmtBetrag(saldo))}`); }
+    if(guthaben){ teile.push(`Guthaben ${esc(fmtProzent(guthaben))}`); }
+    return teile.join("  ·  ");
+}
+
+function vertragZuteilung(items){
+    for(const { v } of items){
+        const z = String(v.zuteilungsdatum || "").trim();
+        if(z){ return z; }
+    }
+    return "";
+}
+
+/* Fakten je Produkt — OHNE die Kopf-Felder (Summe/Saldo/
+   Guthaben/Zuteilung), die oben in der Kachel stehen. */
 function vertragFaktenText(v){
-    const g = String(v.guthabenProzent || "").trim();
-    const guthaben = g ? (g.indexOf("%") !== -1 ? g : g + " %") : "";
-    const paare = [
-        ["Summe",      v.bausparsumme],
-        ["Darlehen",   v.darlehenssumme],
-        ["ZK-Summe",   v.zkSumme],
-        ["Saldo",      v.saldo],
-        ["ZK-Saldo",   v.zkSaldo],
-        ["Restschuld", v.restschuld],
-        ["Guthaben",   guthaben],
-        ["Zins bis",   v.zinsBis],
-        ["Zuteilung",  v.zuteilungsdatum],
-        ["Abschluss",  v.abschluss],
-        ["Beginn",     v.beginn]
+    const felder = [
+        ["Darlehen",   v.darlehenssumme, true],
+        ["Restschuld", v.restschuld,     true],
+        ["ZK-Summe",   v.zkSumme,        true],
+        ["ZK-Saldo",   v.zkSaldo,        true],
+        ["Zins bis",   v.zinsBis,        false],
+        ["Abschluss",  v.abschluss,      false],
+        ["Beginn",     v.beginn,         false]
     ];
-    return paare
+    return felder
         .filter(([, w]) => w && String(w).trim())
-        .map(([l, w]) => `${l} ${esc(String(w).trim())}`)
+        .map(([l, w, betrag]) =>
+            `${l} ${betrag ? esc(fmtBetrag(w)) : esc(String(w).trim())}`)
         .join("  ·  ");
 }
 
@@ -962,16 +1006,9 @@ function vertraegeKachelHtml(vertraege){
     });
 
     return gruppen.map(gr => {
-        const mehrere = gr.items.length > 1;
-        const produkte = gr.items
-            .map(({ v }) => String(v.produkt || "").trim())
-            .filter(Boolean);
-        const zusammen = mehrere
-            ? `<span class="vk-zusammen"
-                     title="Gehören zusammen — gleiche Vertragsnummer">${
-                produkte.length ? esc(produkte.join(" + ")) : (gr.items.length + " Produkte")
-              } · gehören zusammen</span>`
-            : "";
+        const kennzahlen = vertragKopfKennzahlen(gr.items);
+        const zuteilung  = vertragZuteilung(gr.items);
+        const nr         = gr.nummer || "";
 
         const produktZeilen = gr.items.map(({ v, i }) => {
             const fakten = vertragFaktenText(v);
@@ -988,12 +1025,67 @@ function vertraegeKachelHtml(vertraege){
 
         return `<div class="vk-kachel">
             <div class="vk-kachel-kopf">
-                <span class="vk-nr"><span class="lbl">Vertrag</span>${esc(gr.nummer || "—")}</span>
-                ${zusammen}
+                <div class="vk-kopf-links">
+                    <span class="vk-nr">${esc(nr || "—")}</span>
+                    ${zuteilung
+                        ? `<div class="vk-zuteilung">Zuteilung ${esc(zuteilung)}</div>`
+                        : ""}
+                </div>
+                <button class="vk-copy" type="button"
+                    data-nr="${esc(nr)}"
+                    onclick="nummerKopieren(this.dataset.nr, this)"
+                    title="Vertragsnummer kopieren"
+                    aria-label="Vertragsnummer kopieren">
+                    <span class="ico ico-copy"></span>
+                </button>
+                <div class="vk-kopf-kennzahlen">${kennzahlen}</div>
             </div>
             ${produktZeilen}
         </div>`;
     }).join("");
+}
+
+/* Vertragsnummer in die Zwischenablage kopieren (Fallback +
+   kurze visuelle Rückmeldung). */
+function nummerKopieren(nummer, btn){
+    const txt = String(nummer || "");
+    const rueckmeldung = () => {
+        if(!btn){ return; }
+        const alt = btn.innerHTML;
+        btn.innerHTML = '<span class="vk-copy-ok">✓</span>';
+        btn.classList.add("vk-copy-aktiv");
+        setTimeout(() => {
+            btn.innerHTML = alt;
+            btn.classList.remove("vk-copy-aktiv");
+        }, 1100);
+    };
+    try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(txt)
+                .then(rueckmeldung)
+                .catch(() => { _kopierFallback(txt); rueckmeldung(); });
+        }else{
+            _kopierFallback(txt);
+            rueckmeldung();
+        }
+    }catch(_){
+        _kopierFallback(txt);
+        rueckmeldung();
+    }
+}
+
+function _kopierFallback(txt){
+    try{
+        const ta = document.createElement("textarea");
+        ta.value = txt;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+    }catch(_){}
 }
 
 function renderKennzChips(k){
