@@ -921,15 +921,48 @@ function vertragLoeschen(index){
    Kachel — sofort als zusammengehörig erkennbar.
 ===================================================== */
 
-/* Deutsche Zahl mit Tausenderpunkten. "." = Tausender-, "," =
-   Dezimaltrenner (deutsche Notation). null, wenn keine Zahl. */
+/* Zahl robust parsen und mit deutschen Tausenderpunkten ausgeben.
+   Erkennt den Dezimaltrenner, egal ob die Quelle deutsche (84.000,00)
+   oder Punkt-Notation (84000.00) liefert:
+   - Punkt UND Komma vorhanden -> das zuletzt stehende ist der Dezimal-
+     trenner, das andere trennt Tausender.
+   - nur Komma / nur Punkt -> ein einzelnes Vorkommen mit 1–2 Nachkomma-
+     stellen ist der Dezimaltrenner; alles andere trennt Tausender.
+   null, wenn keine Zahl erkennbar. */
 function _zahlDe(roh){
     let s = String(roh == null ? "" : roh).trim();
     if(!s){ return null; }
     let z = s.replace(/[^\d.,-]/g, "");
     if(!/\d/.test(z)){ return null; }
-    z = z.replace(/\./g, "").replace(",", ".");
-    const n = parseFloat(z);
+
+    const vorzeichen = z.indexOf("-") === 0 ? "-" : "";
+    z = z.replace(/-/g, "");
+
+    const hatPunkt = z.indexOf(".") !== -1;
+    const hatKomma = z.indexOf(",") !== -1;
+    let num;
+
+    if(hatPunkt && hatKomma){
+        if(z.lastIndexOf(",") > z.lastIndexOf(".")){
+            num = z.replace(/\./g, "").replace(",", ".");   // Komma = Dezimal
+        }else{
+            num = z.replace(/,/g, "");                      // Punkt = Dezimal
+        }
+    }else if(hatKomma){
+        const t = z.split(",");
+        num = (t.length === 2 && t[1].length >= 1 && t[1].length <= 2)
+            ? z.replace(",", ".")      // Dezimalkomma
+            : z.replace(/,/g, "");     // Tausenderkommas
+    }else if(hatPunkt){
+        const t = z.split(".");
+        num = (t.length === 2 && t[1].length >= 1 && t[1].length <= 2)
+            ? z                        // Dezimalpunkt
+            : z.replace(/\./g, "");    // Tausenderpunkte
+    }else{
+        num = z;
+    }
+
+    const n = parseFloat(vorzeichen + num);
     if(isNaN(n)){ return null; }
     return new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 }).format(n);
 }
