@@ -1026,18 +1026,20 @@ function vertraegeKachelHtml(vertraege){
         return `<div class="vk-kachel">
             <div class="vk-kachel-kopf">
                 <div class="vk-kopf-links">
-                    <span class="vk-nr">${esc(nr || "—")}</span>
-                    ${zuteilung
-                        ? `<div class="vk-zuteilung">Zuteilung ${esc(zuteilung)}</div>`
-                        : ""}
+                    <button class="vk-copy" type="button"
+                        data-nr="${esc(nr)}"
+                        onclick="nummerKopieren(this.dataset.nr, this)"
+                        title="Vertragsnummer kopieren"
+                        aria-label="Vertragsnummer kopieren">
+                        <span class="ico ico-copy"></span>
+                    </button>
+                    <div class="vk-nr-block">
+                        <span class="vk-nr">${esc(nr || "—")}</span>
+                        ${zuteilung
+                            ? `<div class="vk-zuteilung">Zuteilung ${esc(zuteilung)}</div>`
+                            : ""}
+                    </div>
                 </div>
-                <button class="vk-copy" type="button"
-                    data-nr="${esc(nr)}"
-                    onclick="nummerKopieren(this.dataset.nr, this)"
-                    title="Vertragsnummer kopieren"
-                    aria-label="Vertragsnummer kopieren">
-                    <span class="ico ico-copy"></span>
-                </button>
                 <div class="vk-kopf-kennzahlen">${kennzahlen}</div>
             </div>
             ${produktZeilen}
