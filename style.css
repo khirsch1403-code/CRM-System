@@ -1271,7 +1271,7 @@ input.crm-input{
 
 .kd-kontakte-grid-2{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     gap:10px;
     min-width:0;
     margin-top:14px;
@@ -1580,6 +1580,14 @@ input.crm-input{
     white-space:nowrap;
     min-width:0;
     flex:1;
+}
+
+/* Bevorzugt-Stern darf die Zeile NICHT als gleichwertiges flex:1-
+   Element aufteilen (sonst kuerzt die E-Mail viel zu frueh). Er
+   nimmt nur seine eigene Breite ein. */
+.eintrag-zeile .pref-stern{
+    flex:0 0 auto;
+    overflow:visible;
 }
 
 .eintrag-email{
