@@ -350,10 +350,14 @@ ${partnerBanner}
                 <div class="eintrag-liste">
                 ${k.telefone.length === 0
                     ? '<div class="eintrag-leer">–</div>'
-                    : k.telefone.map((t,i) =>
-                        `<div class="eintrag-zeile"><span>${esc(t)}</span>
-                        <button class="eintrag-entfernen" onclick="telefonLoeschen(${i})">×</button></div>`
-                      ).join("")
+                    : k.telefone.map((t,i) => {
+                        const bev = k.telefonBevorzugt
+                            && telefonSchluessel(t) === k.telefonBevorzugt;
+                        return `<div class="eintrag-zeile"><span>${esc(t)}${
+                            bev ? '<span class="pref-stern" title="bevorzugt"> *</span>' : ''
+                        }</span>
+                        <button class="eintrag-entfernen" onclick="telefonLoeschen(${i})">×</button></div>`;
+                      }).join("")
                 }
                 </div>
             </div>
@@ -366,11 +370,15 @@ ${partnerBanner}
                 <div class="eintrag-liste">
                 ${k.emails.length === 0
                     ? '<div class="eintrag-leer">–</div>'
-                    : k.emails.map((e,i) =>
-                        `<div class="eintrag-zeile">
-                        <a class="eintrag-email" href="mailto:${encodeURIComponent(e)}">${esc(e)}</a>
-                        <button class="eintrag-entfernen" onclick="emailLoeschen(${i})">×</button></div>`
-                      ).join("")
+                    : k.emails.map((e,i) => {
+                        const bev = k.emailBevorzugt
+                            && normalisiereEmail(e) === k.emailBevorzugt;
+                        return `<div class="eintrag-zeile">
+                        <a class="eintrag-email" href="mailto:${encodeURIComponent(e)}">${esc(e)}</a>${
+                            bev ? '<span class="pref-stern" title="bevorzugt"> *</span>' : ''
+                        }
+                        <button class="eintrag-entfernen" onclick="emailLoeschen(${i})">×</button></div>`;
+                      }).join("")
                 }
                 </div>
             </div>
@@ -444,32 +452,7 @@ ${partnerBanner}
 
     ${k.vertraege.length === 0
         ? '<div class="eintrag-leer">Keine Verträge vorhanden</div>'
-        : `<div class="vertrag-tabelle">
-            <div class="vertrag-zeile vertrag-kopf">
-                <span>Vertragsnummer</span>
-                <span>Produkt</span>
-                <span>Bausparsumme</span>
-                <span>Saldo</span>
-                <span>Guthaben %</span>
-                <span></span>
-            </div>
-            ${k.vertraege.map((v,i) => {
-                const vObj = typeof v === "string" ? { nummer: v } : v;
-                return `<div class="vertrag-zeile">
-                    <span class="vertrag-nummer">
-                        <strong>${esc(vObj.nummer || "-")}</strong>
-                        ${vObj.zuteilungsdatum
-                            ? `<span class="vertrag-zuteilung">Zuteilung: ${esc(vObj.zuteilungsdatum)}</span>`
-                            : ""}
-                    </span>
-                    <span>${esc(vObj.produkt || "-")}</span>
-                    <span>${esc(vObj.bausparsumme || "-")}</span>
-                    <span>${esc(vObj.saldo || "-")}</span>
-                    <span>${esc(vObj.guthabenProzent || "-")}</span>
-                    <button class="eintrag-entfernen" onclick="vertragLoeschen(${i})">×</button>
-                </div>`;
-            }).join("")}
-        </div>`
+        : `<div class="vk-liste">${vertraegeKachelHtml(k.vertraege)}</div>`
     }
 
 </div>
@@ -929,6 +912,90 @@ function vertragLoeschen(index){
 /* Rendert die Kennzeichen-Chip-Leiste fuer das Kundenpanel.
    Nur die aktiven Marker werden als farbige Chips angezeigt;
    inaktive sind ueber ein "+ Marker"-Klappmenue erreichbar. */
+/* =====================================================
+   VERTRÄGE — Kachel-Darstellung
+   -----------------------------------------------------
+   Gruppiert die Verträge eines Kunden nach Vertragsnummer.
+   Teilen sich mehrere Produkte eine Nummer (z. B. Bausparen
+   + Zwischenfinanzierung), stehen sie zusammen in EINER
+   Kachel — sofort als zusammengehörig erkennbar.
+===================================================== */
+
+/* Kompakte Faktenzeile eines Vertrags: nur befüllte Felder,
+   in fester Reihenfolge, mit " · " getrennt. */
+function vertragFaktenText(v){
+    const g = String(v.guthabenProzent || "").trim();
+    const guthaben = g ? (g.indexOf("%") !== -1 ? g : g + " %") : "";
+    const paare = [
+        ["Summe",      v.bausparsumme],
+        ["Darlehen",   v.darlehenssumme],
+        ["ZK-Summe",   v.zkSumme],
+        ["Saldo",      v.saldo],
+        ["ZK-Saldo",   v.zkSaldo],
+        ["Restschuld", v.restschuld],
+        ["Guthaben",   guthaben],
+        ["Zins bis",   v.zinsBis],
+        ["Zuteilung",  v.zuteilungsdatum],
+        ["Abschluss",  v.abschluss],
+        ["Beginn",     v.beginn]
+    ];
+    return paare
+        .filter(([, w]) => w && String(w).trim())
+        .map(([l, w]) => `${l} ${esc(String(w).trim())}`)
+        .join("  ·  ");
+}
+
+function vertraegeKachelHtml(vertraege){
+    const gruppen = [];
+    const posByNr = {};
+
+    (vertraege || []).forEach((v, i) => {
+        const vObj = typeof v === "string" ? { nummer: v } : (v || {});
+        const nr = String(vObj.nummer || "");
+        let gi = posByNr[nr];
+        if(gi === undefined){
+            gi = gruppen.length;
+            posByNr[nr] = gi;
+            gruppen.push({ nummer: nr, items: [] });
+        }
+        gruppen[gi].items.push({ v: vObj, i });
+    });
+
+    return gruppen.map(gr => {
+        const mehrere = gr.items.length > 1;
+        const produkte = gr.items
+            .map(({ v }) => String(v.produkt || "").trim())
+            .filter(Boolean);
+        const zusammen = mehrere
+            ? `<span class="vk-zusammen"
+                     title="Gehören zusammen — gleiche Vertragsnummer">${
+                produkte.length ? esc(produkte.join(" + ")) : (gr.items.length + " Produkte")
+              } · gehören zusammen</span>`
+            : "";
+
+        const produktZeilen = gr.items.map(({ v, i }) => {
+            const fakten = vertragFaktenText(v);
+            return `<div class="vk-produkt">
+                <div class="vk-produkt-haupt">
+                    <span class="vk-prod-name">${esc(v.produkt || "—")}</span>
+                    ${fakten ? `<span class="vk-prod-fakten">${fakten}</span>` : ""}
+                </div>
+                <button class="eintrag-entfernen"
+                    onclick="vertragLoeschen(${i})"
+                    title="Vertrag entfernen">×</button>
+            </div>`;
+        }).join("");
+
+        return `<div class="vk-kachel">
+            <div class="vk-kachel-kopf">
+                <span class="vk-nr"><span class="lbl">Vertrag</span>${esc(gr.nummer || "—")}</span>
+                ${zusammen}
+            </div>
+            ${produktZeilen}
+        </div>`;
+    }).join("");
+}
+
 function renderKennzChips(k){
     if(!k || !k.kennzeichen){ return ""; }
 

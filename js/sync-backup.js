@@ -456,15 +456,125 @@ document
 
         })();
 
-        const zeilen =
+        // Alle Zeilen als Arrays lesen (header:1). So umgehen wir
+        // doppelte Spaltennamen in der neuen Synchro (z. B.
+        // "Vertragsbeginn" kommt zweimal vor), die beim rein
+        // namensbasierten Einlesen kollidieren wuerden.
+        const aoa =
         XLSX.utils.sheet_to_json(
             worksheet,
             {
+                header:1,
                 defval:"",
                 raw:false,
                 dateNF:"dd.mm.yyyy"
             }
         );
+
+        const kopf = (aoa[0] || []).map(
+            h => String(h == null ? "" : h).trim()
+        );
+
+        function _spalte(name){ return kopf.indexOf(name); }
+        function _spaltenAlle(name){
+            const r = [];
+            kopf.forEach((h, i) => { if(h === name){ r.push(i); } });
+            return r;
+        }
+
+        // Benoetigte Spaltenindizes einmalig bestimmen
+        const SP = {
+            partyId:   _spalte("PARTY_ID"),
+            anrede:    _spalte("Anrede"),
+            vorname:   _spalte("Vorname"),
+            nachname:  _spalte("Nachname"),
+            geburt:    _spalte("Geburtsdatum"),
+            plz:       _spalte("PLZ"),
+            ort:       _spalte("Ort"),
+            strasse:   _spalte("Straße"),
+            hausnr:    _spalte("Hausnummer"),
+            pAnrede:   _spalte("Anrede Partner"),
+            pVorname:  _spalte("Vorname Partner"),
+            pNachname: _spalte("Nachname Partner"),
+            pGeburt:   _spalte("Geburtsdatum Partner"),
+            produkt:   _spalte("Produktbezeichnung"),
+            vertragNr: _spalte("Vertragsnummer"),
+            bausparsumme: _spalte("Bausparsumme"),
+            saldoBs:   _spalte("Saldo (BS)"),
+            guthaben:  _spalte("Guthaben in %"),
+            abschluss: _spalte("Abschlussdatum"),
+            zuteilung: _spalte("Zuteilungsdatum"),
+            zkSumme:   _spalte("ZK Summe"),
+            zkSaldo:   _spalte("ZK Saldo"),
+            darlehen:  _spalte("Darlehenssumme"),
+            restschuld:_spalte("akt. Restschuld"),
+            zinsBis:   _spalte("Zinsfestschreibung bis"),
+            saldo2:    _spalte("Saldo"),
+            depotBeginn:_spalte("Vertragsbeginn Depot"),
+            lvBeginn:  _spalte("LV Vertragsbeginn"),
+            telBev:    _spalte("Telefon bevorzugt"),
+            telPriv:   _spalte("Telefon privat"),
+            telGesch:  _spalte("Telefon geschäftlich"),
+            telSonst:  _spalte("Telefon sonstige"),
+            mobPriv:   _spalte("Mobil privat"),
+            mobGesch:  _spalte("Mobil geschäftlich"),
+            mobSonst:  _spalte("Mobil sonstige"),
+            emailBev:  _spalte("E-Mail bevorzugt"),
+            emailPriv: _spalte("E-Mail privat"),
+            emailGesch:_spalte("E-Mail geschäftlich"),
+            emailSonst:_spalte("E-Mail sonstige")
+        };
+        // "Vertragsbeginn" steht zweimal (verschiedene Darlehens-Bloecke)
+        const SP_beginn = _spaltenAlle("Vertragsbeginn");
+
+        function _zelle(row, idx){
+            return (idx >= 0 && idx < row.length && row[idx] != null)
+                ? row[idx] : "";
+        }
+
+        // Datenzeilen (ohne Kopf) in Objekte mit genau den benoetigten
+        // Schluesseln uebersetzen — alles positionsbasiert.
+        const zeilen = aoa.slice(1).map(row => {
+            const g = (idx) => _zelle(row, idx);
+            const beginn = SP_beginn
+                .map(i => String(g(i) || "").trim())
+                .find(w => w) || "";
+            return {
+                "PARTY_ID":             g(SP.partyId),
+                "Anrede":               g(SP.anrede),
+                "Vorname":              g(SP.vorname),
+                "Nachname":             g(SP.nachname),
+                "Geburtsdatum":         g(SP.geburt),
+                "PLZ":                  g(SP.plz),
+                "Ort":                  g(SP.ort),
+                "Straße":               g(SP.strasse),
+                "Hausnummer":           g(SP.hausnr),
+                "Anrede Partner":       g(SP.pAnrede),
+                "Vorname Partner":      g(SP.pVorname),
+                "Nachname Partner":     g(SP.pNachname),
+                "Geburtsdatum Partner": g(SP.pGeburt),
+                "Produktbezeichnung":   g(SP.produkt),
+                "Vertragsnummer":       g(SP.vertragNr),
+                /* Vertragsdetails (nur grüne Spalten) */
+                "__bausparsumme": g(SP.bausparsumme),
+                "__saldo":        String(g(SP.saldoBs) || g(SP.saldo2) || "").trim(),
+                "__guthaben":     g(SP.guthaben),
+                "__abschluss":    g(SP.abschluss),
+                "__zuteilung":    g(SP.zuteilung),
+                "__zkSumme":      g(SP.zkSumme),
+                "__zkSaldo":      g(SP.zkSaldo),
+                "__darlehen":     g(SP.darlehen),
+                "__restschuld":   g(SP.restschuld),
+                "__zinsBis":      g(SP.zinsBis),
+                "__beginn":       String(beginn || g(SP.depotBeginn) || g(SP.lvBeginn) || "").trim(),
+                /* Kontaktdaten: alle Telefon-/E-Mail-Spalten */
+                "__telefone":    [SP.telBev, SP.telPriv, SP.telGesch, SP.telSonst,
+                                  SP.mobPriv, SP.mobGesch, SP.mobSonst].map(i => g(i)),
+                "__telBevWert":  g(SP.telBev),
+                "__emails":      [SP.emailBev, SP.emailPriv, SP.emailGesch, SP.emailSonst].map(i => g(i)),
+                "__emailBevWert":g(SP.emailBev)
+            };
+        });
 
         let neu = 0;
         let aktualisiert = 0;
@@ -690,25 +800,50 @@ if(
                 kunde.partner = importPartner;
             }
 
-            const telefon = normalisiereTelefon(zeile["Telefon bevorzugt"]);
-            if(telefon){
-                const key = telefonSchluessel(telefon);
+            /* --- Telefon: alle Spalten (bevorzugt + privat/geschäftl./
+               sonstige + Mobil), Dopplungen zusammenführen. Die
+               bevorzugte Nummer wird gemerkt (Anzeige mit *). --- */
+            const telBevKey = (function(){
+                const n = normalisiereTelefon(zeile["__telBevWert"]);
+                return n ? telefonSchluessel(n) : "";
+            })();
+            (zeile["__telefone"] || []).forEach(roh => {
+                const norm = normalisiereTelefon(roh);
+                if(!norm){ return; }
+                const key = telefonSchluessel(norm);
                 const schonDa = kunde.telefone.some(t =>
                     telefonSchluessel(t) === key
                 );
                 if(!schonDa){
-                    kunde.telefone.push(telefon);
+                    kunde.telefone.push(norm);
                 }
+            });
+            if(telBevKey){
+                kunde.telefonBevorzugt = telBevKey;
             }
 
-            const email = normalisiereEmail(zeile["E-Mail bevorzugt"]);
-            if(email){
+            /* --- E-Mail: alle Spalten, Dopplungen zusammenführen.
+               "Vapnomail" = interne Markierung für "keine Mail" →
+               wird uebersprungen (nichts eintragen). --- */
+            const emailBevNorm = (function(){
+                const roh = String(zeile["__emailBevWert"] || "").trim();
+                if(!roh || roh.toLowerCase() === "vapnomail"){ return ""; }
+                return normalisiereEmail(roh);
+            })();
+            (zeile["__emails"] || []).forEach(roh => {
+                const txt = String(roh || "").trim();
+                if(!txt || txt.toLowerCase() === "vapnomail"){ return; }
+                const norm = normalisiereEmail(txt);
+                if(!norm){ return; }
                 const schonDa = kunde.emails.some(e =>
-                    normalisiereEmail(e) === email
+                    normalisiereEmail(e) === norm
                 );
                 if(!schonDa){
-                    kunde.emails.push(email);
+                    kunde.emails.push(norm);
                 }
+            });
+            if(emailBevNorm){
+                kunde.emailBevorzugt = emailBevNorm;
             }
 
             // Vorhandene Eintraege dieses Kunden gleich mitbereinigen
@@ -721,22 +856,26 @@ if(
                 importierteVertragsnummernProKunde.set(kunde.id, new Set());
             }
 
-            // Vertrag als Objekt mit allen Feldern zusammenbauen
-            // (fuehrenden Excel-Apostroph mit abfangen, damit
-            // '12345 und 12345 nicht als verschiedene Vertraege
-            // gelten — sonst wuerde der Reconciler falsch loeschen)
+            // Vertragsnummer (fuehrenden Excel-Apostroph abfangen, damit
+            // '12345 und 12345 nicht als verschiedene Vertraege gelten)
             let vertragNr =
             String(zeile["Vertragsnummer"] || "").trim();
             if(vertragNr.startsWith("'")){
                 vertragNr = vertragNr.substring(1).trim();
             }
+            const produktBez =
+            String(zeile["Produktbezeichnung"] || "").trim();
 
             if(vertragNr){
+
+                // Schluessel = Nummer + Produkt. Zwei unterschiedliche
+                // Produkte duerfen dieselbe Vertragsnummer tragen
+                // (z. B. Bausparen + Zwischenfinanzierung) und werden
+                // getrennt gefuehrt — in der Anzeige aber zusammen in
+                // einer Kachel gruppiert.
+                const vKey = vertragNr + "\u0001" + produktBez;
                 importierteVertragsnummernProKunde
-                    .get(kunde.id).add(vertragNr);
-            }
-
-            if(vertragNr){
+                    .get(kunde.id).add(vKey);
 
                 // Legacy: alte String-Verträge in Objekte migrieren
                 kunde.vertraege = (kunde.vertraege || []).map(v =>
@@ -746,23 +885,26 @@ if(
                 );
 
                 const neuerVertrag = {
-                    nummer: vertragNr,
-                    produkt:
-                    String(zeile["Produktbezeichnung"] || "").trim(),
-                    bausparsumme:
-                    String(zeile["Bausparsumme"] || "").trim(),
-                    saldo:
-                    String(zeile["Saldo (BS)"] || zeile["Saldo"] || "").trim(),
-                    guthabenProzent:
-                    String(zeile["Guthaben in %"] || "").trim(),
-                    zuteilungsdatum:
-                    String(zeile["Zuteilungsdatum"] || "").trim()
+                    nummer:          vertragNr,
+                    produkt:         produktBez,
+                    bausparsumme:    String(zeile["__bausparsumme"] || "").trim(),
+                    saldo:           String(zeile["__saldo"] || "").trim(),
+                    guthabenProzent: String(zeile["__guthaben"] || "").trim(),
+                    zuteilungsdatum: String(zeile["__zuteilung"] || "").trim(),
+                    abschluss:       String(zeile["__abschluss"] || "").trim(),
+                    zkSumme:         String(zeile["__zkSumme"] || "").trim(),
+                    zkSaldo:         String(zeile["__zkSaldo"] || "").trim(),
+                    darlehenssumme:  String(zeile["__darlehen"] || "").trim(),
+                    restschuld:      String(zeile["__restschuld"] || "").trim(),
+                    zinsBis:         String(zeile["__zinsBis"] || "").trim(),
+                    beginn:          String(zeile["__beginn"] || "").trim()
                 };
 
-                // Vorhandenen Vertrag mit gleicher Nummer aktualisieren,
-                // sonst neu anlegen
-                const idx = kunde.vertraege.findIndex(
-                    v => v.nummer === vertragNr
+                // Vorhandenen Vertrag mit gleicher Nummer UND gleichem
+                // Produkt aktualisieren, sonst neu anlegen.
+                const idx = kunde.vertraege.findIndex(v =>
+                    v && v.nummer === vertragNr
+                      && String(v.produkt || "") === produktBez
                 );
 
                 if(idx >= 0){
@@ -824,7 +966,9 @@ if(
             const vorher = kunde.vertraege.length;
             kunde.vertraege = kunde.vertraege.filter(v => {
                 const vObj = typeof v === "string" ? { nummer: v } : v;
-                return vObj && vObj.nummer && gemeldete.has(vObj.nummer);
+                if(!vObj || !vObj.nummer){ return false; }
+                const key = vObj.nummer + "\u0001" + String(vObj.produkt || "");
+                return gemeldete.has(key);
             });
             vertraegeEntfernt += (vorher - kunde.vertraege.length);
         });
@@ -1007,6 +1151,8 @@ function datenPruefen(){
         /* --- String-Felder --- */
         if(typeof kunde.anrede !== "string"){ kunde.anrede = ""; }
         if(typeof kunde.notiz  !== "string"){ kunde.notiz  = ""; }
+        if(typeof kunde.telefonBevorzugt !== "string"){ kunde.telefonBevorzugt = ""; }
+        if(typeof kunde.emailBevorzugt   !== "string"){ kunde.emailBevorzugt   = ""; }
 
         /* --- Kennzeichen-Objekt: muss ein Plain-Object sein ---
            Alt-Bug: manche Kunden hatten kennzeichen = [] statt {}.
