@@ -358,9 +358,41 @@ async function dateienHochladen(kundenId, dateien){
 }
 
 /* =====================================================
-   VOLLBILD-DIALOG "ORDNER ÖFFNEN" (In-App Explorer)
-   Browser kann keinen echten Explorer öffnen — dies ist
-   die praktikable Alternative.
+   LOKALEN ORDNER ÖFFNEN
+   Ein Browser kann keinen OS-Explorer auf einen Pfad
+   starten. Das Nächstliegende ist der native Ordner-
+   Dialog, der direkt IM Kundenordner geöffnet wird
+   (startIn). Der Anwender sieht damit den echten lokalen
+   Ordner samt Inhalt im System-Dateibrowser.
+   ===================================================== */
+
+async function kundenordnerOeffnen(kundenId){
+    const k = findeKunde(kundenId);
+    if(!k){ return; }
+    if(!kuWurzelHandle){
+        alert("Bitte zuerst einen Kundenunterlagen-Ordner wählen "
+            + "(Dashboard → Datensicherung → Ordner auswählen).");
+        return;
+    }
+    const dir = await stelleOrdnerSicher(k);
+    if(!dir){
+        alert("Ordner konnte nicht geöffnet werden.");
+        return;
+    }
+    try{
+        await window.showDirectoryPicker({
+            id: "crmKundenordner",
+            startIn: dir
+        });
+    }catch(e){
+        if(e.name === "AbortError"){ return; }  // Dialog abgebrochen
+        console.log("Ordner öffnen:", e);
+        alert("Ordner konnte nicht geöffnet werden.");
+    }
+}
+
+/* =====================================================
+   VOLLBILD-DIALOG (In-App-Liste, für "weitere anzeigen")
    ===================================================== */
 
 async function kundenordnerModalOeffnen(kundenId){
@@ -459,7 +491,7 @@ async function kundenunterlagenPanelRendern(k){
                     + Datei
                 </button>
                 <button class="crm-button crm-button-klein"
-                    onclick="kundenordnerModalOeffnen(${k.id})">
+                    onclick="kundenordnerOeffnen(${k.id})">
                     Ordner öffnen
                 </button>
             </div>

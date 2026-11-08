@@ -3284,6 +3284,11 @@ body.serienbrief-modus{
 .brief-kopf-links{
     display:flex;
     flex-direction:column;
+    /* Falzmarken bleiben bei 105/210mm. Stattdessen den
+       Adressatenblock nach unten versetzen, damit er beim
+       Falzen im DIN-Sichtfenster (~50-90mm) erscheint.
+       Seitenrand oben 35mm + 12mm = Feldbeginn ~47mm. */
+    padding-top:12mm;
 }
 
 .brief-ruecksender{
@@ -3298,6 +3303,8 @@ body.serienbrief-modus{
 .brief-anschrift{
     font-size:1em;
     line-height:1.3;
+    /* Die Zahl der Personen ist in serienbrief.js begrenzt,
+       damit die Anschriftzone im Sichtfenster bleibt. */
 }
 
 .brief-kopf-rechts{

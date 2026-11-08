@@ -676,14 +676,24 @@ function _serienbriefErstellenImpl(){
     const briefeHtml = sendungen.map(s => {
         const p = s.personen[0];
 
-        // Anschriftzeilen mit "Frau"/"Herr" pro Person
-        const personenZeilen = s.personen.map(pp => {
-            const name = `${esc(pp.vorname||"")} ${esc(pp.nachname||"")}`.trim();
-            if(pp.anrede === "Frau" || pp.anrede === "Herr"){
-                return esc(pp.anrede) + " " + name;
-            }
-            return name;
-        });
+        // Anschriftzeilen mit "Frau"/"Herr" pro Person.
+        // DIN-Anschriftzone fasst nur wenige Zeilen — bei vielen
+        // Personen an einer Adresse wird das Feld sonst so gross,
+        // dass es aus dem Kuvert-Sichtfenster laeuft. Daher auf
+        // max. SB_MAX_ANSCHRIFT_PERSONEN begrenzen, Rest -> "u. a.".
+        const SB_MAX_ANSCHRIFT_PERSONEN = 3;
+        const personenZeilen = s.personen
+            .slice(0, SB_MAX_ANSCHRIFT_PERSONEN)
+            .map(pp => {
+                const name = `${esc(pp.vorname||"")} ${esc(pp.nachname||"")}`.trim();
+                if(pp.anrede === "Frau" || pp.anrede === "Herr"){
+                    return esc(pp.anrede) + " " + name;
+                }
+                return name;
+            });
+        if(s.personen.length > SB_MAX_ANSCHRIFT_PERSONEN){
+            personenZeilen.push("u. a.");
+        }
         const anschriftZeilen = [
             ...personenZeilen,
             `${esc(p.strasse||"")} ${esc(p.hausnummer||"")}`.trim(),
