@@ -11,6 +11,7 @@
 const KU_DB_NAME  = "crmKundenunterlagen";
 const KU_STORE    = "handles";
 const KU_KEY_ROOT = "wurzel";
+const KU_LS_BASISPFAD = "kuBasisPfad";   // absoluter OS-Pfad des Wurzelordners
 
 let kuWurzelHandle = null;       // FileSystemDirectoryHandle
 let kuUnterstuetzt = false;      // Browser-Feature vorhanden?
@@ -358,16 +359,133 @@ async function dateienHochladen(kundenId, dateien){
 }
 
 /* =====================================================
+   DATEIPFAD IN DIE ZWISCHENABLAGE
+   -----------------------------------------------------
+   Die File-System-Access-API verraet den absoluten Pfad
+   nicht. Fuer "Pfad kopieren" fragen wir den Basis-Pfad
+   des Wurzelordners einmalig ab (Explorer: Shift+Rechts-
+   klick -> "Als Pfad kopieren") und setzen daraus den
+   Ordner-/Dateipfad zusammen. Den eingefuegten Pfad kann
+   der Anwender im Explorer oder im Datei-Upload-Dialog
+   (Feld "Dateiname") mit Strg+V einfuegen.
+   ===================================================== */
+
+function kuBasisPfadLaden(){
+    try{ return localStorage.getItem(KU_LS_BASISPFAD) || ""; }
+    catch(_){ return ""; }
+}
+
+function kuBasisPfadSpeichern(p){
+    try{ localStorage.setItem(KU_LS_BASISPFAD, p); }catch(_){}
+}
+
+/* Trennzeichen aus dem Basis-Pfad ableiten (Windows "\", sonst "/"). */
+function kuSep(base){
+    return (base.indexOf("\\") === -1 && base.indexOf("/") !== -1) ? "/" : "\\";
+}
+
+/* Liefert den gespeicherten Basis-Pfad; fragt ihn ab,
+   wenn noch keiner gesetzt ist oder force=true. */
+function kuBasisPfadGeben(force){
+    let p = kuBasisPfadLaden();
+    if(p && !force){ return p; }
+    const wurzel = kuWurzelHandle ? kuWurzelHandle.name : "Kundenunterlagen";
+    const beispiel = "C:\\Users\\DeinName\\Dokumente\\00_CRM\\" + wurzel;
+    const eingabe = prompt(
+        "Vollständiger Pfad des Ordners \"" + wurzel + "\" auf diesem PC:\n\n"
+        + "So findest du ihn: im Explorer den Ordner mit Shift+Rechtsklick "
+        + "anklicken → \"Als Pfad kopieren\" und hier einfügen.\n\n"
+        + "Beispiel: " + beispiel,
+        p || beispiel
+    );
+    if(eingabe === null){ return ""; }                 // abgebrochen
+    p = eingabe.trim()
+        .replace(/^"(.*)"$/, "$1")                     // Anführungszeichen weg
+        .replace(/[\\/]+$/, "");                       // Trailing-Slash weg
+    kuBasisPfadSpeichern(p);
+    return p;
+}
+
+function kuOrdnerPfad(k){
+    const base = kuBasisPfadGeben(false);
+    if(!base){ return ""; }
+    return base + kuSep(base) + ordnerNameFuerKunde(k);
+}
+
+async function kuInZwischenablage(text){
+    try{
+        await navigator.clipboard.writeText(text);
+        return true;
+    }catch(_){
+        try{
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.focus(); ta.select();
+            const ok = document.execCommand("copy");
+            document.body.removeChild(ta);
+            return ok;
+        }catch(_){ return false; }
+    }
+}
+
+/* Kleiner, nicht-blockierender Hinweis (unten mittig). */
+function kuToast(msg){
+    let t = document.getElementById("kuToast");
+    if(!t){
+        t = document.createElement("div");
+        t.id = "kuToast";
+        t.className = "ku-toast";
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add("sichtbar");
+    clearTimeout(kuToast._timer);
+    kuToast._timer = setTimeout(() => t.classList.remove("sichtbar"), 2600);
+}
+
+async function kuPfadAusgeben(text, label){
+    const ok = await kuInZwischenablage(text);
+    if(ok){ kuToast(label + " kopiert"); }
+    else{ window.prompt(label + " (manuell markieren + Strg+C):", text); }
+}
+
+async function kuOrdnerpfadKopieren(kundenId){
+    const k = findeKunde(kundenId);
+    if(!k){ return; }
+    const pfad = kuOrdnerPfad(k);
+    if(!pfad){ return; }   // abgebrochen / kein Basis-Pfad
+    await kuPfadAusgeben(pfad, "Ordnerpfad");
+}
+
+async function kuDateipfadKopieren(kundenId, dateiName){
+    const k = findeKunde(kundenId);
+    if(!k){ return; }
+    const base = kuOrdnerPfad(k);
+    if(!base){ return; }
+    await kuPfadAusgeben(base + kuSep(base) + dateiName, "Dateipfad");
+}
+
+/* Basis-Pfad neu setzen (z. B. bei Umzug des Ordners). */
+function kuBasisPfadAendern(kundenId){
+    kuBasisPfadGeben(true);
+    if(kundenId != null){ kundenordnerModalOeffnen(kundenId); }
+}
+
+/* =====================================================
    ORDNER ÖFFNEN (In-App) + DRAG-OUT IN OS-ORDNER
    -----------------------------------------------------
    Ein Browser kann keinen Windows-Explorer auf einen
    Pfad starten (Sicherheitsbeschraenkung). Stattdessen
    oeffnet der Button direkt die Dateiliste genau dieses
-   Kunden — kein Durchsuchen des gesamten Wurzelordners —
-   und jede Datei laesst sich per Drag & Drop direkt in
-   einen beliebigen Windows-Ordner ziehen (= kopieren).
-   Dafuer legen wir pro Datei eine Object-URL an und
-   nutzen das Chrome-"DownloadURL"-Drag-Protokoll.
+   Kunden — kein Durchsuchen des gesamten Wurzelordners.
+   Zum Weiterverarbeiten gibt es zwei Wege:
+   - "Pfad kopieren": absoluten Datei-/Ordnerpfad in die
+     Zwischenablage, zum Einfuegen im Upload-Dialog.
+   - Drag & Drop: Datei direkt in einen Windows-Ordner
+     ziehen (Chrome-"DownloadURL"-Protokoll).
    ===================================================== */
 
 let kuModalObjectUrls = [];   // offene Object-URLs (zum Freigeben)
@@ -444,12 +562,35 @@ async function kundenordnerModalOeffnen(kundenId){
                  ${url ? "ondragstart=\"kuDragStart(event, this)\"" : ""}>
                 <a href="#" draggable="false" onclick="event.preventDefault();dateiOeffnen(${k.id},'${nameJs}');">${nameEsc}</a>
                 <span class="ku-datei-meta">${formatBytes(d.groesse)} · ${new Date(d.geaendert).toLocaleDateString("de-DE")}</span>
+                <button class="crm-button crm-button-klein ku-pfad-btn"
+                    title="Vollständigen Dateipfad kopieren (im Upload-Dialog in 'Dateiname' einfügen)"
+                    onclick="kuDateipfadKopieren(${k.id},'${nameJs}')">Pfad</button>
                 <button class="eintrag-entfernen" onclick="dateiLoeschen(${k.id},'${nameJs}');">×</button>
             </div>`
         );
     }
+
+    const basisGesetzt = !!kuBasisPfadLaden();
+    const kopfZeile = basisGesetzt
+        ? `<div class="ku-ordner-kopf">
+               <code class="ku-ordner-pfad">${esc(kuOrdnerPfad(k) || "")}</code>
+               <div class="ku-ordner-kopf-btns">
+                   <button class="crm-button crm-button-klein"
+                       onclick="kuOrdnerpfadKopieren(${k.id})">Ordnerpfad kopieren</button>
+                   <button class="crm-button crm-button-klein"
+                       title="Basis-Pfad des Wurzelordners ändern"
+                       onclick="kuBasisPfadAendern(${k.id})">Pfad-Basis ändern</button>
+               </div>
+           </div>`
+        : `<div class="ku-drag-hinweis">
+               Für „Pfad kopieren" einmalig den Speicherort festlegen:
+               <button class="crm-button crm-button-klein"
+                   onclick="kuBasisPfadAendern(${k.id})">Speicherort festlegen</button>
+           </div>`;
+
     inhalt.innerHTML =
-        `<div class="ku-drag-hinweis">Tipp: Datei in einen Windows-Ordner ziehen = kopieren.</div>`
+        kopfZeile
+        + `<div class="ku-drag-hinweis">Tipp: „Pfad" kopiert den Dateipfad (im Upload-Dialog einfügen). Oder die Datei direkt in einen Windows-Ordner ziehen = kopieren.</div>`
         + `<div class="ku-datei-liste">` + zeilen.join("") + `</div>`;
 }
 
