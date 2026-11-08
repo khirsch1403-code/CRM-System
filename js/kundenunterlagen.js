@@ -358,42 +358,38 @@ async function dateienHochladen(kundenId, dateien){
 }
 
 /* =====================================================
-   LOKALEN ORDNER ÖFFNEN
-   Ein Browser kann keinen OS-Explorer auf einen Pfad
-   starten. Das Nächstliegende ist der native Ordner-
-   Dialog, der direkt IM Kundenordner geöffnet wird
-   (startIn). Der Anwender sieht damit den echten lokalen
-   Ordner samt Inhalt im System-Dateibrowser.
+   ORDNER ÖFFNEN (In-App) + DRAG-OUT IN OS-ORDNER
+   -----------------------------------------------------
+   Ein Browser kann keinen Windows-Explorer auf einen
+   Pfad starten (Sicherheitsbeschraenkung). Stattdessen
+   oeffnet der Button direkt die Dateiliste genau dieses
+   Kunden — kein Durchsuchen des gesamten Wurzelordners —
+   und jede Datei laesst sich per Drag & Drop direkt in
+   einen beliebigen Windows-Ordner ziehen (= kopieren).
+   Dafuer legen wir pro Datei eine Object-URL an und
+   nutzen das Chrome-"DownloadURL"-Drag-Protokoll.
    ===================================================== */
 
-async function kundenordnerOeffnen(kundenId){
-    const k = findeKunde(kundenId);
-    if(!k){ return; }
-    if(!kuWurzelHandle){
-        alert("Bitte zuerst einen Kundenunterlagen-Ordner wählen "
-            + "(Dashboard → Datensicherung → Ordner auswählen).");
-        return;
-    }
-    const dir = await stelleOrdnerSicher(k);
-    if(!dir){
-        alert("Ordner konnte nicht geöffnet werden.");
-        return;
-    }
-    try{
-        await window.showDirectoryPicker({
-            id: "crmKundenordner",
-            startIn: dir
-        });
-    }catch(e){
-        if(e.name === "AbortError"){ return; }  // Dialog abgebrochen
-        console.log("Ordner öffnen:", e);
-        alert("Ordner konnte nicht geöffnet werden.");
-    }
+let kuModalObjectUrls = [];   // offene Object-URLs (zum Freigeben)
+
+function kuModalUrlsFreigeben(){
+    kuModalObjectUrls.forEach(u => { try{ URL.revokeObjectURL(u); }catch(_){} });
+    kuModalObjectUrls = [];
 }
 
-/* =====================================================
-   VOLLBILD-DIALOG (In-App-Liste, für "weitere anzeigen")
-   ===================================================== */
+/* dragstart-Handler: setzt das DownloadURL-Format
+   "<mime>:<dateiname>:<url>" — damit kopiert Chrome die
+   Datei beim Ablegen in einen OS-Ordner. */
+function kuDragStart(ev, el){
+    const url  = el.dataset.url;
+    const name = el.dataset.name;
+    const mime = el.dataset.mime || "application/octet-stream";
+    if(!url){ return; }
+    try{
+        ev.dataTransfer.setData("DownloadURL", mime + ":" + name + ":" + url);
+        ev.dataTransfer.effectAllowed = "copy";
+    }catch(_){}
+}
 
 async function kundenordnerModalOeffnen(kundenId){
     const k = findeKunde(kundenId);
@@ -419,23 +415,48 @@ async function kundenordnerModalOeffnen(kundenId){
     inhalt.classList.add("ku-drop-zone");
     inhalt.dataset.kundenId = String(k.id);
 
+    // Alte Object-URLs der vorigen Ansicht freigeben
+    kuModalUrlsFreigeben();
+
     const dateien = await listeDateien(k);
     if(dateien.length === 0){
         inhalt.innerHTML = "<div class=\"eintrag-leer\">Keine Dateien vorhanden</div>";
-    }else{
-        inhalt.innerHTML = "<div class=\"ku-datei-liste\">" + dateien.map(d =>
-            `<div class="ku-datei-zeile">
-                <a href="#" onclick="event.preventDefault();dateiOeffnen(${k.id},'${d.name.replace(/'/g,"\\'")}');">${esc(d.name)}</a>
-                <span class="ku-datei-meta">${formatBytes(d.groesse)} · ${new Date(d.geaendert).toLocaleDateString("de-DE")}</span>
-                <button class="eintrag-entfernen" onclick="dateiLoeschen(${k.id},'${d.name.replace(/'/g,"\\'")}');">×</button>
-            </div>`
-        ).join("") + "</div>";
+        return;
     }
+
+    // Pro Datei eine Object-URL fuer Drag-Out erzeugen.
+    // (File-System-Access-Files liegen auf der Platte, die
+    //  Object-URL haelt keine Vollkopie im Speicher.)
+    const zeilen = [];
+    for(const d of dateien){
+        let url = "", mime = "";
+        try{
+            const file = await d.handle.getFile();
+            url  = URL.createObjectURL(file);
+            mime = file.type || "application/octet-stream";
+            kuModalObjectUrls.push(url);
+        }catch(_){}
+        const nameEsc = esc(d.name);
+        const nameJs  = d.name.replace(/'/g, "\\'");
+        zeilen.push(
+            `<div class="ku-datei-zeile" ${url ? "draggable=\"true\"" : ""}
+                 data-url="${esc(url)}" data-name="${nameEsc}" data-mime="${esc(mime)}"
+                 ${url ? "ondragstart=\"kuDragStart(event, this)\"" : ""}>
+                <a href="#" draggable="false" onclick="event.preventDefault();dateiOeffnen(${k.id},'${nameJs}');">${nameEsc}</a>
+                <span class="ku-datei-meta">${formatBytes(d.groesse)} · ${new Date(d.geaendert).toLocaleDateString("de-DE")}</span>
+                <button class="eintrag-entfernen" onclick="dateiLoeschen(${k.id},'${nameJs}');">×</button>
+            </div>`
+        );
+    }
+    inhalt.innerHTML =
+        `<div class="ku-drag-hinweis">Tipp: Datei in einen Windows-Ordner ziehen = kopieren.</div>`
+        + `<div class="ku-datei-liste">` + zeilen.join("") + `</div>`;
 }
 
 function kundenordnerModalSchliessen(){
     const modal = document.getElementById("kundenordnerModal");
     if(modal){ modal.style.display = "none"; }
+    kuModalUrlsFreigeben();
 }
 
 function formatBytes(b){
@@ -491,7 +512,7 @@ async function kundenunterlagenPanelRendern(k){
                     + Datei
                 </button>
                 <button class="crm-button crm-button-klein"
-                    onclick="kundenordnerOeffnen(${k.id})">
+                    onclick="kundenordnerModalOeffnen(${k.id})">
                     Ordner öffnen
                 </button>
             </div>
