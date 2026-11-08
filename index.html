@@ -271,6 +271,14 @@
                     Verknüpfung entfernen
                 </button>
 
+                <button
+                    type="button"
+                    class="crm-button crm-button-klein"
+                    title="Vollständigen Speicherort (Pfad) für die Funktion &quot;Pfad kopieren&quot; festlegen"
+                    onclick="kuBasisPfadAendern()">
+                    Pfad-Basis festlegen
+                </button>
+
                 <span id="kuStatus" class="speicher-status"></span>
 
             </div>
@@ -1224,7 +1232,8 @@
      KUNDENORDNER MODAL
 ===================================================== -->
 
-<div id="kundenordnerModal" class="modal-overlay">
+<div id="kundenordnerModal" class="modal-overlay"
+     onclick="if(event.target===this) kundenordnerModalSchliessen()">
     <div class="modal modal-breit">
         <h2 id="kundenordnerModalKopf">Unterlagen</h2>
         <div id="kundenordnerModalInhalt"></div>

@@ -2676,7 +2676,7 @@ select.crm-input.filter-select-aktiv{
 
 .ku-datei-zeile{
     display:grid;
-    grid-template-columns:1fr auto auto auto;
+    grid-template-columns:1fr auto auto;
     gap:10px;
     align-items:center;
     padding:4px 6px;
@@ -2686,48 +2686,6 @@ select.crm-input.filter-select-aktiv{
 
 .ku-datei-zeile:hover{
     background:var(--c-hover, rgba(0,0,0,0.03));
-}
-
-.ku-datei-zeile[draggable="true"]{
-    cursor:grab;
-}
-.ku-datei-zeile[draggable="true"]:active{
-    cursor:grabbing;
-}
-
-.ku-pfad-btn{
-    white-space:nowrap;
-}
-
-.ku-drag-hinweis{
-    font-size:11px;
-    color:var(--c-text-schwach);
-    margin:0 0 6px 2px;
-}
-
-/* Kopfzeile im "Ordner öffnen"-Dialog: Pfad + Aktionen */
-.ku-ordner-kopf{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:8px;
-    margin-bottom:8px;
-}
-.ku-ordner-pfad{
-    flex:1 1 auto;
-    min-width:0;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    font-size:12px;
-    background:var(--c-hover, rgba(0,0,0,0.05));
-    padding:4px 7px;
-    border-radius:4px;
-}
-.ku-ordner-kopf-btns{
-    display:flex;
-    gap:6px;
-    flex:0 0 auto;
 }
 
 /* Nicht-blockierender Kopier-Hinweis */

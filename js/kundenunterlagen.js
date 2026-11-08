@@ -460,54 +460,18 @@ async function kuOrdnerpfadKopieren(kundenId){
     await kuPfadAusgeben(pfad, "Ordnerpfad");
 }
 
-async function kuDateipfadKopieren(kundenId, dateiName){
-    const k = findeKunde(kundenId);
-    if(!k){ return; }
-    const base = kuOrdnerPfad(k);
-    if(!base){ return; }
-    await kuPfadAusgeben(base + kuSep(base) + dateiName, "Dateipfad");
-}
-
-/* Basis-Pfad neu setzen (z. B. bei Umzug des Ordners). */
-function kuBasisPfadAendern(kundenId){
-    kuBasisPfadGeben(true);
-    if(kundenId != null){ kundenordnerModalOeffnen(kundenId); }
+/* Basis-Pfad (Speicherort des Wurzelordners) setzen/ändern.
+   Aufruf aus dem Dashboard neben der Ordnerauswahl. */
+function kuBasisPfadAendern(){
+    const p = kuBasisPfadGeben(true);
+    if(p){ kuToast("Speicherort gespeichert"); }
 }
 
 /* =====================================================
-   ORDNER ÖFFNEN (In-App) + DRAG-OUT IN OS-ORDNER
-   -----------------------------------------------------
-   Ein Browser kann keinen Windows-Explorer auf einen
-   Pfad starten (Sicherheitsbeschraenkung). Stattdessen
-   oeffnet der Button direkt die Dateiliste genau dieses
-   Kunden — kein Durchsuchen des gesamten Wurzelordners.
-   Zum Weiterverarbeiten gibt es zwei Wege:
-   - "Pfad kopieren": absoluten Datei-/Ordnerpfad in die
-     Zwischenablage, zum Einfuegen im Upload-Dialog.
-   - Drag & Drop: Datei direkt in einen Windows-Ordner
-     ziehen (Chrome-"DownloadURL"-Protokoll).
+   ORDNER-INHALT ANZEIGEN (In-App-Dialog)
+   Reiner Viewer: Datei öffnen / löschen. Dateien lassen
+   sich per Drag & Drop auch hier ablegen (Upload).
    ===================================================== */
-
-let kuModalObjectUrls = [];   // offene Object-URLs (zum Freigeben)
-
-function kuModalUrlsFreigeben(){
-    kuModalObjectUrls.forEach(u => { try{ URL.revokeObjectURL(u); }catch(_){} });
-    kuModalObjectUrls = [];
-}
-
-/* dragstart-Handler: setzt das DownloadURL-Format
-   "<mime>:<dateiname>:<url>" — damit kopiert Chrome die
-   Datei beim Ablegen in einen OS-Ordner. */
-function kuDragStart(ev, el){
-    const url  = el.dataset.url;
-    const name = el.dataset.name;
-    const mime = el.dataset.mime || "application/octet-stream";
-    if(!url){ return; }
-    try{
-        ev.dataTransfer.setData("DownloadURL", mime + ":" + name + ":" + url);
-        ev.dataTransfer.effectAllowed = "copy";
-    }catch(_){}
-}
 
 async function kundenordnerModalOeffnen(kundenId){
     const k = findeKunde(kundenId);
@@ -523,8 +487,7 @@ async function kundenordnerModalOeffnen(kundenId){
     const modal   = document.getElementById("kundenordnerModal");
     const inhalt  = document.getElementById("kundenordnerModalInhalt");
     const kopf    = document.getElementById("kundenordnerModalKopf");
-    kopf.textContent = "Unterlagen: " + k.vorname + " " + k.nachname
-        + "  (" + ordnerNameFuerKunde(k) + ")";
+    kopf.textContent = "Unterlagen: " + k.vorname + " " + k.nachname;
     inhalt.innerHTML = "<div class=\"eintrag-leer\">Lade …</div>";
     modal.style.display = "flex";
 
@@ -533,71 +496,25 @@ async function kundenordnerModalOeffnen(kundenId){
     inhalt.classList.add("ku-drop-zone");
     inhalt.dataset.kundenId = String(k.id);
 
-    // Alte Object-URLs der vorigen Ansicht freigeben
-    kuModalUrlsFreigeben();
-
     const dateien = await listeDateien(k);
     if(dateien.length === 0){
         inhalt.innerHTML = "<div class=\"eintrag-leer\">Keine Dateien vorhanden</div>";
         return;
     }
 
-    // Pro Datei eine Object-URL fuer Drag-Out erzeugen.
-    // (File-System-Access-Files liegen auf der Platte, die
-    //  Object-URL haelt keine Vollkopie im Speicher.)
-    const zeilen = [];
-    for(const d of dateien){
-        let url = "", mime = "";
-        try{
-            const file = await d.handle.getFile();
-            url  = URL.createObjectURL(file);
-            mime = file.type || "application/octet-stream";
-            kuModalObjectUrls.push(url);
-        }catch(_){}
-        const nameEsc = esc(d.name);
-        const nameJs  = d.name.replace(/'/g, "\\'");
-        zeilen.push(
-            `<div class="ku-datei-zeile" ${url ? "draggable=\"true\"" : ""}
-                 data-url="${esc(url)}" data-name="${nameEsc}" data-mime="${esc(mime)}"
-                 ${url ? "ondragstart=\"kuDragStart(event, this)\"" : ""}>
-                <a href="#" draggable="false" onclick="event.preventDefault();dateiOeffnen(${k.id},'${nameJs}');">${nameEsc}</a>
+    inhalt.innerHTML = "<div class=\"ku-datei-liste\">" + dateien.map(d => {
+        const nameJs = d.name.replace(/'/g, "\\'");
+        return `<div class="ku-datei-zeile">
+                <a href="#" onclick="event.preventDefault();dateiOeffnen(${k.id},'${nameJs}');">${esc(d.name)}</a>
                 <span class="ku-datei-meta">${formatBytes(d.groesse)} · ${new Date(d.geaendert).toLocaleDateString("de-DE")}</span>
-                <button class="crm-button crm-button-klein ku-pfad-btn"
-                    title="Vollständigen Dateipfad kopieren (im Upload-Dialog in 'Dateiname' einfügen)"
-                    onclick="kuDateipfadKopieren(${k.id},'${nameJs}')">Pfad</button>
                 <button class="eintrag-entfernen" onclick="dateiLoeschen(${k.id},'${nameJs}');">×</button>
-            </div>`
-        );
-    }
-
-    const basisGesetzt = !!kuBasisPfadLaden();
-    const kopfZeile = basisGesetzt
-        ? `<div class="ku-ordner-kopf">
-               <code class="ku-ordner-pfad">${esc(kuOrdnerPfad(k) || "")}</code>
-               <div class="ku-ordner-kopf-btns">
-                   <button class="crm-button crm-button-klein"
-                       onclick="kuOrdnerpfadKopieren(${k.id})">Ordnerpfad kopieren</button>
-                   <button class="crm-button crm-button-klein"
-                       title="Basis-Pfad des Wurzelordners ändern"
-                       onclick="kuBasisPfadAendern(${k.id})">Pfad-Basis ändern</button>
-               </div>
-           </div>`
-        : `<div class="ku-drag-hinweis">
-               Für „Pfad kopieren" einmalig den Speicherort festlegen:
-               <button class="crm-button crm-button-klein"
-                   onclick="kuBasisPfadAendern(${k.id})">Speicherort festlegen</button>
-           </div>`;
-
-    inhalt.innerHTML =
-        kopfZeile
-        + `<div class="ku-drag-hinweis">Tipp: „Pfad" kopiert den Dateipfad (im Upload-Dialog einfügen). Oder die Datei direkt in einen Windows-Ordner ziehen = kopieren.</div>`
-        + `<div class="ku-datei-liste">` + zeilen.join("") + `</div>`;
+            </div>`;
+    }).join("") + "</div>";
 }
 
 function kundenordnerModalSchliessen(){
     const modal = document.getElementById("kundenordnerModal");
     if(modal){ modal.style.display = "none"; }
-    kuModalUrlsFreigeben();
 }
 
 function formatBytes(b){
@@ -653,8 +570,9 @@ async function kundenunterlagenPanelRendern(k){
                     + Datei
                 </button>
                 <button class="crm-button crm-button-klein"
-                    onclick="kundenordnerModalOeffnen(${k.id})">
-                    Ordner öffnen
+                    title="Ordnerpfad dieses Kunden in die Zwischenablage kopieren"
+                    onclick="kuOrdnerpfadKopieren(${k.id})">
+                    Pfad kopieren
                 </button>
             </div>
         </div>
