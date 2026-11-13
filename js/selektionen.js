@@ -144,8 +144,32 @@ const SELEKTIONS_FELDER = {
             if(echt.length === 0){ return null; }
             const letzter = echt
                 .slice()
-                .sort((a,b) => new Date(b.datum) - new Date(a.datum))[0];
-            return tageSeit(letzter.datum);
+                .sort((a,b) => new Date(datumZuIso(b.datum)) - new Date(datumZuIso(a.datum)))[0];
+            return tageSeit(datumZuIso(letzter.datum));
+        }
+    },
+
+    // Nur Info-Termine (kein Kontakt) — v. a. "Wichtigbrief versandt"
+    // aus dem Serienbrief. So lassen sich frisch angeschriebene Kunden
+    // von einer Anrufliste ausschliessen (z. B. "größer als 7").
+    // Kein Info-Termin => 999999 (wie "nie"), damit solche Kunden bei
+    // "größer als N" drinbleiben (sie sollen ja angerufen werden).
+    letzterInfoterminTage: {
+        label: "Letzter Infotermin / Serienbrief (Tage her)",
+        typ: "zahl",
+        gruppe: "Aktivität",
+        wert: k => {
+            if(!Array.isArray(k.termine) || k.termine.length === 0){
+                return 999999;
+            }
+            const infos = k.termine.filter(
+                t => t.kategorie === "Info (kein Kontakt)"
+            );
+            if(infos.length === 0){ return 999999; }
+            const letzter = infos
+                .slice()
+                .sort((a,b) => new Date(datumZuIso(b.datum)) - new Date(datumZuIso(a.datum)))[0];
+            return tageSeit(datumZuIso(letzter.datum));
         }
     },
 
