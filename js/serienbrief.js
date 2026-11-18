@@ -35,24 +35,24 @@ const SB_DEFAULT_BETREFF =
 const SB_DEFAULT_TEXT =
     "{anrede_formal},"
   + "\n\n"
-  + "Sie sind uns als {kundenwort} wichtig – und genau deshalb "
-  + "möchten wir Sie persönlich erreichen. In den vergangenen Wochen "
-  + "haben wir mehrfach versucht, Sie telefonisch und per E-Mail zu "
-  + "kontaktieren. Leider ist uns das bislang nicht gelungen; "
+  + "Sie sind mir als {kundenwort} wichtig – und genau deshalb "
+  + "möchte ich Sie persönlich erreichen. In den vergangenen Wochen "
+  + "habe ich mehrfach versucht, Sie telefonisch und per E-Mail zu "
+  + "kontaktieren. Leider ist mir das bislang nicht gelungen; "
   + "vermutlich haben sich Ihre Kontaktdaten zwischenzeitlich geändert."
   + "\n\n"
-  + "Uns liegen aktuell Unterlagen zu Ihrem Vertrag vor, die Ihre "
+  + "Mir liegen aktuell Unterlagen zu Ihrem Vertrag vor, die Ihre "
   + "persönliche Aufmerksamkeit erfordern. Damit Ihnen keine Fristen, "
-  + "Leistungen oder wichtigen Informationen entgehen, möchten wir "
+  + "Leistungen oder wichtigen Informationen entgehen, möchte ich "
   + "diese kurz gemeinsam mit Ihnen klären – unkompliziert, in wenigen "
   + "Minuten und selbstverständlich kostenfrei."
   + "\n\n"
-  + "Bitte geben Sie uns bis zum **{frist}** eine kurze Rückmeldung. "
-  + "Am schnellsten erreichen Sie uns telefonisch oder per WhatsApp "
+  + "Bitte geben Sie mir bis zum **{frist}** eine kurze Rückmeldung. "
+  + "Am schnellsten erreichen Sie mich telefonisch oder per WhatsApp "
   + "unter **{tel}** oder per E-Mail unter **{email}**."
   + "\n\n"
-  + "Ihre Zufriedenheit und die Sicherheit Ihrer Vorsorge liegen uns "
-  + "am Herzen. Wir freuen uns, bald von Ihnen zu hören.";
+  + "Ihre Zufriedenheit und die Sicherheit Ihrer Vorsorge liegen mir "
+  + "am Herzen. Ich freue mich, bald von Ihnen zu hören.";
 
 /* =====================================================
    FIRMEN-/KONTAKT-DATEN LADEN
